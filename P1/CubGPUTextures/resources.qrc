@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/">
+        <file>resources/geometric_mosaic.jpg</file>
+        <file>resources/granite.jpg</file>
+        <file>resources/hielo.jpg</file>
+        <file>resources/hielo0.jpg</file>
+        <file>resources/hielo1.jpg</file>
+        <file>resources/mosaic.png</file>
+        <file>resources/mosaic1.jpg</file>
+        <file>resources/pels.jpg</file>
+        <file>resources/water.jpg</file>
+        <file>vshader1.glsl</file>
+        <file>fshader1.glsl</file>
+    </qresource>
+</RCC>
