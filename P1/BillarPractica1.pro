@@ -19,7 +19,8 @@ SOURCES += main.cpp\
     objecte.cpp \
     taulabillar.cpp \
     cara.cpp \
-    readfile.cpp
+    readfile.cpp \
+    plabase.cpp
 
 HEADERS  += mainwindow.h \
     vec.h \
@@ -30,7 +31,8 @@ HEADERS  += mainwindow.h \
     objecte.h \
     taulabillar.h \
     cara.h \
-    readfile.h
+    readfile.h \
+    plabase.h
 
 FORMS    += mainwindow.ui
 
