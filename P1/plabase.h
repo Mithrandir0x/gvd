@@ -1,5 +1,6 @@
 #ifndef PLABASE_H
 #define PLABASE_H
+
 #include <objecte.h>
 
 const int NumVertices = 6;
@@ -7,7 +8,7 @@ const int NumVertices = 6;
 class PlaBase : public Objecte
 {
 public:
-    PlaBase();
+    PlaBase(int npoints, QObject *parent);
     ~PlaBase();
 private:
     int a; //amplada

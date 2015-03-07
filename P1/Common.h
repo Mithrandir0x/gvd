@@ -34,8 +34,13 @@
 //
 
 #define GL_GLEXT_PROTOTYPES 1
-# include  <GL/gl.h>
-# include  <GL/glext.h>
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#include <OpenGL/glext.h>
+#else
+#include  <GL/gl.h>
+#include  <GL/glext.h>
+#endif
 
 // Define a helpful macro for handling offsets into buffer objects
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))

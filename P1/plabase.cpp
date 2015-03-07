@@ -1,6 +1,6 @@
 #include "plabase.h"
 
-PlaBase::PlaBase()
+PlaBase::PlaBase(int npoints, QObject *parent) : Objecte(npoints, parent)
 {
 
 }
