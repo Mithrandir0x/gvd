@@ -14,6 +14,7 @@
 #include <Common.h>
 #include <objecte.h>
 #include <taulabillar.h>
+#include <plabase.h>
 
 using namespace std;
 

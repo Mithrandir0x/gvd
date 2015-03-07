@@ -235,9 +235,8 @@ void GLWidget::newObjecte(Objecte * obj)
 void GLWidget::newPlaBase()
 {
     // Metode que crea un objecte PlaBase poligon amb el punt central al (0,0,0) i perpendicular a Y=0
-
-    // Metode a implementar
-
+    PlaBase *plaBase = new PlaBase();
+    newObjecte(plaBase);
 }
 
 void GLWidget::newObj(QString fichero)

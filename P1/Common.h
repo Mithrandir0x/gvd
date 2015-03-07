@@ -10,6 +10,8 @@
 #ifndef __ANGEL_H__
 #define __ANGEL_H__
 
+//#define _DEBUG_OBJ_LOADING_
+
 //----------------------------------------------------------------------------
 // 
 // --- Include system headers ---

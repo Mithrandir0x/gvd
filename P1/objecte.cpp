@@ -259,7 +259,7 @@ void Objecte::construeix_cara ( char **words, int nwords, Objecte*objActual, int
         {
             ReadFile::get_indices (words[i], &vindex, &tindex, &nindex);
 
-#if 0
+#ifdef _DEBUG_OBJ_LOADING_
             printf ("vtn: %d %d %d\n", vindex, tindex, nindex);
 #endif
 
