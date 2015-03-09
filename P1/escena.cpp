@@ -16,8 +16,11 @@ Escena::~Escena()
 }
 
 void Escena::addObjecte(Objecte *obj) {
-    if (dynamic_cast<TaulaBillar*>(obj))
+    if (dynamic_cast<TaulaBillar*>(obj)){
         this->taulaBillar = (TaulaBillar*)obj;
+    } else if (dynamic_cast<PlaBase*>(obj)){
+        this->plaBase = (PlaBase*)obj;
+    }
 }
 
 
@@ -50,6 +53,8 @@ void Escena::draw() {
 
     if (taulaBillar!=NULL)
         taulaBillar->draw();
+    if (plaBase!=NULL)
+        plaBase->draw();
 
 }
 

@@ -130,7 +130,7 @@ void GLWidget::initializeGL()
     std::cout<<"Estic inicialitzant el shaders"<<std::ends;
     initShadersGPU();
 
-    glClearColor(clearColor.redF(), clearColor.greenF(), clearColor.blueF(), clearColor.alphaF());
+    //glClearColor(clearColor.redF(), clearColor.greenF(), clearColor.blueF(), clearColor.alphaF());
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 }
@@ -234,6 +234,7 @@ void GLWidget::newObjecte(Objecte * obj)
 }
 void GLWidget::newPlaBase()
 {
+    cout << "Creating new pla base" << endl;
     // Metode que crea un objecte PlaBase poligon amb el punt central al (0,0,0) i perpendicular a Y=0
     PlaBase *plaBase = new PlaBase();
     newObjecte(plaBase);

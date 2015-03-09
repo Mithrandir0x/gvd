@@ -9,7 +9,7 @@ class PlaBase : public Objecte
 {
 public:
     PlaBase();
-    void draw();
+    virtual void make();
     ~PlaBase();
 private:
     int a; //amplada
@@ -21,6 +21,8 @@ private:
 
     point4 points[NumVertices];
     color4 colors[NumVertices];
+
+    void quad( int a, int b, int c, int d );
 };
 
 #endif // PLABASE_H
