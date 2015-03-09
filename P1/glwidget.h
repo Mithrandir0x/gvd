@@ -8,6 +8,7 @@
 #include <QGLWidget>
 #include <QTime>
 
+#define ROTATIONSPEED 0.5
 
 #define PROGRAM_VERTEX_ATTRIBUTE 0
 #define PROGRAM_COLOR_ATTRIBUTE 1

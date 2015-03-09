@@ -7,6 +7,7 @@ Escena::Escena()
     capsaMinima.a = 1; capsaMinima.h = 1; capsaMinima.p = 1;
 
     taulaBillar = NULL;
+    plaBase = NULL;
 }
 
 Escena::~Escena()

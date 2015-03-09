@@ -152,6 +152,10 @@ void GLWidget::paintGL()
        esc->taulaBillar->aplicaTGCentrat(transform);
        esc->draw();
    }
+   if (esc->plaBase != NULL){
+       esc->plaBase->aplicaTGCentrat(transform);
+       esc->draw();
+   }
 }
 
 
@@ -182,10 +186,10 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
     int dy = event->y() - lastPos.y();
 
     if (event->buttons() & Qt::LeftButton) {
-        setXRotation(xRot + 8 * dy);
+        setXRotation(xRot + ROTATIONSPEED * dy);
     } else if (event->buttons() & Qt::RightButton) {
-        setXRotation(xRot + 8 * dy);
-        setZRotation(zRot + 8 * dx);
+        //setXRotation(xRot + ROTATIONSPEED * dy);
+        setZRotation(zRot + ROTATIONSPEED * dx);
     }
     lastPos = event->pos();
 }
