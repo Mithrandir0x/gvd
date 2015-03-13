@@ -42,6 +42,25 @@ Capsa3D Objecte::calculCapsa3D()
     int i;
     vec3    pmin, pmax;
 
+    pmin.x = points[0].x;
+    pmin.y = points[0].y;
+    pmin.z = points[0].z;
+    pmax = pmin;
+
+    for (i=1; i<numPoints; i++){
+        if(points[i].x < pmin[0]) pmin[0] = points[i].x;//calculo punto minimo
+        if(points[i].y < pmin[1]) pmin[1] = points[i].y;
+        if(points[i].z < pmin[2]) pmin[2] = points[i].z;
+
+        if(points[i].x > pmax[0]) pmax[0] = points[i].x;//calculo punto maximo
+        if(points[i].y > pmax[1]) pmax[1] = points[i].y;
+        if(points[i].z > pmax[2]) pmax[2] = points[i].z;
+    }
+
+    capsa.pmin = pmin;
+    capsa.a = pmax[0]-pmin[0];//anchura
+    capsa.h = pmax[1]-pmin[1];//altura
+    capsa.p = pmax[2]-pmin[2];//profundidad
 
     return capsa;
 }
@@ -79,7 +98,20 @@ void Objecte::aplicaTGPoints(mat4 m)
 void Objecte::aplicaTGCentrat(mat4 m)
 {
     // Metode a implementar
-    aplicaTG(m);
+
+    capsa = calculCapsa3D();
+    float xTrasl = capsa.pmin.x + capsa.a/2.;//calculo del centro de la caja
+    float yTrasl = capsa.pmin.y + capsa.h/2.;
+    float zTrasl = capsa.pmin.z + capsa.p/2.;
+
+    mat4 mat = Translate(-xTrasl, -yTrasl, -zTrasl);//traslacion al origen
+    mat4 mat2 = Translate(xTrasl, yTrasl, zTrasl);//traslacion del origen a posicion original
+
+    mat4 maux = mat2*m*mat;
+
+    aplicaTG(maux);
+    capsa = calculCapsa3D();
+
 }
 
 void Objecte::toGPU(QGLShaderProgram *pr){
