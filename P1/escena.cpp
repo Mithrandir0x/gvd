@@ -36,6 +36,8 @@ void Escena::aplicaTG(mat4 m) {
 
     if (taulaBillar!=NULL)
         taulaBillar->aplicaTG(m);
+    if (plaBase!=NULL)
+            plaBase->aplicaTG(m);
 
 }
 
@@ -45,6 +47,8 @@ void Escena::aplicaTGCentrat(mat4 m) {
 
     if (taulaBillar!=NULL)
         taulaBillar->aplicaTGCentrat(m);
+    if (plaBase!=NULL)
+        plaBase->aplicaTGCentrat(m);
 
 }
 
