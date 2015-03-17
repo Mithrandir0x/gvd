@@ -15,6 +15,7 @@
 #include <objecte.h>
 #include <taulabillar.h>
 #include <plabase.h>
+#include <bola.h>
 
 using namespace std;
 
@@ -40,6 +41,7 @@ public:
     // Cal afegir la bola blanca o el pla base per testejar o les 15 boles
     TaulaBillar *taulaBillar;
     PlaBase *plaBase;
+    Bola *bolaBlanca = NULL;
 };
 
 #endif // ESCENA_H
