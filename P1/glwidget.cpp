@@ -222,17 +222,26 @@ void GLWidget::keyReleaseEvent(QKeyEvent *event)
 
 void GLWidget::adaptaObjecteTamanyWidget(Objecte *obj)
 {
-        // Metode a implementar
+    // Metode a implementar
+    /*
+     * L'adaptació de la mida de l'objecte a la pantalla del widget es farà dins
+     * el mètode "adaptaObjecteTamanyWidget" de la clase Objecte.
+     *
+     * Ens semblava més senzill aplicar un escalat global, forçat pel propi widget,
+     * i desprès un escalat global, propi de l'objecte.
+     */
 }
 
 void GLWidget::newObjecte(Objecte * obj)
 {
-    adaptaObjecteTamanyWidget(obj);
+    //adaptaObjecteTamanyWidget(obj);
+    obj->adaptaObjecteTamanyWidget(mtrWidgetScale);
     obj->toGPU(program);
     esc->addObjecte(obj);
 
     updateGL();
 }
+
 void GLWidget::newPlaBase()
 {
     cout << "Creating new pla base" << endl;
@@ -258,6 +267,7 @@ void GLWidget::newBola()
     Bola *obj;
 
     obj = new Bola(0.0, 0.03075, 0.5, 0.03075, 1.0, 1.0, 1.0, "0");//x0,y0,z0,r,R,G,B
+    obj->setScale(0.25);
     newObjecte(obj);
 }
 void GLWidget::newConjuntBoles()

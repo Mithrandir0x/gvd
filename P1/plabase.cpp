@@ -12,14 +12,9 @@ PlaBase::PlaBase() : Objecte(NumVertices)
     vertex_colors[2] = color4( 1.0, 1.0, 0.0, 1.0 ); //yellow
     vertex_colors[3] = color4( 0.0, 1.0, 0.0, 1.0 ); //green
 
+    scale = 1.0;
+
     make();
-    capsa = calculCapsa3D();
-
-    double escalap = 2.0 / capsa.p;//para escalar la dimension maxima(profundidad) a 2
-    double escalaa = 1.0 / capsa.a;//temporal
-
-    mat4 m = Scale(escalaa, 1.0, escalap)*Translate(-(capsa.pmin.x + capsa.a/2.), -(capsa.pmin.y + capsa.h/2.), -(capsa.pmin.z + capsa.p/2.));
-    aplicaTG(m);
     capsa = calculCapsa3D();
 }
 
