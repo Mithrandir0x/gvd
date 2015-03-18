@@ -13,7 +13,6 @@
 
 #include <Common.h>
 #include <objecte.h>
-#include <conjuntboles.h>
 #include <taulabillar.h>
 #include <plabase.h>
 #include <bola.h>

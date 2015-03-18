@@ -4,8 +4,7 @@
 #include <Common.h>
 #include "objecte.h"
 
-const int NumIteracions = 5;
-const int NumVerticesBola = 4 * pow(4.0, NumIteracions) * 3; //(4 triangles)*(4 triangles/(triangle*iteration))^(5 iterations)*(3 vertices/triangle)
+const int NumVerticesBola = 12288; //(4 triangles)*(4 triangles/(triangle*iteration))^(5 iterations)*(3 vertices/triangle)
 
 
 class Bola : public Objecte
@@ -22,7 +21,7 @@ private:
     vec4 normalize(const vec4 &p);
 
     double r; // radio
-    int NumIteracionsEsfera = NumIteracions;
+    int NumIteracionsEsfera = 5;
 };
 
 #endif // BOLA_H

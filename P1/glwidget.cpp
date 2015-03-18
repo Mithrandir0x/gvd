@@ -222,26 +222,17 @@ void GLWidget::keyReleaseEvent(QKeyEvent *event)
 
 void GLWidget::adaptaObjecteTamanyWidget(Objecte *obj)
 {
-    // Metode a implementar
-    /*
-     * L'adaptació de la mida de l'objecte a la pantalla del widget es farà dins
-     * el mètode "adaptaObjecteTamanyWidget" de la clase Objecte.
-     *
-     * Ens semblava més senzill aplicar un escalat global, forçat pel propi widget,
-     * i desprès un escalat global, propi de l'objecte.
-     */
+        // Metode a implementar
 }
 
 void GLWidget::newObjecte(Objecte * obj)
 {
-    //adaptaObjecteTamanyWidget(obj);
-    obj->adaptaObjecteTamanyWidget(mtrWidgetScale);
+    adaptaObjecteTamanyWidget(obj);
     obj->toGPU(program);
     esc->addObjecte(obj);
 
     updateGL();
 }
-
 void GLWidget::newPlaBase()
 {
     cout << "Creating new pla base" << endl;
@@ -266,8 +257,7 @@ void GLWidget::newBola()
 
     Bola *obj;
 
-    obj = new Bola(0.0, 0.03075, 0.5, 0.03075, 1.0, 1.0, 1.0, "0");//x0,y0,z0,r,R,G,B
-    obj->setScale(0.25);
+    obj = new Bola(0.0, 0.03075, 0.5, 0.03075, 1.0, 1.0, 1.0, "0");//x0,y0,z0,r,R,G,B,numBola
     newObjecte(obj);
 }
 void GLWidget::newConjuntBoles()
@@ -287,6 +277,16 @@ void GLWidget::newConjuntBoles()
 void GLWidget::newSalaBillar()
 {
     // Metode que construeix tota la sala de billar: taula, 15 boles i bola blanca
+    QString fileName = "/home/jj/Qtexamples/P1/resources/taula.obj";
+    if (!fileName.isNull())
+        newObj(fileName);
+    //cT = esc->taulaBillar->calculCapsa3D();
+    newBola();
+    //cb = esc->bolaBlanca->calculCapsa3D();
+    newConjuntBoles();
+    //for (int i=0; i<esc->listaConjuntBoles.size(); i++) {
+        //listaCapsasConjuntBoles.push_back(esc->listaConjuntBoles[i]->calculCapsa3D());
+    //}
 }
 
 // Metode per iniciar la dinàmica del joc

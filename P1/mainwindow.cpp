@@ -25,7 +25,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this->ui->action_Bola_Blanca, SIGNAL(triggered()), glWidget, SLOT(newBola()));
     connect(this->ui->action_15_Boles, SIGNAL(triggered()), glWidget, SLOT(newConjuntBoles()));
     connect(this->ui->action_Obre_Fitxer, SIGNAL(triggered()), this, SLOT(newFile()));
-    connect(this->ui->action_Sala_de_Billar, SIGNAL(triggered()), glWidget, SLOT(Play()));
+    connect(this->ui->action_Sala_de_Billar, SIGNAL(triggered()), glWidget, SLOT(newSalaBillar()));
+    //connect(this->ui->action_Sala_de_Billar, SIGNAL(triggered()), glWidget, SLOT(Play()));
 
     connect(this->ui->action_Exit, SIGNAL(triggered()), this, SLOT(Quit()));
 }

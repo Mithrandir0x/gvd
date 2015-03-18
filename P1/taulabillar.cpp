@@ -14,11 +14,34 @@ TaulaBillar::TaulaBillar(QString n) : Objecte(NumVerticesF)
     yRot = 0;
     zRot = 0;
 
-    scale = 2.0;
-
     readObj(n);
 
     Objecte::make();
+    capsa = calculCapsa3D();
+
+    // Codi adhoc per a la taula carregada de fitxer taula.obj. Cal modificar-lo per a que sigui general
+
+    double aristaMax = 0.0;
+
+    if(capsa.a > capsa.p){
+        aristaMax=capsa.a;
+    } else{
+        aristaMax=capsa.p;
+    }
+    if(capsa.h > aristaMax){
+        aristaMax=capsa.h;
+    }
+
+    double escala = 2.0 / aristaMax;
+    mat4 m = Scale(escala, escala, escala);
+    aplicaTG(m);
+
+    capsa = calculCapsa3D();
+    //std::cout<<"px: "<< capsa.pmin.x<< ", py: "<< capsa.pmin.y<<", pz: "<< capsa.pmin.z<<", a: "<<capsa.a<<", h: "<<capsa.h<<", p: "<<capsa.p<<"\n";
+
+    m = Translate(-(capsa.pmin.x + capsa.a / 2.), -(capsa.pmin.y + capsa.h), -(capsa.pmin.z + capsa.p / 2.));
+    aplicaTG(m);
+
     capsa = calculCapsa3D();
 }
 
