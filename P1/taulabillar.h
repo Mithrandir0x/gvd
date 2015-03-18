@@ -11,7 +11,8 @@ public:
 
 private:
 
-    static const int NumVerticesF = 100000;
+    //static const int NumVerticesF = 100000;
+    static const int NumVerticesF = 87288;
     static const int NumCares = 300000;
 
 };

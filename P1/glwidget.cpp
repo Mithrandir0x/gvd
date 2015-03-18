@@ -127,7 +127,7 @@ void GLWidget::initializeGL()
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
-    std::cout<<"Estic inicialitzant el shaders"<<std::ends;
+    std::cout<<"Estic inicialitzant el shaders"<<std::endl;
     initShadersGPU();
 
     //glClearColor(clearColor.redF(), clearColor.greenF(), clearColor.blueF(), clearColor.alphaF());

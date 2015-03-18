@@ -8,6 +8,22 @@ Bola::Bola(double x0, double y0, double z0, double r, double R, double G, double
     make(x0,y0,z0,r);
     capsa = calculCapsa3D();
 
+    double aristaMax = 0.0;
+
+    if(capsa.a > capsa.p){
+        aristaMax=capsa.a;
+    } else{
+        aristaMax=capsa.p;
+    }
+    if(capsa.h > aristaMax){
+        aristaMax=capsa.h;
+    }
+    double escala = 2 * r / aristaMax;
+    mat4 m = Scale(escala, escala, escala)*Translate(-(capsa.pmin.x + capsa.a / 2), -(capsa.pmin.y + this->capsa.h / 2), -(capsa.pmin.z + capsa.p / 2));
+    aplicaTG(m);
+    capsa = calculCapsa3D();
+    m = Translate(x0, y0, z0);
+    aplicaTG(m);
 }
 
 Bola::~Bola()
@@ -34,7 +50,10 @@ void Bola::make(double x0, double  y0, double  z0, double r)
     divide_triangle(v[0],v[3],v[1],NumIteracionsEsfera);
     divide_triangle(v[0],v[2],v[3],NumIteracionsEsfera);
 
-
+    mat4 transform = (Translate(x0,y0,z0) * Scale(r,r,r));
+    for ( int i = 0; i < NumVerticesBola; ++i ) {
+        points[i] = transform  * points[i];
+    }
 
 }
 
