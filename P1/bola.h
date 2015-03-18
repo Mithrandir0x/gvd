@@ -4,16 +4,15 @@
 #include <Common.h>
 #include "objecte.h"
 
-const int NumIteracions = 3;
-const int NumVerticesBola = 4 * pow(4.0, NumIteracions) * 3; //(4 triangles)*(4 triangles/(triangle*iteration))^(5 iterations)*(3 vertices/triangle)
+const int NumVerticesBola = 12288; //(4 triangles)*(4 triangles/(triangle*iteration))^(5 iterations)*(3 vertices/triangle)
 
 
 class Bola : public Objecte
 {
 public:
-    Bola(double x0, double y0, double z0, double r, double R, double G, double B);
+    Bola(double x0, double y0, double z0, double r, double R, double G, double B, QString numBola);
     ~Bola();
-    void make(double x0, double y0, double z0, double r);
+    void make(double x0, double y0, double z0, double r, QString numBola);
 
 private:
     color4 color; //color de la bola
@@ -22,7 +21,7 @@ private:
     vec4 normalize(const vec4 &p);
 
     double r; // radio
-    int NumIteracionsEsfera = NumIteracions;
+    int NumIteracionsEsfera = 5;
 };
 
 #endif // BOLA_H

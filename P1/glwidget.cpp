@@ -257,14 +257,22 @@ void GLWidget::newBola()
 
     Bola *obj;
 
-    obj = new Bola(0.0, 0.03075, 0.5, 0.03075, 1.0, 1.0, 1.0);//x0,y0,z0,r,R,G,B
+    obj = new Bola(0.0, 0.03075, 0.5, 0.03075, 1.0, 1.0, 1.0, "0");//x0,y0,z0,r,R,G,B
     newObjecte(obj);
 }
 void GLWidget::newConjuntBoles()
 {
     // Metode que crea les 15 Boles del billar america
     // Metode a implementar
+    ConjuntBoles *cb;
 
+    cb = new ConjuntBoles();
+    for (int i=0; i<cb->listaConjuntBoles.size(); i++) {
+            adaptaObjecteTamanyWidget(cb->listaConjuntBoles[i]);
+            cb->listaConjuntBoles[i]->toGPU(program);
+            esc->listaConjuntBoles.push_back(cb->listaConjuntBoles[i]);
+    }
+    updateGL();
 }
 void GLWidget::newSalaBillar()
 {

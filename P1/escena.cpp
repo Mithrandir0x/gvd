@@ -44,7 +44,11 @@ void Escena::aplicaTG(mat4 m) {
         plaBase->aplicaTG(m);
     if (bolaBlanca!=NULL)
         bolaBlanca->aplicaTG(m);
-
+    if (listaConjuntBoles.size()!=0) {
+        for (int i=0; i<listaConjuntBoles.size(); i++) {
+            listaConjuntBoles[i]->aplicaTG(m);
+        };
+    }
 
 }
 
@@ -58,6 +62,11 @@ void Escena::aplicaTGCentrat(mat4 m) {
         plaBase->aplicaTGCentrat(m);
     if (bolaBlanca!=NULL)
         bolaBlanca->aplicaTGCentrat(m);
+    if (listaConjuntBoles.size()!=0) {
+        for (int i=0; i<listaConjuntBoles.size(); i++) {
+            listaConjuntBoles[i]->aplicaTGCentrat(m);
+        };
+    }
 
 }
 
@@ -67,10 +76,16 @@ void Escena::draw() {
 
     if (taulaBillar!=NULL)
         taulaBillar->draw();
+
     if (plaBase!=NULL)
         plaBase->draw();
+
     if (bolaBlanca!=NULL)
         bolaBlanca->draw();
+
+    for (int i=0; i<listaConjuntBoles.size(); i++) {
+        listaConjuntBoles[i]->draw();
+    }
 
 }
 

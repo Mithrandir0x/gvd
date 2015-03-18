@@ -1,11 +1,11 @@
 #include "bola.h"
 
-Bola::Bola(double x0, double y0, double z0, double r, double R, double G, double B) : Objecte(NumVerticesBola){
+Bola::Bola(double x0, double y0, double z0, double r, double R, double G, double B, QString numBola) : Objecte(NumVerticesBola){
     color.x = R;
     color.y = G;
     color.z = B;
     color.w = 1;
-    make(x0,y0,z0,r);
+    make(x0,y0,z0,r,numBola);
     capsa = calculCapsa3D();
 
     double aristaMax = 0.0;
@@ -31,7 +31,7 @@ Bola::~Bola()
 
 }
 
-void Bola::make(double x0, double  y0, double  z0, double r)
+void Bola::make(double x0, double  y0, double  z0, double r, QString numBola)
 {
     //std::cout<<"Bola::make\n";
     // generacio de la geometria dels triangles per a visualitzar-lo

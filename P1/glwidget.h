@@ -3,6 +3,8 @@
 
 #include <math.h>
 #include <escena.h>
+#include <bola.h>
+#include <conjuntboles.h>
 
 #include <QtWidgets>
 #include <QGLWidget>

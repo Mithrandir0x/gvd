@@ -42,6 +42,7 @@ public:
     TaulaBillar *taulaBillar;
     PlaBase *plaBase;
     Bola *bolaBlanca = NULL;
+    vector<Bola*> listaConjuntBoles;
 };
 
 #endif // ESCENA_H

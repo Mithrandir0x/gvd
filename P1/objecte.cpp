@@ -118,7 +118,7 @@ void Objecte::toGPU(QGLShaderProgram *pr){
 
     program = pr;
 
-    std::cout<<"Passo les dades de l'objecte a la GPU" << endl;
+    //std::cout<<"Passo les dades de l'objecte a la GPU" << endl;
 
     glGenBuffers( 1, &buffer );
     glBindBuffer( GL_ARRAY_BUFFER, buffer );
