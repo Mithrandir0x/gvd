@@ -16,7 +16,7 @@ PlaBase::PlaBase() : Objecte(NumVertices)
     capsa = calculCapsa3D();
 
     double escalap = 2.0 / capsa.p;//para escalar la dimension maxima(profundidad) a 2
-    double escalaa = 1.0 / capsa.a;//temporal
+    double escalaa = 1.08821869 / capsa.a;//temporal
 
     mat4 m = Scale(escalaa, 1.0, escalap)*Translate(-(capsa.pmin.x + capsa.a/2.), -(capsa.pmin.y + capsa.h/2.), -(capsa.pmin.z + capsa.p/2.));
     aplicaTG(m);

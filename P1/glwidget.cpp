@@ -223,6 +223,19 @@ void GLWidget::keyReleaseEvent(QKeyEvent *event)
 void GLWidget::adaptaObjecteTamanyWidget(Objecte *obj)
 {
         // Metode a implementar
+    Capsa3D capsa;
+    mat4 m;
+
+    obj->aplicaTG(m220); //m220 precalculada en glwidget.h con escala=2/20
+    capsa = obj->calculCapsa3D();
+        if (dynamic_cast<TaulaBillar*>(obj)){
+            m = Translate(0.0,  -capsa.pmin.y - capsa.h, 0.0);
+            obj->aplicaTG(m);
+        }else if (dynamic_cast<Bola*>(obj)){
+            m = Translate(0.0,  -capsa.pmin.y, 0.0);//la base de las 16 bolas quedan en y = 0
+            obj->aplicaTG(m);
+    }
+    //la PlaBase estaba en y = 0 por lo que solo necesita el escalado m220
 }
 
 void GLWidget::newObjecte(Objecte * obj)
@@ -280,13 +293,8 @@ void GLWidget::newSalaBillar()
     QString fileName = "/home/jj/Qtexamples/P1/resources/taula.obj";
     if (!fileName.isNull())
         newObj(fileName);
-    //cT = esc->taulaBillar->calculCapsa3D();
     newBola();
-    //cb = esc->bolaBlanca->calculCapsa3D();
     newConjuntBoles();
-    //for (int i=0; i<esc->listaConjuntBoles.size(); i++) {
-        //listaCapsasConjuntBoles.push_back(esc->listaConjuntBoles[i]->calculCapsa3D());
-    //}
 }
 
 // Metode per iniciar la dinàmica del joc

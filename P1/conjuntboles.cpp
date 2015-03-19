@@ -10,13 +10,13 @@ ConjuntBoles::ConjuntBoles()
     double r = 0.03075;
     double z1 = -0.5;
     double x2 = 0.0 - 3 * r;
-    double z2 = -0.5 - r * cos(30*M_PI/180.0);
+    double z2 = -0.5 - 2 * r * cos(30*M_PI/180.0);
     double x3 = 0.0 - 4 * r;
-    double z3 = -0.5 - 2 * r * cos(30*M_PI/180.0);
+    double z3 = -0.5 - 4 * r * cos(30*M_PI/180.0);
     double x4 = 0.0 - 5 * r;
-    double z4 = -0.5 - 3 * r * cos(30*M_PI/180.0);
+    double z4 = -0.5 - 6 * r * cos(30*M_PI/180.0);
     double x5 = 0.0 - 6 * r;
-    double z5 = -0.5 - 4 * r * cos(30*M_PI/180.0);
+    double z5 = -0.5 - 8 * r * cos(30*M_PI/180.0);
 
     mat4 m;
     QString numBola;

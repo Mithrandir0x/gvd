@@ -69,7 +69,7 @@ private:
 
     // Programa de la GPU
     QGLShaderProgram *program;
-
+    mat4 m220 = Scale(2.0/20.0, 2.0/20.0, 2.0/20.0);
 
     //  Metode per a carregar de fitxers el vertex i el fragment shader
    void InitShader( const char* vertexShaderFile,
