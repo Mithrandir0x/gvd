@@ -3,17 +3,20 @@
 
 #include <math.h>
 #include <escena.h>
-#include <bola.h>
-#include <conjuntboles.h>
 
 #include <QtWidgets>
 #include <QGLWidget>
 #include <QTime>
 
-#define ROTATIONSPEED 8
+#define ROTATIONSPEED 1
 
 #define PROGRAM_VERTEX_ATTRIBUTE 0
 #define PROGRAM_COLOR_ATTRIBUTE 1
+
+// Global Scale Factor
+//const float gsf = 2.0 / 20.0;
+const float gsf = 1.0;
+const mat4 mtrWidgetScale = Scale(gsf, gsf, gsf);
 
 class QGLShaderProgram;
 

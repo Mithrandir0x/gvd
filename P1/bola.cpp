@@ -5,25 +5,13 @@ Bola::Bola(double x0, double y0, double z0, double r, double R, double G, double
     color.y = G;
     color.z = B;
     color.w = 1;
+    xorig = x0;
+    yorig = y0;
+    zorig = z0;
+    scale = 0.0615;
     make(x0,y0,z0,r,numBola);
     capsa = calculCapsa3D();
 
-    double aristaMax = 0.0;
-
-    if(capsa.a > capsa.p){
-        aristaMax=capsa.a;
-    } else{
-        aristaMax=capsa.p;
-    }
-    if(capsa.h > aristaMax){
-        aristaMax=capsa.h;
-    }
-    double escala = 2 * r / aristaMax;
-    mat4 m = Scale(escala, escala, escala)*Translate(-(capsa.pmin.x + capsa.a / 2), -(capsa.pmin.y + this->capsa.h / 2), -(capsa.pmin.z + capsa.p / 2));
-    aplicaTG(m);
-    capsa = calculCapsa3D();
-    m = Translate(x0, y0, z0);
-    aplicaTG(m);
 }
 
 Bola::~Bola()

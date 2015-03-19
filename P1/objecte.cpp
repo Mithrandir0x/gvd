@@ -34,11 +34,21 @@ Objecte::~Objecte()
     delete colors;
 }
 
-
+/**
+ * Alhora de calcular la capsa que conté un model tridimensional,
+ * es cercan els punts mínims i màxims, és a dir, aquells punts els
+ * quals les seves ordenades són els valors mínims i màxims,
+ * respectivament, de tots els punts que conforma el model.
+ *
+ * Cada vegada que es calcula la capsa, s'actualitzarà a la variable
+ * "capsa" de la instància d'Objecte.
+ *
+ * @brief Objecte::calculCapsa3D Calcula la capsa mínima contenidora d'un objecte
+ * @return
+ */
 Capsa3D Objecte::calculCapsa3D()
 {
-
-    // Metode a implementar: calcula la capsa mínima contenidora d'un objecte
+    // Metode a implementar
     int i;
     vec3    pmin, pmax;
 
@@ -77,7 +87,6 @@ void Objecte::aplicaTG(mat4 m)
 
 void Objecte::aplicaTGPoints(mat4 m)
 {
-
     point4  *transformed_points = new point4[Index];
 
     for ( int i = 0; i < Index; ++i ) {
@@ -118,7 +127,7 @@ void Objecte::toGPU(QGLShaderProgram *pr){
 
     program = pr;
 
-    //std::cout<<"Passo les dades de l'objecte a la GPU" << endl;
+    std::cout<<"Passo les dades de l'objecte a la GPU" << endl;
 
     glGenBuffers( 1, &buffer );
     glBindBuffer( GL_ARRAY_BUFFER, buffer );
@@ -157,6 +166,50 @@ void Objecte::draw()
     glDrawArrays( GL_TRIANGLES, 0, Index );
 
     // Abans nomes es feia: glDrawArrays( GL_TRIANGLES, 0, NumVerticesP );
+}
+
+void Objecte::adaptaObjecteTamanyWidget(mat4 globalScaleMatrix)
+{
+//    cout << "scaleMatrix.x: " << globalScaleMatrix[0][0] << endl;
+
+    /* aplicaTG(scaleMatrix);
+    capsa = calculCapsa3D(); */
+
+    double aristaMax = 0.0;
+
+    if ( capsa.a > capsa.p ) {
+        aristaMax=capsa.a;
+    } else {
+        aristaMax=capsa.p;
+    }
+    if ( capsa.h > aristaMax ) {
+        aristaMax=capsa.h;
+    }
+
+//    cout << "scale: " << scale << endl;
+//    cout << "aristaMax: " << aristaMax << endl;
+
+    double escala = scale / aristaMax;
+
+//    cout << "escala: " << escala << endl;
+
+    mat4 m = Translate(xorig, yorig, zorig)
+            * globalScaleMatrix
+            * Scale(escala, escala, escala)
+            * Translate(-(capsa.pmin.x + capsa.a / 2),
+                        -(capsa.pmin.y + this->capsa.h / 2),
+                        -(capsa.pmin.z + capsa.p / 2));
+
+//    cout << -(capsa.pmin.x + capsa.a / 2) << endl;
+//    cout << -(capsa.pmin.y + this->capsa.h / 2) << endl;
+//    cout << -(capsa.pmin.z + capsa.p / 2) << endl;
+
+    aplicaTG(m);
+    capsa = calculCapsa3D();
+
+//    m = Translate(xorig, yorig, zorig);
+//    aplicaTG(m);
+    capsa = calculCapsa3D();
 }
 
 void Objecte::make()
@@ -313,4 +366,7 @@ void Objecte::construeix_cara ( char **words, int nwords, Objecte*objActual, int
     objActual->cares.push_back(face);
 }
 
-
+void Objecte::setScale(float newScale)
+{
+    this->scale = newScale;
+}

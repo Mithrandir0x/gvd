@@ -32,6 +32,7 @@ protected:
 
     GLfloat tam; // Escala de l'objecte aplicada al fitxer d'entrada
 
+    float scale;
 
     // Programa de shaders de la GPU
     QGLShaderProgram *program;
@@ -67,6 +68,9 @@ public:
     // Pintat amb la GPU
     virtual void draw();
 
+    // Adaptar mida de l'objecte a la mesura desitjada del widget
+    virtual void adaptaObjecteTamanyWidget(mat4 scaleMatrix);
+
     // Calcula la capsa 3D contenidora de l'objecte
     Capsa3D calculCapsa3D();
 
@@ -75,6 +79,8 @@ public:
     void aplicaTGPoints(mat4 m);
     // Aplica una TG centrada en el punt central de la capsa de l'objecte a un objecte
     void aplicaTGCentrat(mat4 m);
+
+    void setScale(float scale);
 
 private:
     void construeix_cara ( char **words, int nwords, Objecte*objActual, int vindexUlt);
