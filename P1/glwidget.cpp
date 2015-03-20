@@ -202,46 +202,111 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
 
 void GLWidget::keyPressEvent(QKeyEvent *event)
 {
-    double deltaDesplacament = 0.01;
-    mat4 m;
-    Capsa3D capsaTaula;
-
     // Metode a implementar
-    if (esc->bolaBlanca!=NULL && esc->taulaBillar!=NULL ) {
-        capsaTaula = esc->taulaBillar->calculCapsa3D();
+
+    //std::cout<<"\nkeyPressEvent\n";
+    int Key_Left = 0x01000012;
+    int Key_Up = 0x01000013;
+    int Key_Right = 0x01000014;
+    int Key_Down = 0x01000015;
+
+    double deltaDesplacament = 0.01;
+    double dzP=deltaDesplacament, dzN=-deltaDesplacament, dxP=deltaDesplacament, dxN=-deltaDesplacament;
+    mat4 m;
+    Capsa3D capsaTaula, capsaBolaB, capBi;
+
+    capsaBolaB = esc->bolaBlanca->calculCapsa3D();
 
 
-        switch ( event->key() )
-        {
-        case Qt::Key_Up:
-            if(cb.pmin.z>cT.pmin.z){
-                m = Translate(ejez.x*(-deltaDesplacament),  ejez.y*(-deltaDesplacament), ejez.z*(-deltaDesplacament));
-                cb.pmin.z += -deltaDesplacament;
+    if(cT.pmin.z - cb.pmin.z > - deltaDesplacament)
+        dzN = cT.pmin.z - cb.pmin.z;
+    if(cT.pmin.z + cT.p - (cb.pmin.z + cb.p) < deltaDesplacament)
+        dzP = cT.pmin.z + cT.p - (cb.pmin.z + cb.p);
+    if(cT.pmin.x - cb.pmin.x > -deltaDesplacament)
+        dxN = cT.pmin.x - cb.pmin.x;
+    if(cT.pmin.x + cT.a - (cb.pmin.x + cb.a) < deltaDesplacament)
+        dxP = cT.pmin.x + cT.a - (cb.pmin.x + cb.a);
+
+    for (int i=0; i<esc->listaConjuntBoles.size(); i++) {
+        if(abs((cb.pmin.x+cb.a/2.) - (listaCapsasConjuntBoles[i].pmin.x+listaCapsasConjuntBoles[i].a/2.)) < (cb.a/2. + listaCapsasConjuntBoles[i].a/2.)
+                && abs((cb.pmin.z+cb.p/2.) - (listaCapsasConjuntBoles[i].pmin.z+listaCapsasConjuntBoles[i].p/2.)) < cb.p/2. + listaCapsasConjuntBoles[i].p/2.){
+
+            if(event->key() == Key_Up){
+                if((cb.pmin.z + cb.p/2.0) - (listaCapsasConjuntBoles[i].pmin.z + listaCapsasConjuntBoles[i].p/2.0)<= 0.0){//si bola blanca arriba no hay limitacion
+                    dzN = -deltaDesplacament;
+                }else{
+                    if(listaCapsasConjuntBoles[i].pmin.z + listaCapsasConjuntBoles[i].a - cb.pmin.z > -deltaDesplacament){
+                        dzN = listaCapsasConjuntBoles[i].pmin.z + listaCapsasConjuntBoles[i].a - cb.pmin.z;
+                        if(dzN < 0.005)dzN = 0.0;
+                    }
+                }
             }
-            break;
-        case Qt::Key_Down:
-            if(cb.pmin.z+cb.p<cT.pmin.z+cT.p){
-                m = Translate(ejez.x*deltaDesplacament,  ejez.y*deltaDesplacament, ejez.z*deltaDesplacament);
-                cb.pmin.z += deltaDesplacament;
+
+            if(event->key() == Key_Down){
+                if((cb.pmin.z + cb.p/2.0) - (listaCapsasConjuntBoles[i].pmin.z + listaCapsasConjuntBoles[i].p/2.0)>= 0.0){//si bola blanca abajo no hay limitacion
+                    dzP = deltaDesplacament;
+                }else{
+                    if(listaCapsasConjuntBoles[i].pmin.z - (cb.pmin.z + cb.p) < deltaDesplacament){
+                        dzP = listaCapsasConjuntBoles[i].pmin.z - (cb.pmin.z + cb.p);
+                        if(dzP < 0.005)dzP = 0.0;
+                    }
+                }
             }
-            break;
-        case Qt::Key_Left:
-            if(cb.pmin.x>cT.pmin.x){
-                m = Translate(ejex.x*(-deltaDesplacament),  ejex.y*(-deltaDesplacament), ejex.z*(-deltaDesplacament));
-                cb.pmin.x += -deltaDesplacament;
+
+            if(event->key() == Key_Left){
+                if((cb.pmin.x + cb.a/2.)- (listaCapsasConjuntBoles[i].pmin.x + listaCapsasConjuntBoles[i].a/2.)<= 0.0){//si bola blanca a la izquierda no hay limitacion
+                    dxN = -deltaDesplacament;
+                }else{
+                    if(listaCapsasConjuntBoles[i].pmin.x + listaCapsasConjuntBoles[i].a - cb.pmin.x > -deltaDesplacament){
+                        dxN = listaCapsasConjuntBoles[i].pmin.x + listaCapsasConjuntBoles[i].a - cb.pmin.x;
+                        if(dxN < 0.005)dxN = 0.0;
+                    }
+                }
             }
-            break;
-        case Qt::Key_Right:
-            if(cb.pmin.x+cb.a<cT.pmin.x+cT.a){
-                m = Translate(ejex.x*deltaDesplacament,  ejex.y*deltaDesplacament, ejex.z*deltaDesplacament);
-                cb.pmin.x += deltaDesplacament;
+
+            if(event->key() == Key_Right){
+                if((cb.pmin.x + cb.a/2.)- (listaCapsasConjuntBoles[i].pmin.x + listaCapsasConjuntBoles[i].a/2.) >= 0.0){//si bola blanca a la derecha no hay limitacion
+                    dxP = deltaDesplacament;
+                }else{
+                    if(listaCapsasConjuntBoles[i].pmin.x - (cb.pmin.x + cb.a) < deltaDesplacament ){
+                        dxP = listaCapsasConjuntBoles[i].pmin.x - (cb.pmin.x + cb.a);
+                        if(dxP < 0.005)dxP = 0.0;
+                    }
+                }
             }
-            break;
+
         }
-        esc->bolaBlanca->aplicaTG(m);
-        update();
+    }
 
-   }
+
+    if (esc->bolaBlanca!=NULL && esc->taulaBillar!=NULL ) {
+       capsaTaula = esc->taulaBillar->calculCapsa3D();
+
+
+       switch ( event->key() )
+       {
+       case Qt::Key_Up:
+                  m = Translate(ejez.x*dzN,  ejez.y*dzN, ejez.z*dzN);
+                  cb.pmin.z += dzN;
+           break;
+       case Qt::Key_Down:
+                  m = Translate(ejez.x*dzP,  ejez.y*dzP, ejez.z*dzP);
+                  cb.pmin.z += dzP;
+           break;
+       case Qt::Key_Left:
+                  m = Translate(ejex.x*dxN,  ejex.y*dxN, ejex.z*dxN);
+                  cb.pmin.x += dxN;
+           break;
+       case Qt::Key_Right:
+                  m = Translate(ejex.x*dxP,  ejex.y*dxP, ejex.z*dxP);
+                  cb.pmin.x += dxP;          
+           break;
+       }
+
+       esc->bolaBlanca->aplicaTG(m);
+       update();
+
+    }
 }
 
 void GLWidget::keyReleaseEvent(QKeyEvent *event)
@@ -254,7 +319,7 @@ void GLWidget::keyReleaseEvent(QKeyEvent *event)
 
 void GLWidget::adaptaObjecteTamanyWidget(Objecte *obj)
 {
-        // Metode a implementar
+    // Metode a implementar
     Capsa3D capsa;
     mat4 m;
 
@@ -331,6 +396,9 @@ void GLWidget::newSalaBillar()
     cb = esc->bolaBlanca->calculCapsa3D();
 
     newConjuntBoles();
+    for (int i=0; i<esc->listaConjuntBoles.size(); i++) {
+        listaCapsasConjuntBoles.push_back(esc->listaConjuntBoles[i]->calculCapsa3D());
+    }
 }
 
 // Metode per iniciar la dinàmica del joc

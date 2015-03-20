@@ -77,6 +77,7 @@ private:
     int zRotOld;
     Capsa3D cb;
     Capsa3D cT;
+    vector<Capsa3D> listaCapsasConjuntBoles;
 
     //  Metode per a carregar de fitxers el vertex i el fragment shader
    void InitShader( const char* vertexShaderFile,
