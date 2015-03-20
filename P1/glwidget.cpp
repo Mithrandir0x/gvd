@@ -148,8 +148,16 @@ void GLWidget::paintGL()
                        RotateZ( zRot / 16.0 ) );
 
    // A modificar si cal girar tots els objectes
+   if(xRot != xRotOld || yRot != yRotOld || zRot != zRotOld){
+       ejex = transform * ejex;
+       ejez = transform * ejez;
+       esc->aplicaTG(transform);
+   }
 
-   esc->aplicaTG(transform);
+   xRotOld = xRot;
+   yRotOld = yRot;
+   zRotOld = zRot;
+
    esc->draw();
 
 
@@ -194,22 +202,46 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
 
 void GLWidget::keyPressEvent(QKeyEvent *event)
 {
+    double deltaDesplacament = 0.01;
+    mat4 m;
+    Capsa3D capsaTaula;
+
     // Metode a implementar
-    switch ( event->key() )
-    {
-    case Qt::Key_Up:
+    if (esc->bolaBlanca!=NULL && esc->taulaBillar!=NULL ) {
+        capsaTaula = esc->taulaBillar->calculCapsa3D();
 
-        break;
-    case Qt::Key_Down:
 
-        break;
-    case Qt::Key_Left:
+        switch ( event->key() )
+        {
+        case Qt::Key_Up:
+            if(cb.pmin.z>cT.pmin.z){
+                m = Translate(ejez.x*(-deltaDesplacament),  ejez.y*(-deltaDesplacament), ejez.z*(-deltaDesplacament));
+                cb.pmin.z += -deltaDesplacament;
+            }
+            break;
+        case Qt::Key_Down:
+            if(cb.pmin.z+cb.p<cT.pmin.z+cT.p){
+                m = Translate(ejez.x*deltaDesplacament,  ejez.y*deltaDesplacament, ejez.z*deltaDesplacament);
+                cb.pmin.z += deltaDesplacament;
+            }
+            break;
+        case Qt::Key_Left:
+            if(cb.pmin.x>cT.pmin.x){
+                m = Translate(ejex.x*(-deltaDesplacament),  ejex.y*(-deltaDesplacament), ejex.z*(-deltaDesplacament));
+                cb.pmin.x += -deltaDesplacament;
+            }
+            break;
+        case Qt::Key_Right:
+            if(cb.pmin.x+cb.a<cT.pmin.x+cT.a){
+                m = Translate(ejex.x*deltaDesplacament,  ejex.y*deltaDesplacament, ejex.z*deltaDesplacament);
+                cb.pmin.x += deltaDesplacament;
+            }
+            break;
+        }
+        esc->bolaBlanca->aplicaTG(m);
+        update();
 
-        break;
-    case Qt::Key_Right:
-
-        break;
-    }
+   }
 }
 
 void GLWidget::keyReleaseEvent(QKeyEvent *event)
@@ -293,7 +325,11 @@ void GLWidget::newSalaBillar()
     QString fileName = "/home/jj/Qtexamples/P1/resources/taula.obj";
     if (!fileName.isNull())
         newObj(fileName);
+    cT = esc->taulaBillar->calculCapsa3D();
+
     newBola();
+    cb = esc->bolaBlanca->calculCapsa3D();
+
     newConjuntBoles();
 }
 
