@@ -227,7 +227,7 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
     if(cT.pmin.x + cT.a - (cb.pmin.x + cb.a) < deltaDesplacament)
         dxP = cT.pmin.x + cT.a - (cb.pmin.x + cb.a);
 
-    for (int i=0; i<esc->listaConjuntBoles.size(); i++) {
+    for (int i=0; i<esc->conjuntBoles->listaConjuntBoles.size(); i++) {
         if(abs((cb.pmin.x+cb.a/2.) - (listaCapsasConjuntBoles[i].pmin.x+listaCapsasConjuntBoles[i].a/2.)) < (cb.a/2. + listaCapsasConjuntBoles[i].a/2.)
                 && abs((cb.pmin.z+cb.p/2.) - (listaCapsasConjuntBoles[i].pmin.z+listaCapsasConjuntBoles[i].p/2.)) < cb.p/2. + listaCapsasConjuntBoles[i].p/2.){
 
@@ -340,7 +340,6 @@ void GLWidget::newObjecte(Objecte * obj)
     adaptaObjecteTamanyWidget(obj);
     obj->toGPU(program);
     esc->addObjecte(obj);
-
     updateGL();
 }
 void GLWidget::newPlaBase()
@@ -377,11 +376,12 @@ void GLWidget::newConjuntBoles()
     ConjuntBoles *cb;
 
     cb = new ConjuntBoles();
+
     for (int i=0; i<cb->listaConjuntBoles.size(); i++) {
-            adaptaObjecteTamanyWidget(cb->listaConjuntBoles[i]);
-            cb->listaConjuntBoles[i]->toGPU(program);
-            esc->listaConjuntBoles.push_back(cb->listaConjuntBoles[i]);
+        adaptaObjecteTamanyWidget(cb->listaConjuntBoles[i]);
+        cb->listaConjuntBoles[i]->toGPU(program);
     }
+    esc->conjuntBoles = cb;
     updateGL();
 }
 void GLWidget::newSalaBillar()
@@ -396,8 +396,8 @@ void GLWidget::newSalaBillar()
     cb = esc->bolaBlanca->calculCapsa3D();
 
     newConjuntBoles();
-    for (int i=0; i<esc->listaConjuntBoles.size(); i++) {
-        listaCapsasConjuntBoles.push_back(esc->listaConjuntBoles[i]->calculCapsa3D());
+    for (int i=0; i<esc->conjuntBoles->listaConjuntBoles.size(); i++) {
+        listaCapsasConjuntBoles.push_back(esc->conjuntBoles->listaConjuntBoles[i]->calculCapsa3D());
     }
 }
 

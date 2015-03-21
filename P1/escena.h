@@ -16,6 +16,7 @@
 #include <taulabillar.h>
 #include <plabase.h>
 #include <bola.h>
+#include <conjuntboles.h>
 
 using namespace std;
 
@@ -42,7 +43,7 @@ public:
     TaulaBillar *taulaBillar;
     PlaBase *plaBase;
     Bola *bolaBlanca = NULL;
-    vector<Bola*> listaConjuntBoles;
+    ConjuntBoles *conjuntBoles;
 };
 
 #endif // ESCENA_H
