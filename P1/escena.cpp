@@ -72,23 +72,31 @@ void Escena::aplicaTGCentrat(mat4 m) {
 
 }
 
-void Escena::draw() {
+void Escena::draw(QGLShaderProgram *pr) {
 
     // Metode a modificar
 
     if (taulaBillar!=NULL)
-        taulaBillar->draw();
+            taulaBillar->draw();
 
-    if (plaBase!=NULL)
+    if (plaBase!=NULL){
+        plaBase->texture->bind(0);
+        plaBase->toGPU(pr);
         plaBase->draw();
+    }
 
-    if (bolaBlanca!=NULL)
+    if (bolaBlanca!=NULL){
+        bolaBlanca->texture->bind(0);
+        bolaBlanca->toGPU(pr);
         bolaBlanca->draw();
+    }
 
     if (conjuntBoles!=NULL){
-            for (int i=0; i<conjuntBoles->listaConjuntBoles.size(); i++) {
-                    conjuntBoles->listaConjuntBoles[i]->draw();
-                }
+        for (int i=0; i<conjuntBoles->listaConjuntBoles.size(); i++) {
+            conjuntBoles->listaConjuntBoles[i]->texture->bind(0);
+            conjuntBoles->listaConjuntBoles[i]->toGPU(pr);
+            conjuntBoles->listaConjuntBoles[i]->draw();
+            }
     }
 
 }

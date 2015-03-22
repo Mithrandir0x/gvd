@@ -158,7 +158,7 @@ void GLWidget::paintGL()
    yRotOld = yRot;
    zRotOld = zRot;
 
-   esc->draw();
+   esc->draw(program);
 
 
 }
@@ -193,8 +193,9 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
     if (event->buttons() & Qt::LeftButton) {
         setXRotation(xRot + ROTATIONSPEED * dy);
     } else if (event->buttons() & Qt::RightButton) {
-        setXRotation(xRot + ROTATIONSPEED * dy);
-        setZRotation(zRot + ROTATIONSPEED * dx);
+        //setXRotation(xRot + ROTATIONSPEED * dy);
+        //setZRotation(zRot + ROTATIONSPEED * dx);
+        setYRotation(yRot + ROTATIONSPEED * dx);
     }
     lastPos = event->pos();
 }
@@ -320,7 +321,7 @@ void GLWidget::keyReleaseEvent(QKeyEvent *event)
 void GLWidget::adaptaObjecteTamanyWidget(Objecte *obj)
 {
     // Metode a implementar
-    Capsa3D capsa;
+    /*Capsa3D capsa;
     mat4 m;
 
     obj->aplicaTG(m220); //m220 precalculada en glwidget.h con escala=2/20
@@ -331,7 +332,7 @@ void GLWidget::adaptaObjecteTamanyWidget(Objecte *obj)
         }else if (dynamic_cast<Bola*>(obj)){
             m = Translate(0.0,  -capsa.pmin.y, 0.0);//la base de las 16 bolas quedan en y = 0
             obj->aplicaTG(m);
-    }
+    }*/
     //la PlaBase estaba en y = 0 por lo que solo necesita el escalado m220
 }
 
@@ -366,7 +367,7 @@ void GLWidget::newBola()
 
     Bola *obj;
 
-    obj = new Bola(0.0, 0.03075, 0.5, 0.03075, 1.0, 1.0, 1.0, "0");//x0,y0,z0,r,R,G,B,numBola
+    obj = new Bola(0.0, -0.03075, 0.5, 0.03075, 1.0, 1.0, 1.0, "0");//x0,y0,z0,r,R,G,B,numBola
     newObjecte(obj);
 }
 void GLWidget::newConjuntBoles()
@@ -386,11 +387,13 @@ void GLWidget::newConjuntBoles()
 }
 void GLWidget::newSalaBillar()
 {
+    newPlaBase();
+    cT = esc->plaBase->calculCapsa3D();
     // Metode que construeix tota la sala de billar: taula, 15 boles i bola blanca
-    QString fileName = "/home/jj/Qtexamples/P1/resources/taula.obj";
+   /* QString fileName = "/home/jj/Qtexamples/P1/resources/taula.obj";
     if (!fileName.isNull())
         newObj(fileName);
-    cT = esc->taulaBillar->calculCapsa3D();
+    cT = esc->taulaBillar->calculCapsa3D();*/
 
     newBola();
     cb = esc->bolaBlanca->calculCapsa3D();

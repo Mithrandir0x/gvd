@@ -32,7 +32,7 @@ public:
     void aplicaTGCentrat(mat4 m);
     void reset();
 
-    void draw();
+    void draw(QGLShaderProgram *pr);
     void CapsaMinCont3DEscena();
 
     // Capsa contenedora de l'escena

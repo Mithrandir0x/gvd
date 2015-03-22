@@ -47,6 +47,14 @@ OTHER_FILES += \
 RESOURCES += \
     resources.qrc
 
+macx {
+    copyfiles.commands = cp -r $${PWD}/resources ./../build-BillarPractica1-Desktop_Qt_5_4_1_clang_64bit-Debug/BillarPractica1.app/Contents
+    copyfiles.commands = cp -r $${PWD}/*.glsl ./../build-BillarPractica1-Desktop_Qt_5_4_1_clang_64bit-Debug/BillarPractica1.app/Contents
+}
+
+QMAKE_EXTRA_TARGETS += copyfiles
+POST_TARGETDEPS += copyfiles
+
 
 
 

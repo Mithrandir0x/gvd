@@ -19,6 +19,7 @@ private:
     color4 vertex_colors[4];
 
     void quad( int a, int b, int c, int d );
+    void initTextura();
 };
 
 #endif // PLABASE_H

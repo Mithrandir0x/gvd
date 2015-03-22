@@ -1,29 +1,29 @@
 #include "bola.h"
 
 Bola::Bola(double x0, double y0, double z0, double r, double R, double G, double B, QString numBola) : Objecte(NumVerticesBola){
-    color.x = R;
-    color.y = G;
-    color.z = B;
-    color.w = 1;
-    make(x0,y0,z0,r,numBola);
-    capsa = calculCapsa3D();
+   color.x = R;
+   color.y = G;
+   color.z = B;
+   color.w = 1;
+   make(x0,y0,z0,r,numBola);
+   capsa = calculCapsa3D();
+   double aristaMax = 0.0;
 
-    double aristaMax = 0.0;
-
-    if(capsa.a > capsa.p){
-        aristaMax=capsa.a;
-    } else{
-        aristaMax=capsa.p;
-    }
-    if(capsa.h > aristaMax){
-        aristaMax=capsa.h;
-    }
-    double escala = 2 * r / aristaMax;
-    mat4 m = Scale(escala, escala, escala)*Translate(-(capsa.pmin.x + capsa.a / 2), -(capsa.pmin.y + this->capsa.h / 2), -(capsa.pmin.z + capsa.p / 2));
-    aplicaTG(m);
-    capsa = calculCapsa3D();
-    m = Translate(x0, y0, z0);
-    aplicaTG(m);
+   if(capsa.a > capsa.p){
+       aristaMax=capsa.a;
+   } else{
+       aristaMax=capsa.p;
+   }
+   if(capsa.h > aristaMax){
+       aristaMax=capsa.h;
+   }
+   double escala = 2* r / aristaMax;
+   ///mat4 m = Scale(escala, escala, escala)*Translate(-(capsa.pmin.x + capsa.a / 2), -(capsa.pmin.y + this->capsa.h / 2), -(capsa.pmin.z + capsa.p / 2));
+   //aplicaTG(m);
+   capsa = calculCapsa3D();
+   mat4 m = Translate(x0, y0, z0)*Scale(escala, escala, escala);
+   aplicaTG(m);
+   capsa = calculCapsa3D();
 }
 
 Bola::~Bola()
@@ -50,14 +50,31 @@ void Bola::make(double x0, double  y0, double  z0, double r, QString numBola)
     divide_triangle(v[0],v[3],v[1],NumIteracionsEsfera);
     divide_triangle(v[0],v[2],v[3],NumIteracionsEsfera);
 
-    mat4 transform = (Translate(x0,y0,z0) * Scale(r,r,r));
+    /*mat4 transform = (Translate(x0,y0,z0) * Scale(r,r,r));
     for ( int i = 0; i < NumVerticesBola; ++i ) {
-        points[i] = transform  * points[i];
-    }
+            points[i] = transform  * points[i];
+    }*/
 
+    initTextura(numBola);//añadido
 }
 
+void Bola::initTextura(QString numBola)
+ {
+     //numBola = "2";
+     //qDebug() << "Initializing textures...";
 
+     QString fileTextura = "://resources/Bola";//añadido
+     fileTextura.append(numBola).append(".jpg");//añadido
+
+     // Carregar la textura
+     glActiveTexture(GL_TEXTURE0);
+     texture = new QOpenGLTexture(QImage(fileTextura));  //modificado
+     texture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
+     texture->setMagnificationFilter(QOpenGLTexture::Linear);
+
+     texture->bind(0);
+
+ }
 
 void Bola::divide_triangle(const vec4& a, const vec4& b, const vec4& c, int cont){
 
@@ -89,17 +106,39 @@ vec4 Bola::normalize(const vec4& p)
 
 void Bola::triangle(const vec4& a, const vec4& b, const vec4& c )
 {
+    double u, v;
 
     points[Index] = a;
     colors[Index] = this->color;
+    u = 0.5 + atan2(points[Index].z, points[Index].x)/(2*M_PI);
+    v = 0.5 - asin(points[Index].y)/M_PI;
+    if(u < 0.0)u=0.0;
+    if(v < 0.0)v=0.0;
+    if(u > 1.0)u=1.0;
+    if(v > 1.0)v=1.0;
+    vertexsTextura[Index] = vec2(u , v);
     Index++;
 
     points[Index] = b;
     colors[Index] = this->color;
+    u = 0.5 + atan2(points[Index].z, points[Index].x)/(2*M_PI);
+    v = 0.5 - asin(points[Index].y)/M_PI;
+    if(u < 0.0)u=0.0;
+    if(v < 0.0)v=0.0;
+    if(u > 1.0)u=1.0;
+    if(v > 1.0)v=1.0;
+    vertexsTextura[Index] = vec2(u , v);
     Index++;
 
     points[Index] = c;
     colors[Index] = this->color;
+    u = 0.5 + atan2(points[Index].z, points[Index].x)/(2*M_PI);
+    v = 0.5 - asin(points[Index].y)/M_PI;
+    if(u < 0.0)u=0.0;
+    if(v < 0.0)v=0.0;
+    if(u > 1.0)u=1.0;
+    if(v > 1.0)v=1.0;
+    vertexsTextura[Index] = vec2(u , v);
     Index++;
 }
 

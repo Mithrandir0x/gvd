@@ -2,14 +2,12 @@
 #define OBJECTE_H
 
 #include <QObject>
-
 #include <vector>
-
 #include <Common.h>
 #include <cara.h>
 
-
 #include <QGLShaderProgram>
+#include <QOpenGLTexture>
 
 typedef Common::vec4  color4;
 typedef Common::vec4  point4;
@@ -43,11 +41,13 @@ protected:
     color4 *colors;
     int Index; // index de control del numero de vertexs a posar a la GPU
 
+    vec2 *vertexsTextura; // coordenades de textura associades a cada vertex
 
 public:
 
   // Capsa mínima contenidora de l'objecte
     Capsa3D capsa;
+    QOpenGLTexture *texture;
 
     //explicit Objecte(QObject *parent = 0);
     Objecte(const int npoints, QObject *parent = 0);

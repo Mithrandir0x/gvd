@@ -6,6 +6,7 @@ Objecte::Objecte(int npoints, QObject *parent) : numPoints(npoints) ,
 {
     points = new point4[npoints];
     colors = new color4[npoints];
+    vertexsTextura = new vec2[npoints];
 }
 
 Objecte::Objecte(int npoints, QString n) : numPoints(npoints)
@@ -118,45 +119,57 @@ void Objecte::toGPU(QGLShaderProgram *pr){
 
     program = pr;
 
-    //std::cout<<"Passo les dades de l'objecte a la GPU" << endl;
+    //std::cout<<"Passo les dades de l'objecte a la GPU\n";
 
+    program->setUniformValue("texMap", 0);
+
+    // Creacio i inicialitzacio d'un vertex buffer object (VBO)
     glGenBuffers( 1, &buffer );
-    glBindBuffer( GL_ARRAY_BUFFER, buffer );
-    glBufferData( GL_ARRAY_BUFFER, sizeof(point4) * Index + sizeof(color4) * Index,
-                  NULL, GL_STATIC_DRAW );
-    program->link();
 
-    program->bind();
-    glEnable( GL_DEPTH_TEST );
-}
-
-// Pintat en la GPU.
-void Objecte::draw()
-{
-
-    // cal activar el buffer de l'objecte. Potser que ja n'hi hagi un altre actiu
+    // Activació a GL del Vertex Buffer Object
     glBindBuffer( GL_ARRAY_BUFFER, buffer );
 
-    // per si han canviat les coordenades dels punts
+    // Transferència dels punts, colors i coordenades de textura al vertex buffer object
+    glBufferData( GL_ARRAY_BUFFER, sizeof(point4) * Index + sizeof(color4) * Index + sizeof(vec2) * Index, NULL, GL_STATIC_DRAW );
+
     glBufferSubData( GL_ARRAY_BUFFER, 0, sizeof(point4) * Index, &points[0] );
     glBufferSubData( GL_ARRAY_BUFFER, sizeof(point4) * Index, sizeof(color4) * Index, &colors[0] );
+    glBufferSubData( GL_ARRAY_BUFFER, sizeof(point4)*Index+sizeof(color4)*Index, sizeof(vec2)*Index, vertexsTextura);
 
-    // Per a conservar el buffer
+    // Definició de la correspondència de les variables del shader vPosition, vColor i vCoordTexture
     int vertexLocation = program->attributeLocation("vPosition");
     int colorLocation = program->attributeLocation("vColor");
+    int coordTextureLocation = program->attributeLocation("vCoordTexture");
 
     program->enableAttributeArray(vertexLocation);
     program->setAttributeBuffer("vPosition", GL_FLOAT, 0, 4);
 
     program->enableAttributeArray(colorLocation);
-    program->setAttributeBuffer("vColor", GL_FLOAT, sizeof(point4) * Index, 4);
+    program->setAttributeBuffer("vColor", GL_FLOAT, sizeof(points), 4);
 
+    program->enableAttributeArray(coordTextureLocation);
+    program->setAttributeBuffer("vCoordTexture", GL_FLOAT, sizeof(points)+sizeof(colors), 2);
 
-    glPolygonMode(GL_FRONT_AND_BACK,
-                  GL_LINE);
+    // Activació de la correspondencia entre les variables
+    program->bindAttributeLocation("vPosition", vertexLocation);
+    program->bindAttributeLocation("vColor", colorLocation);
+    program->bindAttributeLocation("vCoordTexture", coordTextureLocation);
+
+    glEnable( GL_DEPTH_TEST );
+    glEnable(GL_TEXTURE_2D);
+    glDisable(GL_CULL_FACE);
+    program->link();
+    program->bind();
+}
+
+// Pintat en la GPU.
+void Objecte::draw()
+{
+    //std::cout<<"Objecte::draw\n";
+
+    //glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
     glDrawArrays( GL_TRIANGLES, 0, Index );
-
-    // Abans nomes es feia: glDrawArrays( GL_TRIANGLES, 0, NumVerticesP );
 }
 
 void Objecte::make()

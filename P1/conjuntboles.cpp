@@ -47,14 +47,14 @@ ConjuntBoles::ConjuntBoles()
         }else if(i>9 && i<15){
             x = x5 + 2 * (i-9) * r;
             z= z5;
-            if(i==6)numBola = "7";
-            if(i==7)numBola = "14";
-            if(i==8)numBola = "9";
-            if(i==9)numBola = "6";
-            if(i==9)numBola = "5";
+            if(i==10)numBola = "7";
+            if(i==11)numBola = "14";
+            if(i==12)numBola = "9";
+            if(i==13)numBola = "6";
+            if(i==14)numBola = "5";
         }
         //std::cout<<"\ncentro bola "<< i<<", x= "<<x<<", y= "<<y<<", z= "<<z<<"\n";
-        bola = new Bola(x, y, z, r, 1.0, 1.0, 0.0, numBola);
+        bola = new Bola(x, -y, z, r, 1.0, 1.0, 0.0, numBola);
         //capsa = bola->calculCapsa3D();
         //std::cout<<"centro bola "<< i <<", x= "<< capsa.pmin.x + capsa.a/2. << ", y= " << capsa.pmin.y + capsa.h/2. <<  ", z= " << capsa.pmin.z + capsa.p/2. <<"\n";
         listaConjuntBoles.push_back(bola);
