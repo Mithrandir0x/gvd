@@ -6,8 +6,8 @@ PlaBase::PlaBase() : Objecte(NumVertices)
     double h = 0.0;
 
     vertices[0] = point4( 0.5, h, 0.5, 1.0 );
-    vertices[1] = point4( 0.5, h,-0.5, 1.0 );
-    vertices[2] = point4(-0.5, h,-0.5, 1.0 );
+    vertices[1] = point4( 0.5, 0.0,-0.5, 1.0 );
+    vertices[2] = point4(-0.5, 0.0,-0.5, 1.0 );
     vertices[3] = point4(-0.5, h, 0.5, 1.0 );
 
     vertex_colors[0] = color4( 1.0, 1.0, 1.0, 1.0 ); //white

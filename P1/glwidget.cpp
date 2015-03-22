@@ -56,6 +56,8 @@ GLWidget::InitShader(const char* vShaderFile, const char* fShaderFile)
 
     program->bindAttributeLocation("vPosition", PROGRAM_VERTEX_ATTRIBUTE);
     program->bindAttributeLocation("vColor", PROGRAM_COLOR_ATTRIBUTE);
+
+
     // muntatge del shader en el pipeline gràfic per a ser usat
     program->link();
 
@@ -193,9 +195,8 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
     if (event->buttons() & Qt::LeftButton) {
         setXRotation(xRot + ROTATIONSPEED * dy);
     } else if (event->buttons() & Qt::RightButton) {
-        //setXRotation(xRot + ROTATIONSPEED * dy);
-        //setZRotation(zRot + ROTATIONSPEED * dx);
-        setYRotation(yRot + ROTATIONSPEED * dx);
+        setXRotation(xRot + ROTATIONSPEED * dy);
+        setZRotation(zRot + ROTATIONSPEED * dx);
     }
     lastPos = event->pos();
 }
@@ -367,7 +368,7 @@ void GLWidget::newBola()
 
     Bola *obj;
 
-    obj = new Bola(0.0, -0.03075, 0.5, 0.03075, 1.0, 1.0, 1.0, "0");//x0,y0,z0,r,R,G,B,numBola
+    obj = new Bola(0.0, 0.03075, -0.5, 0.03075, 1.0, 1.0, 1.0, "0");//x0,y0,z0,r,R,G,B,numBola
     newObjecte(obj);
 }
 void GLWidget::newConjuntBoles()
