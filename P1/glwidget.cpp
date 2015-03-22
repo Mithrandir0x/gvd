@@ -281,19 +281,23 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
     }
 
 
-    if (esc->bolaBlanca!=NULL && esc->taulaBillar!=NULL ) {
-       capsaTaula = esc->taulaBillar->calculCapsa3D();
+    if (esc->bolaBlanca!=NULL && esc->plaBase!=NULL ) {
+       capsaTaula = esc->plaBase->calculCapsa3D();
 
 
        switch ( event->key() )
        {
        case Qt::Key_Up:
-                  m = Translate(ejez.x*dzN,  ejez.y*dzN, ejez.z*dzN);
-                  cb.pmin.z += dzN;
+                   m = Translate(ejez.x*dzP,  ejez.y*dzP, ejez.z*dzP);
+                   cb.pmin.z += dzP;
+                  //m = Translate(ejez.x*dzN,  ejez.y*dzN, ejez.z*dzN);
+                  //cb.pmin.z += dzN;
            break;
        case Qt::Key_Down:
-                  m = Translate(ejez.x*dzP,  ejez.y*dzP, ejez.z*dzP);
-                  cb.pmin.z += dzP;
+                  m = Translate(ejez.x*dzN,  ejez.y*dzN, ejez.z*dzN);
+                  cb.pmin.z += dzN;
+                  //m = Translate(ejez.x*dzP,  ejez.y*dzP, ejez.z*dzP);
+                  //cb.pmin.z += dzP;
            break;
        case Qt::Key_Left:
                   m = Translate(ejex.x*dxN,  ejex.y*dxN, ejex.z*dxN);

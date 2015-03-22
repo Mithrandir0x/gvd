@@ -2,13 +2,11 @@
 
 PlaBase::PlaBase() : Objecte(NumVertices)
 {
-    //0.03075
-    double h = 0.0;
 
-    vertices[0] = point4( 0.5, h, 0.5, 1.0 );
+    vertices[0] = point4( 0.5, 0.0, 0.5, 1.0 );
     vertices[1] = point4( 0.5, 0.0,-0.5, 1.0 );
     vertices[2] = point4(-0.5, 0.0,-0.5, 1.0 );
-    vertices[3] = point4(-0.5, h, 0.5, 1.0 );
+    vertices[3] = point4(-0.5, 0.0, 0.5, 1.0 );
 
     vertex_colors[0] = color4( 1.0, 1.0, 1.0, 1.0 ); //white
     vertex_colors[1] = color4( 1.0, 0.0, 0.0, 1.0 ); //red
@@ -34,7 +32,8 @@ PlaBase::~PlaBase()
 void PlaBase::make()
 {
     Index = 0;
-    quad( 0, 1, 2, 3 );
+    //quad( 0, 1, 2, 3 );
+    quad( 1, 2, 3, 0 );
     initTextura();
 }
 
@@ -46,9 +45,9 @@ void PlaBase::quad( int a, int b, int c, int d )
     colors[Index] = vertex_colors[a]; points[Index] = vertices[a]; vertexsTextura[Index] = vec2(0.0, 0.0); Index++;
     colors[Index] = vertex_colors[b]; points[Index] = vertices[b]; vertexsTextura[Index] = vec2(1.0, 0.0); Index++;
     colors[Index] = vertex_colors[c]; points[Index] = vertices[c]; vertexsTextura[Index] = vec2(1.0, 1.0); Index++;
-    colors[Index] = vertex_colors[a]; points[Index] = vertices[a]; vertexsTextura[Index] = vec2(1.0, 1.0); Index++;
-    colors[Index] = vertex_colors[c]; points[Index] = vertices[c]; vertexsTextura[Index] = vec2(0.0, 0.0); Index++;
-    colors[Index] = vertex_colors[d]; points[Index] = vertices[d]; vertexsTextura[Index] = vec2(1.0, 0.0); Index++;
+    colors[Index] = vertex_colors[a]; points[Index] = vertices[a]; vertexsTextura[Index] = vec2(0.0, 0.0); Index++;
+    colors[Index] = vertex_colors[c]; points[Index] = vertices[c]; vertexsTextura[Index] = vec2(1.0, 0.0); Index++;
+    colors[Index] = vertex_colors[d]; points[Index] = vertices[d]; vertexsTextura[Index] = vec2(0.0, 1.0); Index++;
 }
 
 void PlaBase::initTextura()
