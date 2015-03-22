@@ -192,6 +192,13 @@ void Objecte::make()
         {
             points[Index] = vertexs[cares[i].idxVertices[j]];
             colors[Index] = vec4(base_colors[1], 1.0);
+           /* if(){
+                vertexsTextura[Index] = vec2(0.0, 0.0);
+            }else if(){
+                vertexsTextura[Index] = vec2(1.0, 0.0);
+            }else{
+                vertexsTextura[Index] = vec2(1.0, 1.0);
+            }*/
             Index++;
         }
     }

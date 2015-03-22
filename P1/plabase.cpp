@@ -17,7 +17,7 @@ PlaBase::PlaBase() : Objecte(NumVertices)
     capsa = calculCapsa3D();
 
     double escalap = 2.0 / capsa.p;//para escalar la dimension maxima(profundidad) a 2
-    double escalaa = 1.08821869 / capsa.a;//temporal
+    double escalaa = 1.08821869 / capsa.a;//para que coincida con la mesa de billar
 
     mat4 m = Scale(escalaa, 1.0, escalap)*Translate(-(capsa.pmin.x + capsa.a/2.), -(capsa.pmin.y + capsa.h/2.), -(capsa.pmin.z + capsa.p/2.));
     aplicaTG(m);
@@ -46,7 +46,7 @@ void PlaBase::quad( int a, int b, int c, int d )
     colors[Index] = vertex_colors[b]; points[Index] = vertices[b]; vertexsTextura[Index] = vec2(1.0, 0.0); Index++;
     colors[Index] = vertex_colors[c]; points[Index] = vertices[c]; vertexsTextura[Index] = vec2(1.0, 1.0); Index++;
     colors[Index] = vertex_colors[a]; points[Index] = vertices[a]; vertexsTextura[Index] = vec2(0.0, 0.0); Index++;
-    colors[Index] = vertex_colors[c]; points[Index] = vertices[c]; vertexsTextura[Index] = vec2(1.0, 0.0); Index++;
+    colors[Index] = vertex_colors[c]; points[Index] = vertices[c]; vertexsTextura[Index] = vec2(1.0, 1.0); Index++;
     colors[Index] = vertex_colors[d]; points[Index] = vertices[d]; vertexsTextura[Index] = vec2(0.0, 1.0); Index++;
 }
 
