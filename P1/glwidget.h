@@ -69,7 +69,7 @@ private:
 
     // Programa de la GPU
     QGLShaderProgram *program;
-    mat4 m220 = Scale(2.0/20.0, 2.0/20.0, 2.0/20.0);
+    mat4 m220 = Scale(1.0/2.0, 1.0/2.0, 1.0/2.0);
     vec4 ejex =vec4(1.0, 0.0, 0.0, 0.0);
     vec4 ejez =vec4(0.0, 0.0, 1.0, 0.0);
     int xRotOld;
