@@ -13,6 +13,7 @@ PlaBase::PlaBase() : Objecte(NumVertices)
     vertex_colors[2] = color4( 1.0, 1.0, 0.0, 1.0 ); //yellow
     vertex_colors[3] = color4( 0.0, 1.0, 0.0, 1.0 ); //green
 
+
     make();
     capsa = calculCapsa3D();
 
@@ -32,8 +33,7 @@ PlaBase::~PlaBase()
 void PlaBase::make()
 {
     Index = 0;
-    //quad( 0, 1, 2, 3 );
-    quad( 1, 2, 3, 0 );
+    quad( 3, 2, 1, 0 );//llamando en este orden los triangulos se definen counterclok wise
     initTextura();
 }
 
@@ -42,12 +42,12 @@ void PlaBase::make()
 
 void PlaBase::quad( int a, int b, int c, int d )
 {
-    colors[Index] = vertex_colors[a]; points[Index] = vertices[a]; vertexsTextura[Index] = vec2(0.0, 0.0); Index++;
-    colors[Index] = vertex_colors[b]; points[Index] = vertices[b]; vertexsTextura[Index] = vec2(1.0, 0.0); Index++;
-    colors[Index] = vertex_colors[c]; points[Index] = vertices[c]; vertexsTextura[Index] = vec2(1.0, 1.0); Index++;
-    colors[Index] = vertex_colors[a]; points[Index] = vertices[a]; vertexsTextura[Index] = vec2(0.0, 0.0); Index++;
-    colors[Index] = vertex_colors[c]; points[Index] = vertices[c]; vertexsTextura[Index] = vec2(1.0, 1.0); Index++;
-    colors[Index] = vertex_colors[d]; points[Index] = vertices[d]; vertexsTextura[Index] = vec2(0.0, 1.0); Index++;
+    colors[Index] = vertex_colors[a]; points[Index] = vertices[a]; vertexsTextura[Index] = vec2(1.0, 0.0); Index++;
+    colors[Index] = vertex_colors[b]; points[Index] = vertices[b]; vertexsTextura[Index] = vec2(0.0, 0.0); Index++;
+    colors[Index] = vertex_colors[c]; points[Index] = vertices[c]; vertexsTextura[Index] = vec2(0.0, 1.0); Index++;
+    colors[Index] = vertex_colors[a]; points[Index] = vertices[a]; vertexsTextura[Index] = vec2(1.0, 0.0); Index++;
+    colors[Index] = vertex_colors[c]; points[Index] = vertices[c]; vertexsTextura[Index] = vec2(0.0, 1.0); Index++;
+    colors[Index] = vertex_colors[d]; points[Index] = vertices[d]; vertexsTextura[Index] = vec2(1.0, 1.0); Index++;
 }
 
 void PlaBase::initTextura()
@@ -57,13 +57,10 @@ void PlaBase::initTextura()
      // Carregar la textura
      glActiveTexture(GL_TEXTURE0);
      texture = new QOpenGLTexture(QImage("://resources/Fabric_Green_L.jpg"));
-     //texture = new QOpenGLTexture(QImage("://resources/Bola4.jpg"));
+     //texture = new QOpenGLTexture(QImage("://resources/Bola9.jpg"));
      texture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
      texture->setMagnificationFilter(QOpenGLTexture::Linear);
 
      texture->bind(0);
 
  }
-
-
-
