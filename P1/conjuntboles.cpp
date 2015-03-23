@@ -51,7 +51,7 @@ ConjuntBoles::ConjuntBoles()
             if(i==11)numBola = "14";
             if(i==12)numBola = "9";
             if(i==13)numBola = "6";
-            if(i==14)numBola = "5";
+            if(i==14)numBola = "15";
         }
         //std::cout<<"\ncentro bola "<< i<<", x= "<<x<<", y= "<<y<<", z= "<<z<<"\n";
         bola = new Bola(x, y, z, r, 1.0, 1.0, 0.0, numBola);
