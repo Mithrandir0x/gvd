@@ -145,10 +145,10 @@ void Objecte::toGPU(QGLShaderProgram *pr){
     program->setAttributeBuffer("vPosition", GL_FLOAT, 0, 4);
 
     program->enableAttributeArray(colorLocation);
-    program->setAttributeBuffer("vColor", GL_FLOAT, sizeof(points), 4);
+    program->setAttributeBuffer("vColor", GL_FLOAT, sizeof(point4)*Index, 4);
 
     program->enableAttributeArray(coordTextureLocation);
-    program->setAttributeBuffer("vCoordTexture", GL_FLOAT, sizeof(points)+sizeof(colors), 2);
+    program->setAttributeBuffer("vCoordTexture", GL_FLOAT, sizeof(point4)*Index+sizeof(color4)*Index, 2);
 
     // Activació de la correspondencia entre les variables
     program->bindAttributeLocation("vPosition", vertexLocation);
@@ -157,7 +157,11 @@ void Objecte::toGPU(QGLShaderProgram *pr){
 
     glEnable( GL_DEPTH_TEST );
     glEnable(GL_TEXTURE_2D);
-    glDisable(GL_CULL_FACE);
+
+    glEnable(GL_CULL_FACE);
+    //glCullFace(GL_BACK); //por defecto elimina los triangulos que se ven por detras
+    //glFrontFace(GL_CCW); //por defecto los triangulos se definen counterclock wise
+
     program->link();
     program->bind();
 }
