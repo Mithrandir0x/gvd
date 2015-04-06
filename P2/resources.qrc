@@ -1,0 +1,27 @@
+<RCC>
+    <qresource prefix="/">
+        <file>vshader1.glsl</file>
+        <file>fshader1.glsl</file>
+        <file>resources/Bola0.jpg</file>
+        <file>resources/Bola1.jpg</file>
+        <file>resources/Bola2.jpg</file>
+        <file>resources/Bola3.jpg</file>
+        <file>resources/Bola4.jpg</file>
+        <file>resources/Bola5.jpg</file>
+        <file>resources/Bola6.jpg</file>
+        <file>resources/Bola7.jpg</file>
+        <file>resources/Bola8.jpg</file>
+        <file>resources/Bola9.jpg</file>
+        <file>resources/Bola10.jpg</file>
+        <file>resources/Bola11.jpg</file>
+        <file>resources/Bola12.jpg</file>
+        <file>resources/Bola13.jpg</file>
+        <file>resources/Bola14.jpg</file>
+        <file>resources/Bola15.jpg</file>
+        <file>resources/Fabric_Green_L.jpg</file>
+        <file>resources/pal.mtl</file>
+        <file>resources/pal.obj</file>
+        <file>resources/taula.mtl</file>
+        <file>resources/taula.obj</file>
+    </qresource>
+</RCC>
