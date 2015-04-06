@@ -771,8 +771,8 @@ inline
 mat4 LookAt( const vec4& eye, const vec4& at, const vec4& up )
 {
     vec4 n = normalize(eye - at);
-    vec4 u = normalize(cross(up,n));
-    vec4 v = normalize(cross(n,u));
+    vec4 u = vec4(normalize(cross(up,n)), 0.0);
+    vec4 v = vec4(normalize(cross(n,u)), 0.0);
     vec4 t = vec4(0.0, 0.0, 0.0, 1.0);
     mat4 c = mat4(u, v, n, t);
     return c * Translate( -eye );
