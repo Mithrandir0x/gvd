@@ -15,7 +15,8 @@ uniform mat4 projection;
 I s'ha canviat la manera amb la que es calcula la posició del vèrtex processat:
 
 ```glsl
-gl_Position = projection * model_view * ( vPosition / vPosition.w );
+gl_Position = projection * model_view * vPosition;
+gl_Position = gl_Position / gl_Position.w;
 ```
 
 ## 3 Modificació de la classe càmera
@@ -71,25 +72,11 @@ vs.vrp[2] = capsaMinima.pmin[2] + ( capsaMinima.p / 2. );
 
 #### `Camera::CalculaMatriuModelView`
 
-> **WARNING**
->
-> - S'hauria de calcular angx, angy i angz a partir de la resta de vrp - obs?
-> - Verificar si s'ha de fer una translació addicional tal com indica la
->   diapositiva 22 de la sessió 2 del tema 3. Si s'ha de fer, aquesta
->   translació es fa al principi o al final??
-
 A partir de com està explicat a la diapositiva 22 de la segona sessió del
 tema 3, fem les següents transformacions geomètriques:
 
 ```c
-modView = identity();
-
-modView =
-    RotateZ(-vs.angz) *
-    RotateY(-vs.angy) *
-    Rotatex(-vs.angx) *
-    Translate(vs.vrp * -1) *
-    identity();
+modView = LookAt(vs.obs, vs.vrp, vs.vup);
 ```
 
 #### `Camera::CalculaMatriuProjection`
@@ -144,13 +131,43 @@ Camera camGeneral;
 A la implementació del constructor d'Escena, `Escena::Escena`, s'ha afegit
 la inicialització de l'objecte `camGeneral`:
 
+```c
+// Inicialització de la càmera
+camGeneral = new Camera();
+```
 
+Per a situar la càmera al punt `(0, 20, 0)` i estigui mirant al punt `(0, 0, 0)`,
+s'han afegit les següents línies de codi al constructor, després de construir la
+instància de la càmera:
+
+```c
+// Situem "l'objectiu" que mira la càmera a (0, 0, 0), a una distància de 20
+// respecte l'eix de la Y.
+camGeneral->vs.vrp = vec4(0.0, 0.0, 0.0, 1.0);
+camGeneral->vs.obs = camGeneral->CalculObs(camGeneral->vs.vrp, 20, 0, 90.0);
+```
 
 ### 4.2 Implementació de diferents utilitats referents a la càmera la classe Escena
 
 #### `Escena::iniCamera`
 
-> NO IMPLEMENTAT
+> Annotacions
+>
+> - Tècnicament, s'hauria de calcular l'amplada i l'alçada del viewport, i el VRP.
+>   Però aixó entra una mica en conflicte amb el punt anterior, on es demana que
+>   s'estigui mirant al punt `(0, 0, 0)`. (Crec...)
+>   - L'altra possibilitat és que a partir del càlcul de la window, que encara no
+>     està implementat, es pot calcular els punts 
+
+```c
+void Escena::iniCamera(bool isCamGeneral) {
+    if ( isCamGeneral ) {
+        Capsa3D capsaMinima;
+        camGeneral->ini(wd.a, wd.h, capsaMinima);
+    } else {
+    }
+}
+```
 
 #### `Escena::setAnglesCamera`
 

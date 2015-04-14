@@ -57,16 +57,7 @@ void Camera::toGPU(QGLShaderProgram *program)
 void Camera::CalculaMatriuModelView()
 {
     // CODI A MODIFICAR DURANT LA PRACTICA 2
-    modView = identity();
-
-    // Mirar diapositiva 22 de la teoria per a equació
-    // del càlcul de la matriu
-    modView =
-        RotateZ(-vs.angz) *
-        RotateY(-vs.angy) *
-        Rotatex(-vs.angx) *
-        Translate(vs.vrp * -1) *
-        modView;
+    modView = LookAt(vs.obs, vs.vrp, vs.vup);
 }
 
 void Camera::CalculaMatriuProjection()
