@@ -128,7 +128,23 @@ if ( piram.proj == PARALLELA ) {
 
 ### 4.1 Inclusió d'un nou atribut `camGeneral` a la classe Escena
 
-> NO IMPLEMENTAT
+A `escena.h`, s'ha inclós la següent capçalera:
+
+```c
+#include <camera.h>
+```
+
+I s'ha afegit el següent atribut públic:
+
+```c
+// Camera
+Camera camGeneral;
+```
+
+A la implementació del constructor d'Escena, `Escena::Escena`, s'ha afegit
+la inicialització de l'objecte `camGeneral`:
+
+
 
 ### 4.2 Implementació de diferents utilitats referents a la càmera la classe Escena
 

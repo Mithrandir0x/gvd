@@ -10,6 +10,9 @@ Escena::Escena()
     plaBase = NULL;
     bolaBlanca = NULL;
     conjuntBoles = NULL;
+
+    // Inicialització de la càmera
+    camGeneral = new Camera();
 }
 
 Escena::~Escena()
