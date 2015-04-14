@@ -71,6 +71,13 @@ vs.vrp[2] = capsaMinima.pmin[2] + ( capsaMinima.p / 2. );
 
 #### `Camera::CalculaMatriuModelView`
 
+> **WARNING**
+>
+> - S'hauria de calcular angx, angy i angz a partir de la resta de vrp - obs?
+> - Verificar si s'ha de fer una translació addicional tal com indica la
+>   diapositiva 22 de la sessió 2 del tema 3. Si s'ha de fer, aquesta
+>   translació es fa al principi o al final??
+
 A partir de com està explicat a la diapositiva 22 de la segona sessió del
 tema 3, fem les següents transformacions geomètriques:
 
@@ -86,6 +93,9 @@ modView =
 ```
 
 #### `Camera::CalculaMatriuProjection`
+
+> *Annotacions*
+> - És el VRP el COP?
 
 > **WARNING**
 >
