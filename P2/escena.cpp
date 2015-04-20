@@ -13,11 +13,6 @@ Escena::Escena()
 
     // Inicialització de la càmera
     camGeneral = new Camera();
-
-    // Situem "l'objectiu" que mira la càmera a (0, 0, 0), a una distància de 20
-    // respecte l'eix de la Y.
-    camGeneral->vs.vrp = vec4(0.0, 0.0, 0.0, 1.0);
-    camGeneral->vs.obs = camGeneral->CalculObs(camGeneral->vs.vrp, 20, 0, 90.0);
 }
 
 Escena::~Escena()
@@ -112,10 +107,20 @@ void Escena::draw(QGLShaderProgram *pr) {
 /*
  * Mètodes introduïts pel sistema de càmera
  */
+void Escena::SetZenitCamera()
+{
+    // Situem "l'objectiu" que mira la càmera a (0, 0, 0), a una distància de 20
+    // respecte l'eix de la Y.
+    camGeneral.vs.vrp = vec4(0.0, 0.0, 0.0, 1.0);
+    camGeneral.vs.vup = vec4(0.0, 0.0, 1.0, 1.0);
+    camGeneral.vs.obs = camGeneral->CalculObs(camGeneral->vs.vrp, 20, 0, 90.0);
+}
+
 void Escena::iniCamera(bool isCamGeneral) {
     if ( isCamGeneral ) {
-        Capsa3D capsaMinima;
-        camGeneral->ini(wd.a, wd.h, capsaMinima);
+        Capsa3D capsaMinima = CapsaMinCont3DEscena();
+        camGeneral.ini(screenSize[0], screenSize[1], capsaMinima);
+        SetZenitCamera();
     } else {
     }
 }

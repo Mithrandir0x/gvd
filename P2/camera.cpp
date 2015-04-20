@@ -28,13 +28,8 @@ void Camera::ini(int a, int h, Capsa3D capsaMinima)
     vs.vrp[0] = capsaMinima.pmin[0] + ( capsaMinima.a / 2. );
     vs.vrp[1] = capsaMinima.pmin[1] + ( capsaMinima.h / 2. );
     vs.vrp[2] = capsaMinima.pmin[2] + ( capsaMinima.p / 2. );
-    
    
-    vp.a = a;
-    vp.h = h;
-    vp.pmin[0] = 0;
-    vp.pmin[1] = 0;
-    
+    setViewport(0, 0, a, h);
 }
 
 
@@ -62,30 +57,49 @@ void Camera::CalculaMatriuModelView()
 
 void Camera::CalculaMatriuProjection()
 {
-    // CODI A MODIFICAR DURANT LA PRACTICA 2
-    proj = identity();
+    GLfloat left, right, bottom, top, zNear, zFar;
 
+    left = wd.pmin.x;
+    right = wd.pmin.x + wd.a;
+    bottom = wd.pmin.y;
+    top = wd.pmin.y + wd.h;
+    zNear = piram.dant;
+    zFar = piram.dpost;
+
+    // CODI A MODIFICAR DURANT LA PRACTICA 2
     if ( piram.proj == PARALLELA ) {
-        proj =
-            Ortho(-1., -1., -1., 1., 1., -1.) *
-            proj;
+        proj = Ortho(left, right, bottom, top, zNear, zFar);
     } else if ( piram.proj == PERSPECTIVA ) {
-        proj =
-            Frustum(-1., -1., -1., 1., 1., -1.) *
-            proj;
+        proj = Frustum(left, right, bottom, top, zNear, zFar);
     }
 }
 
 
-void Camera::CalculWindow( Capsa3D c)
+void Camera::CalculWindow(Capsa3D c)
 {
-   // CODI A MODIFICAR DURANT LA PRACTICA 2
-    
-    wd.pmin.x = -1;
-    wd.pmin.y = -1;
-    
-    wd.a = 2;
-    wd.h = 2;
+    // CODI A MODIFICAR DURANT LA PRACTICA 2
+    vec4  vaux[8];
+    mat4  MDP;
+    int i;
+
+    // Calcular la modelview o reutilitzar l'existent?
+    //modView = LookAt(vs.obs, vs.vrp, vup);
+
+    // Es deforma la matriu per que estigui en perspectiva?
+    if ( piram.proj == PERSPECTIVA ) {
+        CreaMatDp(MDP);
+        modView = MDP * modView;
+    }
+
+    // ???
+    VertexCapsa3D(c, vaux);
+
+    // Es transforma en coordenades de càmera els punts anteriors
+    for( i = 0 ; i < 8 ; i++ ) {
+        vaux[i] = modView * vaux[i];
+    }
+    // i es calcula la capsa mínima 2D a partir de les coordenades
+    wd = CapsaMinCont2DXYVert(vaux, 8);
 }
 
 void Camera::setViewport(int x, int y, int a, int h)

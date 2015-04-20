@@ -19,6 +19,14 @@ gl_Position = projection * model_view * vPosition;
 gl_Position = gl_Position / gl_Position.w;
 ```
 
+Quan es multiplica per `model_view`, s'obté les coordenades de càmera.
+
+Quan es multiplica per `projection` el càlcul anterior, s'obté les coordenades
+normalitzades.
+
+I per últim, quan es divideix per la quarta ordenada, s'obté les coordenades
+homogeneitzades.
+
 ## 3 Modificació de la classe càmera
 
 ### 3.1 Implementació del pas a la GPU de la matriu M-V/P des de la classe Càmera
@@ -61,13 +69,15 @@ S'han d'implementar els mètodes indicats:
 
 #### `Camera::ini`
 
-En primer lloc, es calcula el View Reference Point a partir de la capça
+En primer lloc, es calcula el View Reference Point a partir de la capsa
 contenidora passada per paràmetre:
 
 ```c
 vs.vrp[0] = capsaMinima.pmin[0] + ( capsaMinima.a / 2. );
 vs.vrp[1] = capsaMinima.pmin[1] + ( capsaMinima.h / 2. );
 vs.vrp[2] = capsaMinima.pmin[2] + ( capsaMinima.p / 2. );
+
+setViewport(0, 0, a, h);
 ```
 
 #### `Camera::CalculaMatriuModelView`
@@ -95,27 +105,64 @@ En funció del tipus de projecció que s'estigui utilitzant, la matriu de
 projecció canvia:
 
 ```c
-proj = identity();
+GLfloat left, right, bottom, top, zNear, zFar;
 
+left = wd.pmin.x;
+right = wd.pmin.x + wd.a;
+bottom = wd.pmin.y;
+top = wd.pmin.y + wd.h;
+zNear = piram.dant;
+zFar = piram.dpost;
+
+// CODI A MODIFICAR DURANT LA PRACTICA 2
 if ( piram.proj == PARALLELA ) {
-    proj =
-        Ortho(-1., -1., -1., 1., 1., -1.) *
-        proj;
+    proj = Ortho(left, right, bottom, top, zNear, zFar);
 } else if ( piram.proj == PERSPECTIVA ) {
-    proj =
-        Frustum(-1., -1., -1., 1., 1., -1.) *
-        proj;
+    proj = Frustum(left, right, bottom, top, zNear, zFar);
 }
 ```
+
 #### `Camera::CalculWindow`
 
-> NO IMPLEMENTAT
+> **WARNING**
+> - La capsa mínima que rep per paràmetre, de qui és? És la capsa mínima de
+> l'escena o es la capsa de l'objecte al que apunta la càmera?
+> - Preguntar qué fa la funció `Camera::VertexCapsa3D`
+
+
+La *window* es calcula amb coordenades de càmera. Per això, s'agafa la capsa
+contenidora, i es transforma a coordenades de càmera.
+
+```c
+vec4  vaux[8];
+mat4  MDP;
+int i;
+
+// Calcular la modelview o reutilitzar l'existent?
+//modView = LookAt(vs.obs, vs.vrp, vup);
+
+// Es deforma la matriu per que estigui en perspectiva?
+if ( piram.proj == PERSPECTIVA ) {
+    CreaMatDp(MDP);
+    modView = MDP * modView;
+}
+
+// ???
+VertexCapsa3D(c, vaux);
+
+// Es transforma en coordenades de càmera els punts anteriors
+for( i = 0 ; i < 8 ; i++ ) {
+    vaux[i] = modView * vaux[i];
+}
+// i es calcula la capsa mínima 2D a partir de les coordenades
+wd = CapsaMinCont2DXYVert(vaux, 8);
+```
 
 ## 4 Modificació de la classe Escena per incloure la càmera general
 
 ### 4.1 Inclusió d'un nou atribut `camGeneral` a la classe Escena
 
-A `escena.h`, s'ha inclós la següent capçalera:
+A `escena.h`, s'ha inclós la següent capsalera:
 
 ```c
 #include <camera.h>
@@ -137,14 +184,17 @@ camGeneral = new Camera();
 ```
 
 Per a situar la càmera al punt `(0, 20, 0)` i estigui mirant al punt `(0, 0, 0)`,
-s'han afegit les següents línies de codi al constructor, després de construir la
-instància de la càmera:
+s'ha definit aquesta funció:
 
 ```c
-// Situem "l'objectiu" que mira la càmera a (0, 0, 0), a una distància de 20
-// respecte l'eix de la Y.
-camGeneral->vs.vrp = vec4(0.0, 0.0, 0.0, 1.0);
-camGeneral->vs.obs = camGeneral->CalculObs(camGeneral->vs.vrp, 20, 0, 90.0);
+void Escena::SetZenitCamera()
+{
+    // Situem "l'objectiu" que mira la càmera a (0, 0, 0), a una distància de 20
+    // respecte l'eix de la Y.
+    camGeneral.vs.vrp = vec4(0.0, 0.0, 0.0, 1.0);
+    camGeneral.vs.vup = vec4(0.0, 0.0, 1.0, 1.0);
+    camGeneral.vs.obs = camGeneral->CalculObs(camGeneral->vs.vrp, 20, 0, 90.0);
+}
 ```
 
 ### 4.2 Implementació de diferents utilitats referents a la càmera la classe Escena
@@ -162,8 +212,9 @@ camGeneral->vs.obs = camGeneral->CalculObs(camGeneral->vs.vrp, 20, 0, 90.0);
 ```c
 void Escena::iniCamera(bool isCamGeneral) {
     if ( isCamGeneral ) {
-        Capsa3D capsaMinima;
-        camGeneral->ini(wd.a, wd.h, capsaMinima);
+        Capsa3D capsaMinima = CapsaMinCont3DEscena();
+        camGeneral.ini(screenSize[0], screenSize[1], capsaMinima);
+        SetZenitCamera();
     } else {
     }
 }

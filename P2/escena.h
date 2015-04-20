@@ -37,6 +37,7 @@ public:
 
     // Camera
     Camera camGeneral;
+    vec2 screenSize;
 
     // Capsa contenedora de l'escena
     Capsa3D capsaMinima;
