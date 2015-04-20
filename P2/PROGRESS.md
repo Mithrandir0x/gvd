@@ -29,6 +29,10 @@ homogeneitzades.
 
 ## 3 Modificació de la classe càmera
 
+**WARNING**
+> Verificar matrius amb identitat per veure si s'estan passant correctament les
+> matrius model-view i projection.
+
 ### 3.1 Implementació del pas a la GPU de la matriu M-V/P des de la classe Càmera
 
 S'implementen els següents mètodes dins la clase Camera:
@@ -96,10 +100,7 @@ modView = LookAt(vs.obs, vs.vrp, vs.vup);
 
 > **WARNING**
 >
-> - Les coordenades de la projecció paral·lela estan forçades. S'hauria de
->   mirar si s'han de calcular respecte alguna variable.
-> - Les coordenades de la projecció perspectiva estan malament. S'han de
->   corregir
+> - Verificar que els arguments de totes dues funcions s'utilitzen correctament.
 
 En funció del tipus de projecció que s'estigui utilitzant, la matriu de
 projecció canvia:
@@ -279,3 +280,30 @@ S'han de modificar els següents mètodes de la càmera:
 ### 6.3 Modificació de la càmera en primera persona amb el moviment de la bola blanca
 
 > NO IMPLEMENTAT
+
+---
+
+# Correccions sobre la pràctica 1
+
+> **WARNING**
+>
+> **PODEN HAVER MÉS CORRECCIONS, DEGUT A QUE NO S'HA POGUT EXECUTAR LA PRÀCTICA**
+
+## `PlaBase`
+
+- Canviar la manera en que es defineixen les coordenades inicials del pla base. En comptes que estiguin en el constructor, haurien d'estar definides a través de métodes GET/SET i cridades des d'`Escena`.
+
+## `Bola`
+
+- `Bola::triangle` -> tenemos codigo repetido, don't noooooo
+
+## `GlWidget`
+
+- Descomentar `adaptaObjecteTamanyWidget`, i verificar que al treure els escalats dels constructors funciona correctament l'adaptació a la capsa (-1,1).
+
+## `Escena`
+
+- A `Escena::aplicaTGCentrat`, s'ha d'aplicar la transformació de la matriu respecte el centre de la capsa contenidora de l'escena.
+
+- A `Escena::~Escena` Evitar un "NULLPOINTEREXCEPTION" al destruir els objectes, comprovant abans que existeixin (i.e. no siguin nuls)
+
