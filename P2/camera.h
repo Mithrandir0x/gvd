@@ -23,7 +23,7 @@ typedef enum {PARALLELA = 0, PERSPECTIVA = 1} TipProj;
 
 
 typedef struct
- {
+{
   double      angy, angx, angz;  /* angles de gir del sistema de coords obser */
   vec4        vrp;               /* view reference point */
   vec4        obs;               /* posicio de l'observador */
@@ -31,7 +31,7 @@ typedef struct
  } VisuSystem;
 
 typedef struct  
- {
+{
   TipProj    proj;           /* tipus de proj: 0 paral.lela 1 perspectiva */
   double     d;              /* distancia observador a pla de projeccio */
   double     dant, dpost;    /* distancies al pla de retallat anterior i posterior desde l'observador*/
@@ -81,8 +81,8 @@ public:
 
     VisuSystem vs;      /* Sistema de visualitzacio  */
     PiramProj piram;    /* Piramide de visualitzacio */
-    Capsa2D wd;	      /* Window                    */
-    Capsa2D vp;       /* Viewport                  */
+    Capsa2D wd;	        /* Window                    */
+    Capsa2D vp;         /* Viewport                  */
 
 
 private:

@@ -101,37 +101,19 @@ void Bola::triangle(const vec4& a, const vec4& b, const vec4& c )
 {
     double u, v;
 
-    points[Index] = a;
-    colors[Index] = this->color;
-    u = 0.5 + atan2(-points[Index].z, -points[Index].x)/(2*M_PI);
-    v = 0.5 - asin(-points[Index].y)/M_PI;
-    if(u < 0.0)u=0.0;
-    if(v < 0.0)v=0.0;
-    if(u > 1.0)u=1.0;
-    if(v > 1.0)v=1.0;
-    vertexsTextura[Index] = vec2(u , v);
-    Index++;
+    vec4 vertArr[3] = {a, b, c};
 
-    points[Index] = b;
-    colors[Index] = this->color;
-    u = 0.5 + atan2(-points[Index].z, -points[Index].x)/(2*M_PI);
-    v = 0.5 - asin(-points[Index].y)/M_PI;
-    if(u < 0.0)u=0.0;
-    if(v < 0.0)v=0.0;
-    if(u > 1.0)u=1.0;
-    if(v > 1.0)v=1.0;
-    vertexsTextura[Index] = vec2(u , v);
-    Index++;
-
-    points[Index] = c;
-    colors[Index] = this->color;
-    u = 0.5 + atan2(-points[Index].z, -points[Index].x)/(2*M_PI);
-    v = 0.5 - asin(-points[Index].y)/M_PI;
-    if(u < 0.0)u=0.0;
-    if(v < 0.0)v=0.0;
-    if(u > 1.0)u=1.0;
-    if(v > 1.0)v=1.0;
-    vertexsTextura[Index] = vec2(u , v);
-    Index++;
+    for(int i =0; i<3;i++){
+        points[Index] = vertArr[i];
+        colors[Index] = this->color;
+        u = 0.5 + atan2(-points[Index].z, -points[Index].x)/(2*M_PI);
+        v = 0.5 - asin(-points[Index].y)/M_PI;
+        if(u < 0.0)u=0.0;
+        if(v < 0.0)v=0.0;
+        if(u > 1.0)u=1.0;
+        if(v > 1.0)v=1.0;
+        vertexsTextura[Index] = vec2(u , v);
+        Index++;
+    }
 }
 

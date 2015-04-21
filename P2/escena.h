@@ -35,6 +35,10 @@ public:
     void draw(QGLShaderProgram *pr);
     void CapsaMinCont3DEscena();
 
+    // Camera
+    Camera camGeneral;
+    vec2 screenSize;
+
     // Capsa contenedora de l'escena
     Capsa3D capsaMinima;
 
