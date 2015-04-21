@@ -294,7 +294,30 @@ S'han de modificar els següents mètodes de la càmera:
 
 - Canviar la manera en que es defineixen les coordenades inicials del pla base. En comptes que estiguin en el constructor, haurien d'estar definides a través de métodes GET/SET i cridades des d'`Escena`.
 
-> S'ha comentat tot el codi pertinent a l'escalat s'ha traslladat al mètode `GLWidget::adaptaObjecteTamanyWidget`.
+> S'ha comentat tot el codi pertinent a l'escalat s'ha traslladat al mètode `GLWidget::adaptaObjecteTamanyWidget`. Aquest canvis
+> estan esmentats més a sota.
+> 
+> Però també s'ha canviat la creació del `PlaBase`:
+>
+> ```c
+> void GLWidget::newPlaBase()
+> {
+>     cout << "Creating new pla base" << endl;
+>     // Metode que crea un objecte PlaBase poligon amb el punt central al (0,0,0) i perpendicular a Y=0
+>     point4 v0  = point4( 10.0, 0.0, 10.0, 1.0 );
+>     point4 v1  = point4( 10.0, 0.0,-10.0, 1.0 );
+>     point4 v2  = point4(-10.0, 0.0,-10.0, 1.0 );
+>     point4 v3  = point4(-10.0, 0.0, 10.0, 1.0 );
+> 
+>     color4 cv0 = color4( 1.0, 1.0, 1.0, 1.0 ); //white
+>     color4 cv1  = color4( 1.0, 0.0, 0.0, 1.0 ); //red
+>     color4 cv2  = color4( 1.0, 1.0, 0.0, 1.0 ); //yellow
+>     color4 cv3  = color4( 0.0, 1.0, 0.0, 1.0 ); //green
+> 
+>     PlaBase *plaBase = new PlaBase(v0, v1, v2, v3, cv0, cv1, cv2, cv3);
+>     newObjecte(plaBase);
+}
+> ```
 
 ## `Bola`
 

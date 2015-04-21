@@ -10,40 +10,60 @@ Escena::Escena()
     plaBase = NULL;
     bolaBlanca = NULL;
     conjuntBoles = NULL;
-
-    // Inicialització de la càmera
-    camGeneral = new Camera();
 }
 
 Escena::~Escena()
 {
     // Cal anar fent delete dels objectes que se'l hagi fet new
-    if ( taulaBillar != NULL )
-        delete this->taulaBillar;
-
-    if ( plaBase != NULL )
-        delete this->plaBase;
-
-    if ( bolaBlanca != NULL )
-        delete this->bolaBlanca;
-
-    if ( bolaBlanca != NULL )
-        delete this->conjuntBoles;
+    if (taulaBillar!=NULL)
+       delete this->taulaBillar;
+    if (plaBase!=NULL)
+       delete this->plaBase;
+    if (bolaBlanca!=NULL)
+       delete this->bolaBlanca;
+    if (conjuntBoles!=NULL)
+       delete this->conjuntBoles;
 }
 
 void Escena::addObjecte(Objecte *obj) {
     if (dynamic_cast<TaulaBillar*>(obj)){
         this->taulaBillar = (TaulaBillar*)obj;
+        listaObjectes.push_back(taulaBillar);
     } else if (dynamic_cast<PlaBase*>(obj)){
         this->plaBase = (PlaBase*)obj;
-    }else if (dynamic_cast<Bola*>(obj))
+        listaObjectes.push_back(plaBase);
+    }else if (dynamic_cast<Bola*>(obj)){
         this->bolaBlanca= (Bola*)obj;
+        listaObjectes.push_back(bolaBlanca);
+    }
 }
 
 
 void Escena::CapsaMinCont3DEscena()
 {
-    // Metode a implementar
+    Capsa3D c;
+    vec3 pmax;
+
+    capsaMinima.pmin[0]=INFINITY;
+    capsaMinima.pmin[1]=INFINITY;
+    capsaMinima.pmin[2]=INFINITY;
+    pmax[0] = -INFINITY;
+    pmax[1] = -INFINITY;
+    pmax[2] = -INFINITY;
+
+    for (int i=0; i<listaObjectes.size(); i++) {
+        c = listaObjectes[i]->calculCapsa3D();
+
+        if (capsaMinima.pmin[0]>c.pmin[0]) capsaMinima.pmin[0] = c.pmin[0];
+        if (capsaMinima.pmin[1]>c.pmin[1]) capsaMinima.pmin[1] = c.pmin[1];
+        if (capsaMinima.pmin[2]>c.pmin[2]) capsaMinima.pmin[2] = c.pmin[2];
+        if (pmax[0]<c.pmin[0]+c.a) pmax[0] = c.pmin[0]+c.a;
+        if (pmax[1]<c.pmin[1]+c.h) pmax[1] = c.pmin[1]+c.h;
+        if (pmax[2]<c.pmin[2]+c.p) pmax[2] = c.pmin[2]+c.p;
+    }
+    capsaMinima.a = pmax[0]-capsaMinima.pmin[0];
+    capsaMinima.h = pmax[1]-capsaMinima.pmin[1];
+    capsaMinima.p = pmax[2]-capsaMinima.pmin[2];
 }
 
 void Escena::aplicaTG(mat4 m) {
@@ -66,20 +86,15 @@ void Escena::aplicaTG(mat4 m) {
 
 void Escena::aplicaTGCentrat(mat4 m) {
 
-    // Metode a modificar
+    this->CapsaMinCont3DEscena();
 
-    if (taulaBillar!=NULL)
-        taulaBillar->aplicaTGCentrat(m);
-    if (plaBase!=NULL)
-        plaBase->aplicaTGCentrat(m);
-    if (bolaBlanca!=NULL)
-        bolaBlanca->aplicaTGCentrat(m);
-    if (conjuntBoles!=NULL){
-            for (int i=0; i<conjuntBoles->listaConjuntBoles.size(); i++) {
-                    conjuntBoles->listaConjuntBoles[i]->aplicaTGCentrat(m);
-            };
-    }
+    float xTrasl = capsaMinima.pmin.x + capsaMinima.a/2.;//calculo del centro de la caja de la escena
+    float yTrasl = capsaMinima.pmin.y + capsaMinima.h/2.;
+    float zTrasl = capsaMinima.pmin.z + capsaMinima.p/2.;
 
+    mat4 maux = Translate(xTrasl, yTrasl, zTrasl) * m * Translate(-xTrasl, -yTrasl, -zTrasl);
+
+    this->aplicaTG(maux);
 }
 
 void Escena::draw(QGLShaderProgram *pr) {
@@ -111,23 +126,5 @@ void Escena::draw(QGLShaderProgram *pr) {
 
 }
 
-/*
- * Mètodes introduïts pel sistema de càmera
- */
-void Escena::SetZenitCamera()
-{
-    // Situem "l'objectiu" que mira la càmera a (0, 0, 0), a una distància de 20
-    // respecte l'eix de la Y.
-    camGeneral.vs.vrp = vec4(0.0, 0.0, 0.0, 1.0);
-    camGeneral.vs.vup = vec4(0.0, 0.0, 1.0, 1.0);
-    camGeneral.vs.obs = camGeneral->CalculObs(camGeneral->vs.vrp, 20, 0, 90.0);
-}
 
-void Escena::iniCamera(bool isCamGeneral) {
-    if ( isCamGeneral ) {
-        Capsa3D capsaMinima = CapsaMinCont3DEscena();
-        camGeneral.ini(screenSize[0], screenSize[1], capsaMinima);
-        SetZenitCamera();
-    } else {
-    }
-}
+
