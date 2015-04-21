@@ -8,7 +8,7 @@ const int NumVertices = 6; //(1 faces)*(2 triangles/face)*(3 vertices/triangle)
 class PlaBase : public Objecte
 {
 public:
-    PlaBase();
+    PlaBase(point4 v0, point4 v1, point4 v2, point4 v3, color4 cv0, color4 cv1, color4 cv2, color4 cv3);
     virtual void make();
     ~PlaBase();
 private:
