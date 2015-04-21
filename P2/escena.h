@@ -35,10 +35,6 @@ public:
     void draw(QGLShaderProgram *pr);
     void CapsaMinCont3DEscena();
 
-    // Camera
-    Camera camGeneral;
-    vec2 screenSize;
-
     // Capsa contenedora de l'escena
     Capsa3D capsaMinima;
 
@@ -48,6 +44,7 @@ public:
     PlaBase *plaBase;
     Bola *bolaBlanca = NULL;
     ConjuntBoles *conjuntBoles;
+    vector<Objecte*> listaObjectes;
 };
 
 #endif // ESCENA_H
