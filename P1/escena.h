@@ -18,8 +18,6 @@
 #include <bola.h>
 #include <conjuntboles.h>
 
-#include <camera.h>
-
 using namespace std;
 
 class Escena

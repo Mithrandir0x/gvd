@@ -21,8 +21,9 @@ OUT vec2 v_texcoord;
 
 void main()
 {
-  gl_Position = projection * model_view * vPosition;
-  gl_Position = gl_Position / gl_Position.w;
+  gl_Position = vPosition;
+  //gl_Position = projection * model_view * vPosition;
+  //gl_Position = gl_Position / gl_Position.w;
 
   color = vColor;
   
