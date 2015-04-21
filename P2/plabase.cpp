@@ -1,28 +1,28 @@
 #include "plabase.h"
 
-PlaBase::PlaBase() : Objecte(NumVertices)
+PlaBase::PlaBase(point4 v0, point4 v1, point4 v2, point4 v3, color4 cv0, color4 cv1, color4 cv2, color4 cv3) : Objecte(NumVertices)
 {
 
-    vertices[0] = point4( 0.5, 0.0, 0.5, 1.0 );
-    vertices[1] = point4( 0.5, 0.0,-0.5, 1.0 );
-    vertices[2] = point4(-0.5, 0.0,-0.5, 1.0 );
-    vertices[3] = point4(-0.5, 0.0, 0.5, 1.0 );
+    vertices[0] = v0;
+    vertices[1] = v1;
+    vertices[2] = v2;
+    vertices[3] = v3;
 
-    vertex_colors[0] = color4( 1.0, 1.0, 1.0, 1.0 ); //white
-    vertex_colors[1] = color4( 1.0, 0.0, 0.0, 1.0 ); //red
-    vertex_colors[2] = color4( 1.0, 1.0, 0.0, 1.0 ); //yellow
-    vertex_colors[3] = color4( 0.0, 1.0, 0.0, 1.0 ); //green
+    vertex_colors[0] = cv0; //white
+    vertex_colors[1] = cv1; //red
+    vertex_colors[2] = cv2; //yellow
+    vertex_colors[3] = cv3; //green
 
 
     make();
     capsa = calculCapsa3D();
 
-    double escalap = 2.0 / capsa.p;//para escalar la dimension maxima(profundidad) a 2
+    /*double escalap = 2.0 / capsa.p;//para escalar la dimension maxima(profundidad) a 2
     double escalaa = 1.08821869 / capsa.a;//para que coincida con la mesa de billar
 
     mat4 m = Scale(escalaa, 1.0, escalap)*Translate(-(capsa.pmin.x + capsa.a/2.), -(capsa.pmin.y + capsa.h/2.), -(capsa.pmin.z + capsa.p/2.));
     aplicaTG(m);
-    capsa = calculCapsa3D();
+    capsa = calculCapsa3D();*/
 }
 
 PlaBase::~PlaBase()
@@ -64,3 +64,6 @@ void PlaBase::initTextura()
      texture->bind(0);
 
  }
+
+
+

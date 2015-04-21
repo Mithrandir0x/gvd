@@ -148,7 +148,8 @@ if ( piram.proj == PERSPECTIVA ) {
     modView = MDP * modView;
 }
 
-// ???
+// Transforma la capsa 3D en un vector amb cadascun dels
+// vèrtex de la capsa mínima
 VertexCapsa3D(c, vaux);
 
 // Es transforma en coordenades de càmera els punts anteriors
@@ -293,17 +294,125 @@ S'han de modificar els següents mètodes de la càmera:
 
 - Canviar la manera en que es defineixen les coordenades inicials del pla base. En comptes que estiguin en el constructor, haurien d'estar definides a través de métodes GET/SET i cridades des d'`Escena`.
 
+> S'ha comentat tot el codi pertinent a l'escalat s'ha traslladat al mètode `GLWidget::adaptaObjecteTamanyWidget`.
+
 ## `Bola`
 
 - `Bola::triangle` -> tenemos codigo repetido, don't noooooo
 
+> Per corregir aquesta part, hem modificat el mètode quedant de la següent manera:
+>
+> ```c
+> void Bola::triangle(const vec4& a, const vec4& b, const vec4& c )
+> {
+>     double u, v;
+> 
+>     vec4 vertArr[3] = {a, b, c};
+> 
+>     for(int i =0; i<3;i++){
+>         points[Index] = vertArr[i];
+>         colors[Index] = this->color;
+>         u = 0.5 + atan2(-points[Index].z, -points[Index].x)/(2*M_PI);
+>         v = 0.5 - asin(-points[Index].y)/M_PI;
+>         if(u < 0.0)u=0.0;
+>         if(v < 0.0)v=0.0;
+>         if(u > 1.0)u=1.0;
+>         if(v > 1.0)v=1.0;
+>         vertexsTextura[Index] = vec2(u , v);
+>         Index++;
+>     }
+> }
+> ```
+
 ## `GlWidget`
 
-- Descomentar `adaptaObjecteTamanyWidget`, i verificar que al treure els escalats dels constructors funciona correctament l'adaptació a la capsa (-1,1).
+- Descomentar `GLWidget::adaptaObjecteTamanyWidget`, i verificar que al treure els escalats dels constructors funciona correctament l'adaptació a la capsa (-1,1).
+
+> S'ha implementat el mètode `GLWidget::adaptaObjecteTamanyWidget`:
+>
+> ```c
+> void GLWidget::adaptaObjecteTamanyWidget(Objecte *obj)
+> {
+>     // Metode a implementar
+>     Capsa3D capsa;
+>     mat4 m;
+> 
+>     capsa = obj->calculCapsa3D();
+>     if (dynamic_cast<TaulaBillar*>(obj)){
+>             double aristaMax = 0.0;
+> 
+>         if(capsa.a > capsa.p){
+>             aristaMax=capsa.a;
+>         } else{
+>             aristaMax=capsa.p;
+>         }
+>         if(capsa.h > aristaMax){
+>             aristaMax=capsa.h;
+>         }
+> 
+>         double escala = 2.0 / aristaMax;
+>         mat4 m = Scale(escala, escala, escala);
+>         obj->aplicaTG(m);//la mayor arista de la caja contenedora de la mesa es 2.0
+> 
+>         capsa = obj->calculCapsa3D();
+> 
+>         m = Translate(-(capsa.pmin.x + capsa.a / 2.), -(capsa.pmin.y + capsa.h), -(capsa.pmin.z + capsa.p / 2.));
+>         obj->aplicaTG(m);//deja el centro de la mesa(x,z) en el origen de coordenadas y el tope en el plano y=0, con arista maxima 2.0
+>         //capsa = obj->calculCapsa3D();
+> 
+>     }else if (dynamic_cast<Bola*>(obj)){
+>             m = Translate(0.0,  -capsa.pmin.y, 0.0);//la base de las 16 bolas quedan en y = 0
+>             obj->aplicaTG(m);
+>     }else if (dynamic_cast<PlaBase*>(obj)){
+>             mat4 m = Scale(2.0/(1.8379*capsa.a), 1.0, 2.0/capsa.p)*Translate(-(capsa.pmin.x + capsa.a/2.), -(capsa.pmin.y + capsa.h/2.), -(capsa.pmin.z + capsa.p/2.));
+>             obj->aplicaTG(m);
+>     }
+>             //capsa = obj->calculCapsa3D();
+> }
+> ```
 
 ## `Escena`
 
 - A `Escena::aplicaTGCentrat`, s'ha d'aplicar la transformació de la matriu respecte el centre de la capsa contenidora de l'escena.
 
+> S'ha reimplementat el mètode per fer el que toca:
+>
+> ```c
+> void Escena::aplicaTGCentrat(mat4 m) {
+> 
+>     // Metode a modificar
+> 
+>     if (taulaBillar!=NULL)
+>         taulaBillar->aplicaTGCentrat(m);
+>     if (plaBase!=NULL)
+>         plaBase->aplicaTGCentrat(m);
+>     if (bolaBlanca!=NULL)
+>         bolaBlanca->aplicaTGCentrat(m);
+>     if (conjuntBoles!=NULL){
+>             for (int i=0; i<conjuntBoles->listaConjuntBoles.size(); i++) {
+>                     conjuntBoles->listaConjuntBoles[i]->aplicaTGCentrat(m);
+>             };
+>     }
+> 
+> }
+> ```
+
 - A `Escena::~Escena` Evitar un "NULLPOINTEREXCEPTION" al destruir els objectes, comprovant abans que existeixin (i.e. no siguin nuls)
+
+> Per arreglar aquest problema, hem canviat la implementació del mètode:
+>
+> ```c
+> Escena::~Escena()
+> {
+>     // Cal anar fent delete dels objectes que se'l hagi fet new
+>     if (taulaBillar!=NULL)
+>        delete this->taulaBillar;
+>     if (plaBase!=NULL)
+>        delete this->plaBase;
+>     if (bolaBlanca!=NULL)
+>        delete this->bolaBlanca;
+>     if (conjuntBoles!=NULL)
+>        delete this->conjuntBoles;
+> }
+> ```
 

@@ -91,7 +91,8 @@ void Camera::CalculWindow(Capsa3D c)
         modView = MDP * modView;
     }
 
-    // ???
+    // Transforma la capsa 3D en un vector amb cadascun dels
+    // vèrtex de la capsa mínima
     VertexCapsa3D(c, vaux);
 
     // Es transforma en coordenades de càmera els punts anteriors

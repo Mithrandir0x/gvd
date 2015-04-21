@@ -18,10 +18,17 @@ Escena::Escena()
 Escena::~Escena()
 {
     // Cal anar fent delete dels objectes que se'l hagi fet new
-   delete this->taulaBillar;
-   delete this->plaBase;
-   delete this->bolaBlanca;
-   delete this->conjuntBoles;
+    if ( taulaBillar != NULL )
+        delete this->taulaBillar;
+
+    if ( plaBase != NULL )
+        delete this->plaBase;
+
+    if ( bolaBlanca != NULL )
+        delete this->bolaBlanca;
+
+    if ( bolaBlanca != NULL )
+        delete this->conjuntBoles;
 }
 
 void Escena::addObjecte(Objecte *obj) {

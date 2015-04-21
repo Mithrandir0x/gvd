@@ -353,19 +353,40 @@ void GLWidget::keyReleaseEvent(QKeyEvent *event)
 void GLWidget::adaptaObjecteTamanyWidget(Objecte *obj)
 {
     // Metode a implementar
-    /*Capsa3D capsa;
+    Capsa3D capsa;
     mat4 m;
 
-    obj->aplicaTG(m220); //m220 precalculada en glwidget.h con escala=2/20
     capsa = obj->calculCapsa3D();
-        if (dynamic_cast<TaulaBillar*>(obj)){
-            m = Translate(0.0,  -capsa.pmin.y - capsa.h, 0.0);//no es estrictamente necesario
-            obj->aplicaTG(m);
-        }else if (dynamic_cast<Bola*>(obj)){
+    if (dynamic_cast<TaulaBillar*>(obj)){
+            double aristaMax = 0.0;
+
+        if(capsa.a > capsa.p){
+            aristaMax=capsa.a;
+        } else{
+            aristaMax=capsa.p;
+        }
+        if(capsa.h > aristaMax){
+            aristaMax=capsa.h;
+        }
+
+        double escala = 2.0 / aristaMax;
+        mat4 m = Scale(escala, escala, escala);
+        obj->aplicaTG(m);//la mayor arista de la caja contenedora de la mesa es 2.0
+
+        capsa = obj->calculCapsa3D();
+
+        m = Translate(-(capsa.pmin.x + capsa.a / 2.), -(capsa.pmin.y + capsa.h), -(capsa.pmin.z + capsa.p / 2.));
+        obj->aplicaTG(m);//deja el centro de la mesa(x,z) en el origen de coordenadas y el tope en el plano y=0, con arista maxima 2.0
+        //capsa = obj->calculCapsa3D();
+
+    }else if (dynamic_cast<Bola*>(obj)){
             m = Translate(0.0,  -capsa.pmin.y, 0.0);//la base de las 16 bolas quedan en y = 0
             obj->aplicaTG(m);
-    }*/
-    //la PlaBase estaba en y = 0 por lo que solo necesita el escalado m220
+    }else if (dynamic_cast<PlaBase*>(obj)){
+            mat4 m = Scale(2.0/(1.8379*capsa.a), 1.0, 2.0/capsa.p)*Translate(-(capsa.pmin.x + capsa.a/2.), -(capsa.pmin.y + capsa.h/2.), -(capsa.pmin.z + capsa.p/2.));
+            obj->aplicaTG(m);
+    }
+            //capsa = obj->calculCapsa3D();
 }
 
 void GLWidget::newObjecte(Objecte * obj)
