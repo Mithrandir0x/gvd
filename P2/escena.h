@@ -34,7 +34,7 @@ public:
     void aplicaTGCentrat(mat4 m);
     void reset();
 
-    void draw(QGLShaderProgram *pr);
+    void draw();
     void CapsaMinCont3DEscena();
 
     void iniCamera(bool camGen, int vpa, int vph);
@@ -42,18 +42,18 @@ public:
     void setVRPCamera(bool camGeneral, point4 vrp);
     void setWindowCamera(bool camGeneral, bool retallat, Capsa2D window);
     void setDCamera(bool camGeneral, float d);
+    void tuneCamera(bool retallat, bool centrat, QGLShaderProgram *program);
 
+    QGLShaderProgram *pr;
     // Capsa contenedora de l'escena
     Capsa3D capsaMinima;
 
-    // Objectes de l'escena: a modificar. Ara nomes té un objecte: la taula de billar.
-    // Cal afegir la bola blanca o el pla base per testejar o les 15 boles
     TaulaBillar *taulaBillar;
     PlaBase *plaBase;
     Bola *bolaBlanca = NULL;
     ConjuntBoles *conjuntBoles;
-    vector<Objecte*> listaObjectes;
     Camera camGeneral;
+    vector<Objecte*> listaObjectes;
 };
 
 #endif // ESCENA_H

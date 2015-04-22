@@ -276,10 +276,6 @@ void Camera::toGPU(QGLShaderProgram *program)
 }
 ```
 
-### Comprobació dels mètodes
-
-Per veure si estem passant les matrius correctament, 
-
 ### 3.2 Implementació de diferents utilitats de la classe Camera
 
 S'han d'implementar els mètodes indicats:

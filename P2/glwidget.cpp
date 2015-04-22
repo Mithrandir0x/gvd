@@ -177,15 +177,6 @@ void GLWidget::resizeGL(int width, int height)
     //std::cout<<"GLWidget::resizeGL"<<std::endl;
     int side = qMin(width, height);
     glViewport((width - side) / 2, (height - side) / 2, side, side);
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-#ifdef QT_OPENGL_ES_1
-    glOrthof(-1.5, +1.5, -1.5, +1.5, 0.0, 15.0);
-#else
-    glOrtho(-1.5, +1.5, -1.5, +1.5, 0.0, 15.0);
-#endif
-    glMatrixMode(GL_MODELVIEW);
     
     esc->camGeneral.setViewport(0, 0, width, height);
 }
