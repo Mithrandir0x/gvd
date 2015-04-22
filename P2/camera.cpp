@@ -24,83 +24,102 @@ void Camera::ini(int a, int h, Capsa3D capsaMinima)
     // Calcul del vrp com el centre de la capsa minima contenedora 3D
     // CAL IMPLEMENTAR
     // CODI A MODIFICAR DURANT LA PRACTICA 2
-    
-    vs.vrp[0] = capsaMinima.pmin[0] + ( capsaMinima.a / 2. );
-    vs.vrp[1] = capsaMinima.pmin[1] + ( capsaMinima.h / 2. );
-    vs.vrp[2] = capsaMinima.pmin[2] + ( capsaMinima.p / 2. );
-   
-    setViewport(0, 0, a, h);
+
+    vs.vrp[0] = capsaMinima.pmin.x + capsaMinima.a/2;
+    vs.vrp[1] = capsaMinima.pmin.y + capsaMinima.h/2;
+    vs.vrp[2] = capsaMinima.pmin.z + capsaMinima.p/2;
+
+    vp.a = a;
+    vp.h = h;
+    vp.pmin[0] = 0;
+    vp.pmin[1] = 0;
+
 }
 
 
 
 void Camera::toGPU(QGLShaderProgram *program)
 {
-    // CODI A MODIFICAR DURANT LA PRACTICA 2
-    setModelViewToGPU(program, modView);
-    setProjectionToGPU(program, projection);
-
-    program->link();
-    program->bind();
+    this->setProjectionToGPU(program, this->proj);
+    this->setModelViewToGPU(program, this->modView);
 }
 
 
+void Camera::setModelViewToGPU(QGLShaderProgram *program, mat4 m)
+{
 
+    model_view = program->uniformLocation("model_view");
+    glUniformMatrix4fv( model_view, 1, GL_TRUE, m );
+
+}
+
+void Camera::setProjectionToGPU(QGLShaderProgram *program, mat4 p)
+{
+
+    projection = program->uniformLocation("projection");
+    glUniformMatrix4fv(projection,1,GL_TRUE, p);
+}
 
 // Suposa que les dades d'obs, vrp i vup son correctes en la camera
 
 void Camera::CalculaMatriuModelView()
 {
     // CODI A MODIFICAR DURANT LA PRACTICA 2
-    modView = LookAt(vs.obs, vs.vrp, vs.vup);
+    modView = identity();
+
+    vec4 eye = CalculObs(vs.vrp, piram.d, vs.angx, vs.angy);
+    vec4 at = vs.vrp;
+    vec4 up = CalculVup(vs.angx, vs.angy, vs.angz);
+
+    modView = LookAt(eye, at, up);
 }
 
 void Camera::CalculaMatriuProjection()
 {
-    GLfloat left, right, bottom, top, zNear, zFar;
-
-    left = wd.pmin.x;
-    right = wd.pmin.x + wd.a;
-    bottom = wd.pmin.y;
-    top = wd.pmin.y + wd.h;
-    zNear = piram.dant;
-    zFar = piram.dpost;
-
     // CODI A MODIFICAR DURANT LA PRACTICA 2
-    if ( piram.proj == PARALLELA ) {
-        proj = Ortho(left, right, bottom, top, zNear, zFar);
-    } else if ( piram.proj == PERSPECTIVA ) {
-        proj = Frustum(left, right, bottom, top, zNear, zFar);
+    proj = identity();
+
+    if(piram.proj == PARALLELA){
+       proj = Ortho(wd.pmin.x, wd.pmin.x+wd.a, wd.pmin.y, wd.pmin.y+wd.h, piram.dant, piram.dpost);
     }
+
+    if(piram.proj == PERSPECTIVA){
+       proj = Frustum(wd.pmin.x, wd.pmin.x+wd.a, wd.pmin.y, wd.pmin.y+wd.h, piram.dant, piram.dpost);
+    }
+
 }
 
 
-void Camera::CalculWindow(Capsa3D c)
+void Camera::CalculWindow( Capsa3D c)
 {
-    // CODI A MODIFICAR DURANT LA PRACTICA 2
-    vec4  vaux[8];
-    mat4  MDP;
-    int i;
+   // CODI A MODIFICAR DURANT LA PRACTICA 2
 
-    // Calcular la modelview o reutilitzar l'existent?
-    //modView = LookAt(vs.obs, vs.vrp, vup);
+    mat4 MDP;
+    vec4  vaux[8], vauxMod[8];
+    //wd.pmin.x = -1;
+    //wd.pmin.y = -1;
 
-    // Es deforma la matriu per que estigui en perspectiva?
-    if ( piram.proj == PERSPECTIVA ) {
-        CreaMatDp(MDP);
+    //wd.a = 2;
+    //wd.h = 2;
+
+    CalculaMatriuModelView();
+
+    if (piram.proj==PERSPECTIVA) {
+        CreaMatDp(MDP); // crea la matriu de deformacio perspectiva
         modView = MDP * modView;
     }
 
-    // Transforma la capsa 3D en un vector amb cadascun dels
-    // vèrtex de la capsa mínima
-    VertexCapsa3D(c, vaux);
+    VertexCapsa3D(c, vaux);//se pasa la capsa y obtenemos sus vertices
 
-    // Es transforma en coordenades de càmera els punts anteriors
-    for( i = 0 ; i < 8 ; i++ ) {
-        vaux[i] = modView * vaux[i];
+    for(int i=0; i<8; i++) {
+        vauxMod[i]= modView * vaux[i];
     }
-    // i es calcula la capsa mínima 2D a partir de les coordenades
-    wd = CapsaMinCont2DXYVert(vaux, 8);
+
+    wd = CapsaMinCont2DXYVert(vauxMod, 8);
+    AmpliaWindow(0.15);      //probar si es necesario
+    AjustaAspectRatioWd();//amplia el window per tal que el seu aspect ratio sigui igual al del viewport
+
+
 }
 
 void Camera::setViewport(int x, int y, int a, int h)
@@ -111,33 +130,21 @@ void Camera::setViewport(int x, int y, int a, int h)
     vp.h = h;
 }
 
-void Camera::setModelViewToGPU(QGLShaderProgram *program, mat4 m)
-{
-    // CODI A MODIFICAR DURANT LA PRACTICA 2
-    model_view = program->uniformLocation("model_view");
-    glUniformMatrix4fv( model_view, 1, GL_TRUE, m );
-}
 
-void Camera::setProjectionToGPU(QGLShaderProgram *program, mat4 p)
-{
-    // CODI A MODIFICAR DURANT LA PRACTICA 2
-    projection = program->uniformLocation("projection");
-    glUniformMatrix4fv( projection, 1, GL_TRUE, p );
-}
 
 void  Camera::AmpliaWindow(double r)
 {
-  // Pre r = 1.5 => amplia a 150%
-  double na, da;
+    // Pre r = 1.5 => amplia a 150%
+    double na, da;
 
-  na  = wd.a * (1.0 + r);
-  da = na - wd.a;
-  wd.pmin[0] = wd.pmin[0] - 0.5*da;
-  wd.a  = na;
-  na  = wd.h * (1.0 + r);
-  da = na - wd.h;
-  wd.pmin[1] = wd.pmin[1] - 0.5*da;
-  wd.h  = na;
+    na  = wd.a * (1.0 + r);
+    da = na - wd.a;
+    wd.pmin[0] = wd.pmin[0] - 0.5*da;
+    wd.a  = na;
+    na  = wd.h * (1.0 + r);
+    da = na - wd.h;
+    wd.pmin[1] = wd.pmin[1] - 0.5*da;
+    wd.h  = na;
 }
 
 
@@ -148,7 +155,7 @@ void  Camera::AmpliaWindow(double r)
 
 void Camera::CalculAngleOberturaVertical()
 {
-  piram.alfav =  180.0 * atan2(wd.h/2.0, piram.d)/PI;
+    piram.alfav =  180.0 * atan2(wd.h/2.0, piram.d)/PI;
 
 }
 
@@ -159,56 +166,56 @@ void Camera::CalculAngleOberturaVertical()
 void Camera::CalculAngleOberturaHoritzontal()
 {
 
-  piram.alfah =  180.0 * atan2(wd.a/2.0, piram.d)/PI;
+    piram.alfah =  180.0 * atan2(wd.a/2.0, piram.d)/PI;
 
 }
 
 void  Camera::CalculWindowAmbRetallat()
 {
 
-  Capsa2D c;
+    Capsa2D c;
 
-  if (piram.proj == PARALLELA) {
-    /* Projeccio paral.lela:
-         el window ve donat: amplada o alcada o tots dos. */
+    if (piram.proj == PARALLELA) {
+      /* Projeccio paral.lela:
+           el window ve donat: amplada o alcada o tots dos. */
 
-    if( fabs(wd.h) <EPS ) {
-      c.a = wd.a;
-      c.h = ((float)(vp.h)/ (float)(vp.a) ) * wd.a;
-    }
-    else {
-      c.h = wd.h;
-      c.a = ((float)(vp.a)/ (float)(vp.h) ) * wd.h;
-    }
-  }
-  else {
-
-    /* Projeccio perspectiva:
-         el window ve donat pels angles d'obertura de la camera: el
-         vertical, l'horitzontal o tots dos.  */
-
-    if( fabs(piram.alfav) <EPS ) {
-      c.a = 2.0  * piram.d * tan( PI*piram.alfah/180.);
-      c.h = ((float)(vp.h)/ (float)(vp.a) ) * c.a;
-    }
-    else {
-      if (fabs(piram.alfah) <EPS ) {
-        c.h = 2.0  * piram.d * tan( PI*piram.alfav/180.);
-        c.a = ((float)(vp.a)/ (float)(vp.h) ) * c.h;
+      if( fabs(wd.h) <EPS ) {
+        c.a = wd.a;
+        c.h = ((float)(vp.h)/ (float)(vp.a) ) * wd.a;
       }
       else {
-        c.a = 2.0  * piram.d * tan( PI*piram.alfah/180.);
-        c.h = 2.0  * piram.d * tan( PI*piram.alfav/180.);
+        c.h = wd.h;
+        c.a = ((float)(vp.a)/ (float)(vp.h) ) * wd.h;
       }
     }
-  }
-  c.pmin[0] = -0.5 * c.a;
-  c.pmin[1] = -0.5 * c.h;
+    else {
 
-  wd.pmin[0] = c.pmin[0];
-  wd.pmin[1] = c.pmin[1];
-  wd.a = c.a;
-  wd.h = c.h;
+      /* Projeccio perspectiva:
+           el window ve donat pels angles d'obertura de la camera: el
+           vertical, l'horitzontal o tots dos.  */
+
+      if( fabs(piram.alfav) <EPS ) {
+        c.a = 2.0  * piram.d * tan( PI*piram.alfah/180.);
+        c.h = ((float)(vp.h)/ (float)(vp.a) ) * c.a;
+      }
+      else {
+        if (fabs(piram.alfah) <EPS ) {
+          c.h = 2.0  * piram.d * tan( PI*piram.alfav/180.);
+          c.a = ((float)(vp.a)/ (float)(vp.h) ) * c.h;
+        }
+        else {
+          c.a = 2.0  * piram.d * tan( PI*piram.alfah/180.);
+          c.h = 2.0  * piram.d * tan( PI*piram.alfav/180.);
+        }
+      }
+    }
+    c.pmin[0] = -0.5 * c.a;
+    c.pmin[1] = -0.5 * c.h;
+
+    wd.pmin[0] = c.pmin[0];
+    wd.pmin[1] = c.pmin[1];
+    wd.a = c.a;
+    wd.h = c.h;
 }
 
 
@@ -281,51 +288,51 @@ Capsa2D  Camera::CapsaMinCont2DXYVert( vec4 *v, int nv)
 
 vec4 Camera::CalculObs(vec4 vrp, double d, double angx, double angy)
 {
- vec4 obs2;
- vec3 v;
- double norma;
+    vec4 obs2;
+    vec3 v;
+    double norma;
 
- /* Calcul del vector de visio a partir dels angles */
+    /* Calcul del vector de visio a partir dels angles */
 
- v[0] = sin (PI*angy/180.) * cos (PI*angx/180.);
- v[2] = cos (PI*angy/180.) * cos (PI*angx/180.);
- v[1]= - sin (PI*angx/180.);
+    v[0] = sin (PI*angy/180.) * cos (PI*angx/180.);
+    v[2] = cos (PI*angy/180.) * cos (PI*angx/180.);
+    v[1]= - sin (PI*angx/180.);
 
- norma = sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);
+    norma = sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);
 
- v[0] = v[0]/norma;
- v[1] = v[1]/norma;
- v[2] = v[2]/norma;
+    v[0] = v[0]/norma;
+    v[1] = v[1]/norma;
+    v[2] = v[2]/norma;
 
 
- obs2[0] = vrp[0] + v[0] *d;
- obs2[1] = vrp[1] + v[1] *d;
- obs2[2] = vrp[2] + v[2] *d;
- obs2[3] = 1.0;
+    obs2[0] = vrp[0] + v[0] *d;
+    obs2[1] = vrp[1] + v[1] *d;
+    obs2[2] = vrp[2] + v[2] *d;
+    obs2[3] = 1.0;
 
- return(obs2);
+    return(obs2);
 
 }
 
 
 vec3 Camera::CalculVup(double angx, double angy, double angz)
 {
-  vec3 v;
-  int   x, y;
+    vec3 v;
+    int   x, y;
 
-  x = 1.0;
-  y = 1.0;
+    x = 1.0;
+    y = 1.0;
 
-  if (cos(PI*angx/180.)<0.0) y = -1.0;
+    if (cos(PI*angx/180.)<0.0) y = -1.0;
 
-  if (cos(PI*angy/180.)<0.0) x = -1.0;
+    if (cos(PI*angy/180.)<0.0) x = -1.0;
 
 
-  v[0] = x*sin (-PI*angz/180.);
-  v[1] = y*cos( -PI*angz/180.);
-  v[2] = 0.0;
+    v[0] = x*sin (-PI*angz/180.);
+    v[1] = y*cos( -PI*angz/180.);
+    v[2] = 0.0;
 
-  return(v);
+    return(v);
 
 }
 
