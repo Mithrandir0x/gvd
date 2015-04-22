@@ -340,20 +340,20 @@ En funció del tipus de projecció que s'estigui utilitzant, la matriu de
 projecció canvia:
 
 ```c
-> void Camera::CalculaMatriuProjection()
-> {
->     // CODI A MODIFICAR DURANT LA PRACTICA 2
->     proj = identity();
-> 
->     if(piram.proj == PARALLELA){
->        proj = Ortho(wd.pmin.x, wd.pmin.x+wd.a, wd.pmin.y, wd.pmin.y+wd.h, piram.dant, piram.dpost);
->     }
-> 
->     if(piram.proj == PERSPECTIVA){
->        proj = Frustum(wd.pmin.x, wd.pmin.x+wd.a, wd.pmin.y, wd.pmin.y+wd.h, piram.dant, piram.dpost);
->     }
-> 
-> }
+void Camera::CalculaMatriuProjection()
+{
+    // CODI A MODIFICAR DURANT LA PRACTICA 2
+    proj = identity();
+
+    if(piram.proj == PARALLELA){
+       proj = Ortho(wd.pmin.x, wd.pmin.x+wd.a, wd.pmin.y, wd.pmin.y+wd.h, piram.dant, piram.dpost);
+    }
+
+    if(piram.proj == PERSPECTIVA){
+       proj = Frustum(wd.pmin.x, wd.pmin.x+wd.a, wd.pmin.y, wd.pmin.y+wd.h, piram.dant, piram.dpost);
+    }
+
+}
 ```
 
 #### `Camera::CalculWindow`
@@ -485,31 +485,38 @@ I s'ha afegit el següent atribut públic:
 Camera camGeneral;
 ```
 
-A la implementació del constructor d'Escena, `Escena::Escena`, s'ha afegit
-la inicialització de l'objecte `camGeneral`:
+S'ha canviat el constructor de l'escena per que rebi per paràmetre l'amplada
+i l'alçada de la finestra.
 
 ```c
-// Inicialització de la càmera
-camGeneral = new Camera();
+// escena.h
+Escena::Escena(int vpa, int vph)
 ```
 
-Per a situar la càmera al punt `(0, 20, 0)` i estigui mirant al punt `(0, 0, 0)`,
-s'ha definit aquesta funció:
+La seva implementació també s'ha canviat per que inicialitzi la càmera:
 
 ```c
-void Escena::SetZenitCamera()
+Escena::Escena(int vpa, int vph)
 {
-    // Situem "l'objectiu" que mira la càmera a (0, 0, 0), a una distància de 20
-    // respecte l'eix de la Y.
-    camGeneral.vs.vrp = vec4(0.0, 0.0, 0.0, 1.0);
-    camGeneral.vs.vup = vec4(0.0, 0.0, 1.0, 1.0);
-    camGeneral.vs.obs = camGeneral->CalculObs(camGeneral->vs.vrp, 20, 0, 90.0);
+    // Capsa minima contenidora provisional: S'ha de fer un recorregut dels objectes de l'escenes
+    capsaMinima.pmin[0] = 0; capsaMinima.pmin[1] = 0; capsaMinima.pmin[2]=0;
+    capsaMinima.a = 1; capsaMinima.h = 1; capsaMinima.p = 1;
+
+    taulaBillar = NULL;
+    plaBase = NULL;
+    bolaBlanca = NULL;
+    conjuntBoles = NULL;
+
+    iniCamera(true, vpa, vph);//crea la camera general. a y h del vp obtenidos en glWidget
 }
 ```
 
 ### 4.2 Implementació de diferents utilitats referents a la càmera la classe Escena
 
 #### `Escena::iniCamera`
+
+Alhora d'inicialitzar la càmera, també hem canviat una mica els paràmetres
+del mètode per que rebin la mida de la finestra:
 
 > Annotacions
 >
@@ -520,31 +527,101 @@ void Escena::SetZenitCamera()
 >     està implementat, es pot calcular els punts 
 
 ```c
-void Escena::iniCamera(bool isCamGeneral) {
-    if ( isCamGeneral ) {
-        Capsa3D capsaMinima = CapsaMinCont3DEscena();
-        camGeneral.ini(screenSize[0], screenSize[1], capsaMinima);
-        SetZenitCamera();
-    } else {
+void Escena::iniCamera(bool camGen, int a, int h){
+   if(camGen == true){
+       a = 600;//inicialmente 640x480 y
+       h = 600; //al usarse Camera::AjustaAspectRatioWd no queda bien
+       camGeneral.ini(a, h, capsaMinima);
+       camGeneral.vs.obs = vec4(0.0, 20.0, 0.0, 1.0);
+       camGeneral.piram.d = 2.0;
+       camGeneral.piram.dant = 10.0;
+       camGeneral.piram.dpost = 30.0;
+
+       camGeneral.vs.vrp = vec4(0.0, 0.0, 0.0, 1.0);
+                                  //ver Camera::CalculVup
+       camGeneral.vs.angx = -90.0;//un giro de +90 apunta vup a z+
+       camGeneral.vs.angy = 0.0;//un giro de +90 apunta el vetor forward de la camara a -x
+       camGeneral.vs.angz = 0.0;//un giro de +90 apunta vup a x-
+       vec3 vu = camGeneral.CalculVup(camGeneral.vs.angx, camGeneral.vs.angy, camGeneral.vs.angz);
+       camGeneral.vs.vup = vec4(vu[0], vu[1], vu[2], 0.0);
+       //camGeneral.vs.vup = vec4(0.0, 0.0, -1.0, 0.0);//con 0,1,0 la camara apunta a -z y no se ve
+
+       camGeneral.CalculaMatriuModelView();
+       camGeneral.CalculWindow(capsaMinima);
+       camGeneral.CalculaMatriuProjection();
+   }else{
+       //inicializar camera en primera persona
+   }
+
+}
+```
+
+De moment, treballarem amb la primera càmera, i quan s'introdueixi la càmera
+en primera persona, s'introduirà els canvis per fer-la funcionar.
+
+#### `Escena::setAnglesCamera`
+
+```c
+void Escena::setAnglesCamera(bool camGen, float angX, float angY, float angZ){
+    if(camGen == true){
+        camGeneral.vs.angx = angX;
+        camGeneral.vs.angy = angY;
+        camGeneral.vs.angz = angZ;
+        vec3 vu = camGeneral.CalculVup(camGeneral.vs.angx, camGeneral.vs.angy, camGeneral.vs.angz);
+        camGeneral.vs.vup = vec4(vu[0], vu[1], vu[2], 0.0);
+        camGeneral.CalculaMatriuModelView();
+        CapsaMinCont3DEscena();
+        camGeneral.CalculWindow(capsaMinima);
+        camGeneral.CalculaMatriuProjection();
+
     }
 }
 ```
 
-#### `Escena::setAnglesCamera`
-
-> NO IMPLEMENTAT
-
 #### `Escena::setVRPCamera`
 
-> NO IMPLEMENTAT
+```c
+void Escena::setVRPCamera(bool camGen, point4 vrp){
+    if(camGen == true){
+        camGeneral.vs.vrp = vrp;
+        camGeneral.CalculaMatriuModelView();
+        CapsaMinCont3DEscena();
+        camGeneral.CalculWindow(capsaMinima);
+        camGeneral.CalculaMatriuProjection();
+    }
+}
+```
 
 #### `Escena::setWindowCamera`
 
-> NO IMPLEMENTAT
+```c
+void Escena::setWindowCamera(bool camGen, bool retallat, Capsa2D window){
+    if(camGen == true){
+        camGeneral.wd = window;
+        camGeneral.CalculAngleOberturaHoritzontal();
+        camGeneral.CalculAngleOberturaVertical();
+        if(retallat == true){
+            camGeneral.CalculWindowAmbRetallat();
+        }
+        //camGeneral.AmpliaWindow(0.15);   //0.15 aumenta tamaño window un 15% (disminuye imagen)
+        camGeneral.AjustaAspectRatioWd();//amplia el window per tal que el seu aspect ratio sigui igual al del viewport
+        camGeneral.CalculaMatriuProjection();
+    }
+}
+```
 
 #### `Escena::setDCamera`
 
-> NO IMPLEMENTAT
+```c
+void Escena::setDCamera(bool camGen, float d){
+    if(camGen == true){
+        camGeneral.piram.d = d;
+        CapsaMinCont3DEscena();
+        camGeneral.CalculWindow(capsaMinima);
+        camGeneral.CalculaMatriuProjection();
+    }
+}
+```
 
 ## 5 Modificació de la classe GLWidget per incloure la càmera general
 

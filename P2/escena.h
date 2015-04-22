@@ -17,13 +17,15 @@
 #include <plabase.h>
 #include <bola.h>
 #include <conjuntboles.h>
+#include <camera.h>
+#include <math.h>
 
 using namespace std;
 
 class Escena
 {
 public:
-    Escena();
+    Escena(int vpa, int vph);
     ~Escena();
 
     void addObjecte(Objecte *obj);
@@ -35,6 +37,12 @@ public:
     void draw(QGLShaderProgram *pr);
     void CapsaMinCont3DEscena();
 
+    void iniCamera(bool camGen, int vpa, int vph);
+    void setAnglesCamera(bool camGeneral, float angX, float angY, float angZ);
+    void setVRPCamera(bool camGeneral, point4 vrp);
+    void setWindowCamera(bool camGeneral, bool retallat, Capsa2D window);
+    void setDCamera(bool camGeneral, float d);
+
     // Capsa contenedora de l'escena
     Capsa3D capsaMinima;
 
@@ -45,6 +53,7 @@ public:
     Bola *bolaBlanca = NULL;
     ConjuntBoles *conjuntBoles;
     vector<Objecte*> listaObjectes;
+    Camera camGeneral;
 };
 
 #endif // ESCENA_H
