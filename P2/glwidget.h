@@ -10,7 +10,7 @@
 #include <QGLWidget>
 #include <QTime>
 
-#define ROTATIONSPEED 1
+#define ROTATIONSPEED 8
 
 #define PROGRAM_VERTEX_ATTRIBUTE 0
 #define PROGRAM_COLOR_ATTRIBUTE 1
@@ -69,7 +69,6 @@ private:
 
     // Programa de la GPU
     QGLShaderProgram *program;
-    mat4 m220 = Scale(1.0/2.0, 1.0/2.0, 1.0/2.0);
     vec4 ejex =vec4(1.0, 0.0, 0.0, 0.0);
     vec4 ejez =vec4(0.0, 0.0, 1.0, 0.0);
     int xRotOld;

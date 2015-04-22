@@ -10,8 +10,9 @@ GLWidget::GLWidget(QWidget *parent)
     : QGLWidget(QGLFormat(QGL::SampleBuffers), parent)
 
 {
+    //std::cout<<"GLWidget::GLWidget"<<std::endl;
     setFocusPolicy( Qt::StrongFocus );
-    esc = new Escena();
+    esc = new Escena(this->size().width(), this->size().height());
 
     xRot = 0;
     yRot = 0;
@@ -126,19 +127,21 @@ void GLWidget::setZRotation(int angle)
 
 void GLWidget::initializeGL()
 {
+    //std::cout<<"GLWidget::initializeGL"<<std::endl;
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
-    std::cout<<"Estic inicialitzant el shaders"<<std::endl;
     initShadersGPU();
-
+    esc->pr = program;
     //glClearColor(clearColor.redF(), clearColor.greenF(), clearColor.blueF(), clearColor.alphaF());
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    esc->camGeneral.toGPU(program);
 }
 
 void GLWidget::paintGL()
 {
+   //std::cout<<"\nGLWidget::paintGL"<<std::endl;
    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
    qNormalizeAngle(xRot);
@@ -160,14 +163,18 @@ void GLWidget::paintGL()
    yRotOld = yRot;
    zRotOld = zRot;
 
-   esc->draw(program);
-
-
+   //esc->tuneCamera(false,true,program);//para pruebas
+   esc->camGeneral.CalculaMatriuModelView();
+   esc->CapsaMinCont3DEscena();
+   esc->camGeneral.CalculWindow(esc->capsaMinima);
+   esc->camGeneral.CalculaMatriuProjection();
+   esc->draw();
 }
 
 
 void GLWidget::resizeGL(int width, int height)
 {
+    //std::cout<<"GLWidget::resizeGL"<<std::endl;
     int side = qMin(width, height);
     glViewport((width - side) / 2, (height - side) / 2, side, side);
 
@@ -179,6 +186,8 @@ void GLWidget::resizeGL(int width, int height)
     glOrtho(-1.5, +1.5, -1.5, +1.5, 0.0, 15.0);
 #endif
     glMatrixMode(GL_MODELVIEW);
+    
+    esc->camGeneral.setViewport(0, 0, width, height);
 }
 
 
@@ -207,8 +216,6 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
 
 void GLWidget::keyPressEvent(QKeyEvent *event)
 {
-    // Metode a implementar
-
     //std::cout<<"\nkeyPressEvent\n";
     int Key_Left = 0x01000012;
     int Key_Up = 0x01000013;
@@ -235,25 +242,25 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
                 && abs((cb.pmin.z+cb.p/2.) - (listaCapsasConjuntBoles[i].pmin.z+listaCapsasConjuntBoles[i].p/2.)) < cb.p/2. + listaCapsasConjuntBoles[i].p/2.){
 
             if(event->key() == Key_Up){
-                if((cb.pmin.z + cb.p/2.0) - (listaCapsasConjuntBoles[i].pmin.z + listaCapsasConjuntBoles[i].p/2.0)<= 0.0){//si bola blanca con menor z que la i puede haber limitacion
-                    if(listaCapsasConjuntBoles[i].pmin.z - cb.pmin.z - cb.p < deltaDesplacament){//si distancia menor que deltaDesplacament hay limitacion
-                        dzP = listaCapsasConjuntBoles[i].pmin.z - cb.pmin.z - cb.p;
-                        if(dzP < 0.005)dzP = 0.0;
-                    }
+                if((cb.pmin.z + cb.p/2.)- (listaCapsasConjuntBoles[i].pmin.z + listaCapsasConjuntBoles[i].p/2.)<= 0.0){//si bola blanca cn menor z que la i no hay limitacion
+                    dzN = -deltaDesplacament;
                 }else{
-                    dzP = deltaDesplacament;//bola blanca tiene mayor z que la i por lo tanto no hay limitacion
+                    if(listaCapsasConjuntBoles[i].pmin.z + listaCapsasConjuntBoles[i].p - cb.pmin.z > -deltaDesplacament){//si distancia menor que deltaDesplacament hay limitacion
+                        dzN = listaCapsasConjuntBoles[i].pmin.z + listaCapsasConjuntBoles[i].p - cb.pmin.z;
+                        if(dzN > -0.002)dzN = 0.0;
+                    }
                 }
             }
 
             if(event->key() == Key_Down){
-                if((cb.pmin.z + cb.p/2.0) - (listaCapsasConjuntBoles[i].pmin.z + listaCapsasConjuntBoles[i].p/2.0)>= 0.0){//si bola blanca con mayor z que la i, puede haber limitacion
-                    if(listaCapsasConjuntBoles[i].pmin.z + listaCapsasConjuntBoles[i].p - cb.pmin.z > -deltaDesplacament){//si distancia menor que deltaDesplacament hay limitacion
-                         dzN = listaCapsasConjuntBoles[i].pmin.z + listaCapsasConjuntBoles[i].p - cb.pmin.z;
-                         if(dzN > -0.005)dzN = 0.0;
-                    }   else{
-                           dzN = -deltaDesplacament;//bola blanca tiene menor z que la i por lo tanto no hay limitacion
-                        }
-                 }
+                if((cb.pmin.z+ cb.p/2.)- (listaCapsasConjuntBoles[i].pmin.z + listaCapsasConjuntBoles[i].p/2.) >= 0.0){//si bola blanca con mayor z que la i no hay limitacion
+                    dzP = deltaDesplacament;
+                }else{
+                    if(listaCapsasConjuntBoles[i].pmin.z - (cb.pmin.z + cb.p) < deltaDesplacament ){//si distancia menor que deltaDesplacament hay limitacion
+                        dzP = listaCapsasConjuntBoles[i].pmin.z - (cb.pmin.z + cb.p);
+                        if(dzP < 0.002)dzP = 0.0;
+                    }
+                }
             }
 
             if(event->key() == Key_Left){
@@ -288,12 +295,12 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
        switch ( event->key() )
        {
        case Qt::Key_Up:
-                  m = Translate(ejez.x*dzP,  ejez.y*dzP, ejez.z*dzP);
-                  cb.pmin.z += dzP;
-           break;
-       case Qt::Key_Down:
                   m = Translate(ejez.x*dzN,  ejez.y*dzN, ejez.z*dzN);
                   cb.pmin.z += dzN;
+           break;
+       case Qt::Key_Down:
+                  m = Translate(ejez.x*dzP,  ejez.y*dzP, ejez.z*dzP);
+                  cb.pmin.z += dzP;
            break;
        case Qt::Key_Left:
                   m = Translate(ejex.x*dxN,  ejex.y*dxN, ejex.z*dxN);
@@ -386,10 +393,9 @@ void GLWidget::newPlaBase()
 void GLWidget::newObj(QString fichero)
 {
     // Metode que carrega un fitxer .obj llegit de disc
-    TaulaBillar *obj;
 
-    obj = new TaulaBillar(fichero);
-    newObjecte(obj);
+    TaulaBillar *taulabillar = new TaulaBillar(fichero);
+    newObjecte(taulabillar);
 }
 
 void GLWidget::newBola()
@@ -417,6 +423,8 @@ void GLWidget::newConjuntBoles()
     esc->conjuntBoles = cb;
     updateGL();
 }
+
+
 void GLWidget::newSalaBillar()
 {
     newPlaBase();
