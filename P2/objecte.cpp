@@ -159,6 +159,7 @@ void Objecte::toGPU(QGLShaderProgram *pr){
     glEnable(GL_TEXTURE_2D);
 
     glEnable(GL_CULL_FACE);
+    //glDisable(GL_CULL_FACE);
     //glCullFace(GL_BACK); //por defecto elimina los triangulos que se ven por detras
     //glFrontFace(GL_CCW); //por defecto los triangulos se definen counterclock wise
 

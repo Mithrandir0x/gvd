@@ -15,23 +15,23 @@
 
 #define DEGREES *180.0/PI
 
-typedef enum {VISTA_X = 0, VISTA_Y = 1, VISTA_Z = 2, AXONOMETRIC = 3} TipVista; 
+typedef enum {VISTA_X = 0, VISTA_Y = 1, VISTA_Z = 2, AXONOMETRIC = 3} TipVista;
 
-typedef enum {YAMUNT = 0, YABAIX = 1} Orienty; 
+typedef enum {YAMUNT = 0, YABAIX = 1} Orienty;
 
-typedef enum {PARALLELA = 0, PERSPECTIVA = 1} TipProj; 
+typedef enum {PARALLELA = 0, PERSPECTIVA = 1} TipProj;
 
 
 typedef struct
-{
+ {
   double      angy, angx, angz;  /* angles de gir del sistema de coords obser */
   vec4        vrp;               /* view reference point */
   vec4        obs;               /* posicio de l'observador */
   vec4        vup;               /* verticalitat de la càmera */
  } VisuSystem;
 
-typedef struct  
-{
+typedef struct
+ {
   TipProj    proj;           /* tipus de proj: 0 paral.lela 1 perspectiva */
   double     d;              /* distancia observador a pla de projeccio */
   double     dant, dpost;    /* distancies al pla de retallat anterior i posterior desde l'observador*/
@@ -81,27 +81,19 @@ public:
 
     VisuSystem vs;      /* Sistema de visualitzacio  */
     PiramProj piram;    /* Piramide de visualitzacio */
-    Capsa2D wd;	        /* Window                    */
-    Capsa2D vp;         /* Viewport                  */
-
+    Capsa2D wd;	      /* Window                    */
+    Capsa2D vp;       /* Viewport                  */
+    mat4  modView; // Matriu model-view de la CPU
+    mat4  proj;  // Matriu projection de la CPU
 
 private:
     void VertexCapsa3D(Capsa3D capsaMinima, vec4 vaux[8]);
 
-    mat4  modView; // Matriu model-view de la CPU
-    mat4  proj;  // Matriu projection de la CPU
+    //mat4  modView; // Matriu model-view de la CPU
+    //mat4  proj;  // Matriu projection de la CPU
     GLuint  model_view;  // model-view matrix uniform shader variable (GPU)
     GLuint  projection;  // projection matrix uniform shader variable (GPU)
 };
 
 
 #endif
-
-
-
-
-
-
-
-
-

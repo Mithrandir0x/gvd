@@ -2,13 +2,14 @@
 
 Camera::Camera()
 {
+    //std::cout<<"Camera::Camera"<<std::endl;
     vs.vrp = vec4(0.0, 0.0, 0.0, 1.0);
     vs.vup = vec4(0.0, 1.0, 0.0, 0.0);
     vs.obs = vec4(0.0, 0.0, 200.0, 1.0);
 
-    vs.angx = 0;
-    vs.angy = 0;
-    vs.angz = 0;
+    vs.angx = 0.0;
+    vs.angy = 0.0;
+    vs.angz = 0.0;//con los 3 angulos a cero vup apunta a (0,1,0)
 
     vp.a = 600;
     vp.h = 600;
@@ -16,14 +17,13 @@ Camera::Camera()
     vp.pmin[1] = 0;
 
     piram.proj = PARALLELA;
-    piram.d = 100;
+    piram.d = 2;
 }
 
 void Camera::ini(int a, int h, Capsa3D capsaMinima)
 {
+    //std::cout<<"Camera::ini"<<std::endl;
     // Calcul del vrp com el centre de la capsa minima contenedora 3D
-    // CAL IMPLEMENTAR
-    // CODI A MODIFICAR DURANT LA PRACTICA 2
 
     vs.vrp[0] = capsaMinima.pmin.x + capsaMinima.a/2;
     vs.vrp[1] = capsaMinima.pmin.y + capsaMinima.h/2;
@@ -40,38 +40,26 @@ void Camera::ini(int a, int h, Capsa3D capsaMinima)
 
 void Camera::toGPU(QGLShaderProgram *program)
 {
+    // CODI A MODIFICAR DURANT LA PRACTICA 2
     this->setProjectionToGPU(program, this->proj);
     this->setModelViewToGPU(program, this->modView);
 }
 
 
-void Camera::setModelViewToGPU(QGLShaderProgram *program, mat4 m)
-{
 
-    model_view = program->uniformLocation("model_view");
-    glUniformMatrix4fv( model_view, 1, GL_TRUE, m );
-
-}
-
-void Camera::setProjectionToGPU(QGLShaderProgram *program, mat4 p)
-{
-
-    projection = program->uniformLocation("projection");
-    glUniformMatrix4fv(projection,1,GL_TRUE, p);
-}
 
 // Suposa que les dades d'obs, vrp i vup son correctes en la camera
-
+// angx, angy, angles de gir del sistema de coords obser
 void Camera::CalculaMatriuModelView()
 {
     // CODI A MODIFICAR DURANT LA PRACTICA 2
     modView = identity();
 
-    vec4 eye = CalculObs(vs.vrp, piram.d, vs.angx, vs.angy);
-    vec4 at = vs.vrp;
-    vec4 up = CalculVup(vs.angx, vs.angy, vs.angz);
+    vec4 eye = vs.obs; //se supone correcto
+    vec4 at = vs.vrp;  //se supone correcto
+    vec4 up = vs.vup;  //se supone correcto
 
-    modView = LookAt(eye, at, up);
+    this->modView = LookAt(eye, at, up);
 }
 
 void Camera::CalculaMatriuProjection()
@@ -86,23 +74,24 @@ void Camera::CalculaMatriuProjection()
     if(piram.proj == PERSPECTIVA){
        proj = Frustum(wd.pmin.x, wd.pmin.x+wd.a, wd.pmin.y, wd.pmin.y+wd.h, piram.dant, piram.dpost);
     }
-
 }
 
 
 void Camera::CalculWindow( Capsa3D c)
 {
    // CODI A MODIFICAR DURANT LA PRACTICA 2
-
     mat4 MDP;
     vec4  vaux[8], vauxMod[8];
+
     //wd.pmin.x = -1;
     //wd.pmin.y = -1;
 
     //wd.a = 2;
     //wd.h = 2;
 
-    CalculaMatriuModelView();
+    //vec3 up =  CalculVup(vs.angx,vs.angy,vs.angz);
+    //camGeneral.vs.vup = vec4(vu[0], vu[1], vu[2], 0.0);
+    //modView = LookAt(vs.obs, vs.vrp, up);
 
     if (piram.proj==PERSPECTIVA) {
         CreaMatDp(MDP); // crea la matriu de deformacio perspectiva
@@ -116,7 +105,7 @@ void Camera::CalculWindow( Capsa3D c)
     }
 
     wd = CapsaMinCont2DXYVert(vauxMod, 8);
-    AmpliaWindow(0.15);      //probar si es necesario
+    //AmpliaWindow(0.3);      //0.3 aumenta el tamño un 30% (reduce el tamaño)
     AjustaAspectRatioWd();//amplia el window per tal que el seu aspect ratio sigui igual al del viewport
 
 
@@ -130,7 +119,20 @@ void Camera::setViewport(int x, int y, int a, int h)
     vp.h = h;
 }
 
+void Camera::setModelViewToGPU(QGLShaderProgram *program, mat4 m)
+{
+   // CODI A MODIFICAR DURANT LA PRACTICA 2
+    model_view = program->uniformLocation("model_view");
+    glUniformMatrix4fv( model_view, 1, GL_TRUE, m );
 
+}
+
+void Camera::setProjectionToGPU(QGLShaderProgram *program, mat4 p)
+{
+       // CODI A MODIFICAR DURANT LA PRACTICA 2
+    projection = program->uniformLocation("projection");
+    glUniformMatrix4fv(projection,1,GL_TRUE, p);
+}
 
 void  Camera::AmpliaWindow(double r)
 {
@@ -165,14 +167,12 @@ void Camera::CalculAngleOberturaVertical()
 
 void Camera::CalculAngleOberturaHoritzontal()
 {
-
     piram.alfah =  180.0 * atan2(wd.a/2.0, piram.d)/PI;
 
 }
 
 void  Camera::CalculWindowAmbRetallat()
 {
-
     Capsa2D c;
 
     if (piram.proj == PARALLELA) {
@@ -225,7 +225,6 @@ void  Camera::CalculWindowAmbRetallat()
 
 void    Camera::AjustaAspectRatioWd()
 {
-
     double arvp, arwd;
 
     arvp = ((double) vp.h)/((double)(vp.a));
@@ -293,6 +292,7 @@ vec4 Camera::CalculObs(vec4 vrp, double d, double angx, double angy)
     double norma;
 
     /* Calcul del vector de visio a partir dels angles */
+    //angx es la latitud y angy la longitud respecto al eje z
 
     v[0] = sin (PI*angy/180.) * cos (PI*angx/180.);
     v[2] = cos (PI*angy/180.) * cos (PI*angx/180.);
@@ -315,10 +315,10 @@ vec4 Camera::CalculObs(vec4 vrp, double d, double angx, double angy)
 }
 
 
-vec3 Camera::CalculVup(double angx, double angy, double angz)
+vec3 Camera::CalculVup(double angx, double angy, double angz) // angx, angy, angz, angles de gir del sistema de coords obser
 {
     vec3 v;
-    int   x, y;
+    /*int  x, y;
 
     x = 1.0;
     y = 1.0;
@@ -330,8 +330,16 @@ vec3 Camera::CalculVup(double angx, double angy, double angz)
 
     v[0] = x*sin (-PI*angz/180.);
     v[1] = y*cos( -PI*angz/180.);
-    v[2] = 0.0;
+    v[2] = 0.0;*/
 
+    double sx = sin(PI*angx/180.); //se supone Rx * Ry * Rz
+    double cx = cos(PI*angx/180.); //ver http://www.songho.ca/opengl/gl_anglestoaxes.html
+    double sy = sin(PI*angy/180.);
+    double cy = cos(PI*angy/180.);
+    double sz = sin(PI*angz/180.);
+    double cz = cos(PI*angz/180.);
+
+    v = vec3(-cy * sz, -sx * sy * sz + cx * cz, cx * sy * sz + sx * cz);
     return(v);
 
 }
@@ -353,3 +361,4 @@ void Camera::VertexCapsa3D(Capsa3D capsaMinima, vec4 vaux[8])
     vaux[6] = vec4(ptfi[0], ptfi[1], capsaMinima.pmin[2], 1.0);
     vaux[7] = vec4(ptfi[0], ptfi[1], ptfi[2], 1.0);
 }
+
