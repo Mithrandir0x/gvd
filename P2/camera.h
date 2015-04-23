@@ -77,6 +77,7 @@ public:
     void rotate(Capsa3D c);
     void pan();
     void zoom();
+    void PrintCamera();
 
 
     VisuSystem vs;      /* Sistema de visualitzacio  */

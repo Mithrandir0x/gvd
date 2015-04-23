@@ -87,41 +87,61 @@ QSize GLWidget::sizeHint() const
 }
 
 
-static void qNormalizeAngle(int &angle)
+static void qNormalizeAngle(double &angle)
 {
     while (angle < 0)
-        angle += 360 * 16;
-    while (angle > 360 * 16)
-        angle -= 360 * 16;
+        angle += 360;
+    while (angle > 360)
+        angle -= 360;
 }
 
 
 void GLWidget::setXRotation(int angle)
 {
-    qNormalizeAngle(angle);
-    if (angle != xRot) {
-        xRot = angle;
-        update();
-    }
+    //modificando el vrp con angx
+    /*if (angle > 0) {
+        esc->camGeneral.vs.angx += 0.0005;
+    } else if (angle<0)
+        esc->camGeneral.vs.angx -= 0.0005;
+
+    if(esc->camGeneral.vs.angx < -90.0 - atan(2.0/20.0))esc->camGeneral.vs.angx = -90.0 - atan(2.0/20.0);
+    if(esc->camGeneral.vs.angx > -90.0 + atan(2.0/20.0))esc->camGeneral.vs.angx = -90.0 + atan(2.0/20.0);
+    esc->camGeneral.vs.vrp[2] = 0.0 - 20.0 * tan(90.0 + esc->camGeneral.vs.angx);*/
+
+    //modificando el obs con angx
+    if (angle > 0) {
+        esc->camGeneral.vs.angx += 1.0;
+    } else if (angle<0)
+        esc->camGeneral.vs.angx -= 1.0;
+    qNormalizeAngle(esc->camGeneral.vs.angx);
+    esc->camGeneral.vs.obs = esc->camGeneral.CalculObs(esc->camGeneral.vs.vrp,esc->camGeneral.piram.d,esc->camGeneral.vs.angx,esc->camGeneral.vs.angy);
+    updateGL();
 }
 
 
 void GLWidget::setYRotation(int angle)
 {
-    qNormalizeAngle(angle);
-    if (angle != yRot) {
-        yRot = angle;
-        update();
-    }
+    if (angle > 0) {
+        esc->camGeneral.vs.angy += 1.0;
+    } else if (angle<0)
+        esc->camGeneral.vs.angy -= 1.0;
+
+    qNormalizeAngle(esc->camGeneral.vs.angy);
+    //esc->camGeneral.vs.obs = esc->camGeneral.CalculObs(esc->camGeneral.vs.vrp,esc->camGeneral.piram.d,esc->camGeneral.vs.angx,esc->camGeneral.vs.angy);
+    updateGL();
+
 }
 
 void GLWidget::setZRotation(int angle)
 {
-    qNormalizeAngle(angle);
-    if (angle != zRot) {
-        zRot = angle;
-        update();
-    }
+    /*if (angle > 0) {
+        esc->camGeneral.vs.angz += 1.0;
+    } else if (angle<0)
+        esc->camGeneral.vs.angz -= 1.0;
+
+    qNormalizeAngle(esc->camGeneral.vs.angz);
+    //esc->camGeneral.vs.obs = esc->camGeneral.CalculObs(esc->camGeneral.vs.vrp,esc->camGeneral.piram.d,esc->camGeneral.vs.angx,esc->camGeneral.vs.angy);
+    updateGL();*/
 }
 
 
@@ -137,6 +157,7 @@ void GLWidget::initializeGL()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     esc->camGeneral.toGPU(program);
+    //esc->camGeneral.PrintCamera();
 }
 
 void GLWidget::paintGL()
@@ -163,11 +184,12 @@ void GLWidget::paintGL()
    yRotOld = yRot;
    zRotOld = zRot;
 
-   //esc->tuneCamera(false,true,program);//para pruebas
+   vec3 vu = esc->camGeneral.CalculVup(esc->camGeneral.vs.angx, esc->camGeneral.vs.angy, esc->camGeneral.vs.angz);
+   esc->camGeneral.vs.vup = vec4(vu[0], vu[1], vu[2], 0.0);
    esc->camGeneral.CalculaMatriuModelView();
-   esc->CapsaMinCont3DEscena();
-   esc->camGeneral.CalculWindow(esc->capsaMinima);
+
    esc->camGeneral.CalculaMatriuProjection();
+   //esc->camGeneral.PrintCamera();
    esc->draw();
 }
 
@@ -177,7 +199,7 @@ void GLWidget::resizeGL(int width, int height)
     //std::cout<<"GLWidget::resizeGL"<<std::endl;
     int side = qMin(width, height);
     glViewport((width - side) / 2, (height - side) / 2, side, side);
-    
+
     esc->camGeneral.setViewport(0, 0, width, height);
 }
 
@@ -192,27 +214,39 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
     int dx = event->x() - lastPos.x();
     int dy = event->y() - lastPos.y();
 
-    //std::cout<<"\ndx=" <<dx<<" ,zRot= "<<zRot<<"\n";
 
     if (event->buttons() & Qt::LeftButton) {
-        setXRotation(xRot + ROTATIONSPEED * dy);
-    } else if (event->buttons() & Qt::RightButton) {
-        setXRotation(xRot + ROTATIONSPEED * dy);
-        setZRotation(zRot + ROTATIONSPEED * dx);
+        if(lastPos.y()!= event->y() && lastPos.x()!= event->x()) {
+            setYRotation(dx);
+            //setXRotation(dy);
+        }
+        else if(lastPos.y()!= event->y()) {// rotar la camera
+            //setXRotation(dy);
+        }
+        else if (lastPos.x()!= event->x()) {
+            setYRotation(dx);
+        }
     }
-    //std::cout<<"dx=" <<dx<<" ,zRot= "<<zRot<<"\n";
+
+    if (event->buttons() & Qt::RightButton) {//es mas preciso usar un boton para cada giro
+        if(lastPos.y()!= event->y() && lastPos.x()!= event->x()) {
+            //setYRotation(dx);
+            setXRotation(dy);
+        }
+        else if(lastPos.y()!= event->y()) {// rotar la camera
+            setXRotation(dy);
+        }
+        else if (lastPos.x()!= event->x()) {
+            //setYRotation(dx);
+        }
+    }
+
     lastPos = event->pos();
 }
 
 
 void GLWidget::keyPressEvent(QKeyEvent *event)
 {
-    //std::cout<<"\nkeyPressEvent\n";
-    int Key_Left = 0x01000012;
-    int Key_Up = 0x01000013;
-    int Key_Right = 0x01000014;
-    int Key_Down = 0x01000015;
-
     double deltaDesplacament = 0.01;
     double dzP=deltaDesplacament, dzN=-deltaDesplacament, dxP=deltaDesplacament, dxN=-deltaDesplacament;
     mat4 m;
@@ -232,7 +266,7 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
         if(abs((cb.pmin.x+cb.a/2.) - (listaCapsasConjuntBoles[i].pmin.x+listaCapsasConjuntBoles[i].a/2.)) < (cb.a/2. + listaCapsasConjuntBoles[i].a/2.)
                 && abs((cb.pmin.z+cb.p/2.) - (listaCapsasConjuntBoles[i].pmin.z+listaCapsasConjuntBoles[i].p/2.)) < cb.p/2. + listaCapsasConjuntBoles[i].p/2.){
 
-            if(event->key() == Key_Up){
+            if(event->key() == Qt::Key_Up){
                 if((cb.pmin.z + cb.p/2.)- (listaCapsasConjuntBoles[i].pmin.z + listaCapsasConjuntBoles[i].p/2.)<= 0.0){//si bola blanca cn menor z que la i no hay limitacion
                     dzN = -deltaDesplacament;
                 }else{
@@ -243,7 +277,7 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
                 }
             }
 
-            if(event->key() == Key_Down){
+            if(event->key() == Qt::Key_Down){
                 if((cb.pmin.z+ cb.p/2.)- (listaCapsasConjuntBoles[i].pmin.z + listaCapsasConjuntBoles[i].p/2.) >= 0.0){//si bola blanca con mayor z que la i no hay limitacion
                     dzP = deltaDesplacament;
                 }else{
@@ -254,7 +288,7 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
                 }
             }
 
-            if(event->key() == Key_Left){
+            if(event->key() == Qt::Key_Left){
                 if((cb.pmin.x + cb.a/2.)- (listaCapsasConjuntBoles[i].pmin.x + listaCapsasConjuntBoles[i].a/2.)<= 0.0){//si bola blanca a la izquierda no hay limitacion
                     dxN = -deltaDesplacament;
                 }else{
@@ -265,7 +299,7 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
                 }
             }
 
-            if(event->key() == Key_Right){
+            if(event->key() == Qt::Key_Right){
                 if((cb.pmin.x + cb.a/2.)- (listaCapsasConjuntBoles[i].pmin.x + listaCapsasConjuntBoles[i].a/2.) >= 0.0){//si bola blanca a la derecha no hay limitacion
                     dxP = deltaDesplacament;
                 }else{
@@ -282,30 +316,50 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 
     if (esc->bolaBlanca!=NULL && esc->plaBase!=NULL ) {
 
-
        switch ( event->key() )
        {
        case Qt::Key_Up:
+                  if (event->modifiers() & Qt::AltModifier){
+                      Pan(0, -0.01);
+                      break;
+                   }
                   m = Translate(ejez.x*dzN,  ejez.y*dzN, ejez.z*dzN);
                   cb.pmin.z += dzN;
            break;
        case Qt::Key_Down:
+                 if (event->modifiers() & Qt::AltModifier){
+                     Pan(0, 0.01);
+                     break;
+                  }
                   m = Translate(ejez.x*dzP,  ejez.y*dzP, ejez.z*dzP);
                   cb.pmin.z += dzP;
            break;
        case Qt::Key_Left:
+                 if (event->modifiers() & Qt::AltModifier){
+                    Pan(0.01, 0);
+                    break;
+                  }
                   m = Translate(ejex.x*dxN,  ejex.y*dxN, ejex.z*dxN);
                   cb.pmin.x += dxN;
            break;
        case Qt::Key_Right:
+                 if (event->modifiers() & Qt::AltModifier){
+                     Pan(-0.01, 0);
+                     break;
+                  }
                   m = Translate(ejex.x*dxP,  ejex.y*dxP, ejex.z*dxP);
                   cb.pmin.x += dxP;
+           break;
+       case Qt::Key_Plus:
+           Zoom(-0.05);
+           break;
+       case Qt::Key_Minus:
+           Zoom(0.05);
            break;
        }
 
        esc->bolaBlanca->aplicaTG(m);
        update();
-
     }
 }
 
@@ -315,62 +369,43 @@ void GLWidget::keyReleaseEvent(QKeyEvent *event)
 
 }
 
+void GLWidget::Zoom (double inOut) {
+     esc->camGeneral.AmpliaWindow(inOut);//aumentar el tamaño del window equivale a un zoom out(inOut positivo)
+     updateGL();
+}
+
+void GLWidget::Pan(double dx, double dy) {
+    esc->camGeneral.wd.pmin.x = esc->camGeneral.wd.pmin.x + dx;
+    esc->camGeneral.wd.pmin.y = esc->camGeneral.wd.pmin.y + dy;
+    updateGL();
+}
+
 
 
 void GLWidget::adaptaObjecteTamanyWidget(Objecte *obj)
 {
-    // Metode a implementar
-    Capsa3D capsa;
-    mat4 m;
 
-    capsa = obj->calculCapsa3D();
-    if (dynamic_cast<TaulaBillar*>(obj)){
-            double aristaMax = 0.0;
-
-        if(capsa.a > capsa.p){
-            aristaMax=capsa.a;
-        } else{
-            aristaMax=capsa.p;
-        }
-        if(capsa.h > aristaMax){
-            aristaMax=capsa.h;
-        }
-
-        double escala = 2.0 / aristaMax;
-        mat4 m = Scale(escala, escala, escala);
-        obj->aplicaTG(m);//la mayor arista de la caja contenedora de la mesa es 2.0
-
-        capsa = obj->calculCapsa3D();
-
-        m = Translate(-(capsa.pmin.x + capsa.a / 2.), -(capsa.pmin.y + capsa.h), -(capsa.pmin.z + capsa.p / 2.));
-        obj->aplicaTG(m);//deja el centro de la mesa(x,z) en el origen de coordenadas y el tope en el plano y=0, con arista maxima 2.0
-        //capsa = obj->calculCapsa3D();
-
-    }else if (dynamic_cast<Bola*>(obj)){
-            m = Translate(0.0,  -capsa.pmin.y, 0.0);//la base de las 16 bolas quedan en y = 0
-            obj->aplicaTG(m);
-    }else if (dynamic_cast<PlaBase*>(obj)){
-            mat4 m = Scale(2.0/(1.8379*capsa.a), 1.0, 2.0/capsa.p)*Translate(-(capsa.pmin.x + capsa.a/2.), -(capsa.pmin.y + capsa.h/2.), -(capsa.pmin.z + capsa.p/2.));
-            obj->aplicaTG(m);
-    }
-            //capsa = obj->calculCapsa3D();
 }
 
 void GLWidget::newObjecte(Objecte * obj)
 {
-    adaptaObjecteTamanyWidget(obj);
-    obj->toGPU(program);
     esc->addObjecte(obj);
     updateGL();
 }
+
 void GLWidget::newPlaBase()
 {
-    cout << "Creating new pla base" << endl;
-    // Metode que crea un objecte PlaBase poligon amb el punt central al (0,0,0) i perpendicular a Y=0
-    point4 v0  = point4( 10.0, 0.0, 10.0, 1.0 );
-    point4 v1  = point4( 10.0, 0.0,-10.0, 1.0 );
-    point4 v2  = point4(-10.0, 0.0,-10.0, 1.0 );
-    point4 v3  = point4(-10.0, 0.0, 10.0, 1.0 );
+    PlaBase *plaBase;
+
+    plaBase = this->newPlaBs();
+    newObjecte(plaBase);
+}
+
+PlaBase* GLWidget::newPlaBs(){
+    point4 v0  = point4( 0.5441, 0.0, 1.0, 1.0 );
+    point4 v1  = point4( 0.5441, 0.0,-1.0, 1.0 );
+    point4 v2  = point4(-0.5441, 0.0,-1.0, 1.0 );
+    point4 v3  = point4(-0.5441, 0.0, 1.0, 1.0 );
 
     color4 cv0 = color4( 1.0, 1.0, 1.0, 1.0 ); //white
     color4 cv1  = color4( 1.0, 0.0, 0.0, 1.0 ); //red
@@ -378,7 +413,7 @@ void GLWidget::newPlaBase()
     color4 cv3  = color4( 0.0, 1.0, 0.0, 1.0 ); //green
 
     PlaBase *plaBase = new PlaBase(v0, v1, v2, v3, cv0, cv1, cv2, cv3);
-    newObjecte(plaBase);
+    return plaBase;
 }
 
 void GLWidget::newObj(QString fichero)
@@ -391,49 +426,62 @@ void GLWidget::newObj(QString fichero)
 
 void GLWidget::newBola()
 {
-    // Metode que crea la Bola blanca de joc
-     // Metode a implementar
-
-    Bola *obj;
-
-    obj = new Bola(0.0, 0.03075, -0.5, 0.03075, 1.0, 1.0, 1.0, "0");//x0,y0,z0,r,R,G,B,numBola
-    newObjecte(obj);
+    Bola *bolablanca = new Bola(0.0, 0.03075, 0.5, 0.03075, 1.0, 1.0, 1.0, "0");//x0,y0,z0,r,R,G,B,numBola
+    newObjecte(bolablanca);
+    cb = bolablanca->calculCapsa3D();//para el calculo de colisiones
 }
 void GLWidget::newConjuntBoles()
 {
-    // Metode que crea les 15 Boles del billar america
-    // Metode a implementar
-    ConjuntBoles *cb;
+    ConjuntBoles *conjuntboles = new ConjuntBoles();
 
-    cb = new ConjuntBoles();
-
-    for (int i=0; i<cb->listaConjuntBoles.size(); i++) {
-        adaptaObjecteTamanyWidget(cb->listaConjuntBoles[i]);
-        cb->listaConjuntBoles[i]->toGPU(program);
+    esc->conjuntBoles = conjuntboles;
+    for(int i=0; i<conjuntboles->listaConjuntBoles.size(); i++){
+        esc->listaObjectes.push_back(conjuntboles->listaConjuntBoles[i]);
+        listaCapsasConjuntBoles.push_back(conjuntboles->listaConjuntBoles[i]->calculCapsa3D());
     }
-    esc->conjuntBoles = cb;
+
     updateGL();
 }
 
 
-void GLWidget::newSalaBillar()
-{
-    newPlaBase();
-    cT = esc->plaBase->calculCapsa3D();//para el calculo de colisiones
-    // Metode que construeix tota la sala de billar: taula, 15 boles i bola blanca
-   /* QString fileName = "/home/jj/Qtexamples/P1/resources/taula.obj";
-    if (!fileName.isNull())
-        newObj(fileName);
-    cT = esc->taulaBillar->calculCapsa3D();*/
+    void GLWidget::newSalaBillar()
+    {
+        PlaBase *plaBase = this->newPlaBs();
+        esc->addObjecte(plaBase);
+        cT = plaBase->calculCapsa3D();//para el calculo de colisiones
 
-    newBola();
-    cb = esc->bolaBlanca->calculCapsa3D();//para el calculo de colisiones
+       /* QString fileName = "/home/jj/Qtexamples/P1/resources/taula.obj";
+        if (!fileName.isNull())
+            newObj(fileName);
+        cT = esc->taulaBillar->calculCapsa3D();*/
 
-    newConjuntBoles();
-    for (int i=0; i<esc->conjuntBoles->listaConjuntBoles.size(); i++) {
-        listaCapsasConjuntBoles.push_back(esc->conjuntBoles->listaConjuntBoles[i]->calculCapsa3D());
+        Bola *bolab = new Bola(0.0, 0.03075, 0.5, 0.03075, 1.0, 1.0, 1.0, "0");//x0,y0,z0,r,R,G,B,numBola
+        esc->addObjecte(bolab);
+        cb = bolab->calculCapsa3D();//para el calculo de colisiones
+
+        ConjuntBoles *conjuntboles = new ConjuntBoles();
+        esc->conjuntBoles = conjuntboles;
+        for(int i=0; i<conjuntboles->listaConjuntBoles.size(); i++){
+            esc->listaObjectes.push_back(conjuntboles->listaConjuntBoles[i]);
+            listaCapsasConjuntBoles.push_back(conjuntboles->listaConjuntBoles[i]->calculCapsa3D());
+        }
+
+        esc->CapsaMinCont3DEscena();
+        esc->camGeneral.vs.vrp[0] = esc->capsaMinima.pmin[0]+(esc->capsaMinima.a/2.0);
+        esc->camGeneral.vs.vrp[1] = esc->capsaMinima.pmin[1]+(esc->capsaMinima.h/2.0);
+        esc->camGeneral.vs.vrp[2] = esc->capsaMinima.pmin[2]+(esc->capsaMinima.p/2.0);
+
+        //esc->camGeneral.CalculWindow(esc->capsaMinima);
+        esc->camGeneral.wd.a = 2.5;//al disminuir reduce al ancho de los objetos y los lleva a la derecha
+                                   //al aumentar reduce al ancho de los objetos y los lleva a la izquierda
+        esc->camGeneral.wd.h = 2.5;//al disminuir aumenta la profundidad de los objetos y los lleva hacia arriba
+                                   //al aumentar disminuye la profundidad de los objetos y los lleva hacia abajo
+        esc->camGeneral.wd.pmin[0] = -1.25;//al aumentar mueve los objetos a la izquierda
+        esc->camGeneral.wd.pmin[1] = -1.25;//al aumentar mueve los objetos hacia abajo
+
+        updateGL();
+
     }
-}
 
 // Metode per iniciar la dinàmica del joc
 void GLWidget::Play()

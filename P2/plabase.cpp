@@ -13,16 +13,10 @@ PlaBase::PlaBase(point4 v0, point4 v1, point4 v2, point4 v3, color4 cv0, color4 
     vertex_colors[2] = cv2; //yellow
     vertex_colors[3] = cv3; //green
 
-
     make();
     capsa = calculCapsa3D();
 
-    /*double escalap = 2.0 / capsa.p;//para escalar la dimension maxima(profundidad) a 2
-    double escalaa = 1.08821869 / capsa.a;//para que coincida con la mesa de billar
 
-    mat4 m = Scale(escalaa, 1.0, escalap)*Translate(-(capsa.pmin.x + capsa.a/2.), -(capsa.pmin.y + capsa.h/2.), -(capsa.pmin.z + capsa.p/2.));
-    aplicaTG(m);
-    capsa = calculCapsa3D();*/
 }
 
 PlaBase::~PlaBase()
@@ -33,7 +27,7 @@ PlaBase::~PlaBase()
 void PlaBase::make()
 {
     Index = 0;
-    quad( 3, 2, 1, 0 );//llamando en este orden los triangulos se definen counterclok wise
+    quad( 3, 0, 1, 2 );//llamando en este orden los triangulos se definen counterclok wise
     initTextura();
 }
 

@@ -11,10 +11,7 @@ Camera::Camera()
     vs.angy = 0.0;
     vs.angz = 0.0;//con los 3 angulos a cero vup apunta a (0,1,0)
 
-    vp.a = 600;
-    vp.h = 600;
-    vp.pmin[0] = 0;
-    vp.pmin[1] = 0;
+    setViewport(0, 0, 600, 600);
 
     piram.proj = PARALLELA;
     piram.d = 2;
@@ -24,6 +21,13 @@ void Camera::ini(int a, int h, Capsa3D capsaMinima)
 {
     //std::cout<<"Camera::ini"<<std::endl;
     // Calcul del vrp com el centre de la capsa minima contenedora 3D
+
+    wd.a = 2.5;//al disminuir reduce al ancho de los objetos y los lleva a la derecha
+                               //al aumentar reduce al ancho de los objetos y los lleva a la izquierda
+    wd.h = 2.5;//al disminuir aumenta la profundidad de los objetos y los lleva hacia arriba
+                               //al aumentar disminuye la profundidad de los objetos y los lleva hacia abajo
+    wd.pmin[0] = -1.25;//al aumentar mueve los objetos a la izquierda
+    wd.pmin[1] = -1.25;//al aumentar mueve los objetos hacia abajo*/
 
     vs.vrp[0] = capsaMinima.pmin.x + capsaMinima.a/2;
     vs.vrp[1] = capsaMinima.pmin.y + capsaMinima.h/2;
@@ -35,18 +39,6 @@ void Camera::ini(int a, int h, Capsa3D capsaMinima)
     vp.pmin[1] = 0;
 
 }
-
-
-
-void Camera::toGPU(QGLShaderProgram *program)
-{
-    // CODI A MODIFICAR DURANT LA PRACTICA 2
-    this->setProjectionToGPU(program, this->proj);
-    this->setModelViewToGPU(program, this->modView);
-}
-
-
-
 
 // Suposa que les dades d'obs, vrp i vup son correctes en la camera
 // angx, angy, angles de gir del sistema de coords obser
@@ -117,6 +109,13 @@ void Camera::setViewport(int x, int y, int a, int h)
     vp.pmin[1] = y;
     vp.a = a;
     vp.h = h;
+}
+
+void Camera::toGPU(QGLShaderProgram *program)
+{
+    // CODI A MODIFICAR DURANT LA PRACTICA 2
+    this->setProjectionToGPU(program, this->proj);
+    this->setModelViewToGPU(program, this->modView);
 }
 
 void Camera::setModelViewToGPU(QGLShaderProgram *program, mat4 m)
@@ -295,8 +294,8 @@ vec4 Camera::CalculObs(vec4 vrp, double d, double angx, double angy)
     //angx es la latitud y angy la longitud respecto al eje z
 
     v[0] = sin (PI*angy/180.) * cos (PI*angx/180.);
-    v[2] = cos (PI*angy/180.) * cos (PI*angx/180.);
     v[1]= - sin (PI*angx/180.);
+    v[2] = cos (PI*angy/180.) * cos (PI*angx/180.);
 
     norma = sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);
 
@@ -309,11 +308,10 @@ vec4 Camera::CalculObs(vec4 vrp, double d, double angx, double angy)
     obs2[1] = vrp[1] + v[1] *d;
     obs2[2] = vrp[2] + v[2] *d;
     obs2[3] = 1.0;
-
+    //std::cout<<"v[0]: "<<v[0]<<", v[1]: "<<v[1]<<", v[2]: "<<v[2]<<std::endl;
     return(obs2);
 
 }
-
 
 vec3 Camera::CalculVup(double angx, double angy, double angz) // angx, angy, angz, angles de gir del sistema de coords obser
 {
@@ -332,14 +330,15 @@ vec3 Camera::CalculVup(double angx, double angy, double angz) // angx, angy, ang
     v[1] = y*cos( -PI*angz/180.);
     v[2] = 0.0;*/
 
-    double sx = sin(PI*angx/180.); //se supone Rx * Ry * Rz
+    double sx = sin(PI*angx/180.); //se supone Rz * Ry * Rx
     double cx = cos(PI*angx/180.); //ver http://www.songho.ca/opengl/gl_anglestoaxes.html
     double sy = sin(PI*angy/180.);
     double cy = cos(PI*angy/180.);
     double sz = sin(PI*angz/180.);
     double cz = cos(PI*angz/180.);
 
-    v = vec3(-cy * sz, -sx * sy * sz + cx * cz, cx * sy * sz + sx * cz);
+    v = vec3(sx*sy, cx, sx*cy);
+    //v = vec3(-sz*cx+cz*sy*sx, cz*cx+sz*sy*sx, cy*sx);
     return(v);
 
 }
@@ -361,4 +360,17 @@ void Camera::VertexCapsa3D(Capsa3D capsaMinima, vec4 vaux[8])
     vaux[6] = vec4(ptfi[0], ptfi[1], capsaMinima.pmin[2], 1.0);
     vaux[7] = vec4(ptfi[0], ptfi[1], ptfi[2], 1.0);
 }
+
+
+void Camera::PrintCamera(){
+
+    std::cout<<"\nangx: "<<vs.angx<<", angy: "<<vs.angy<<", angz: "<<vs.angz<<std::endl;
+    std::cout<<"vrp[0]: "<<vs.vrp[0]<<", vrp[1]: "<<vs.vrp[1]<<", vrp[2]: "<<vs.vrp[2]<<std::endl;
+    std::cout<<"obs[0]: "<<vs.obs[0]<<", obs[1]: "<<vs.obs[1]<<", obs[2]: "<<vs.obs[2]<<std::endl;
+    std::cout<<"vup[0]: "<<vs.vup[0]<<", vup[1]: "<<vs.vup[1]<<", vup[2]: "<<vs.vup[2]<<std::endl;
+    std::cout<<"d: "<<piram.d<<", dant: "<<piram.dant<<", dpost: "<<piram.dpost<<std::endl;
+    std::cout<<"wd.pmin[0]: "<<wd.pmin[0]<<", wd.pmin[1]: "<<wd.pmin[1]<<", wd.a: "<<wd.a<<", wd.h: "<<wd.h<<std::endl;
+    std::cout<<"vp.pmin[0]: "<<vp.pmin[0]<<", vp.pmin[1]: "<<vp.pmin[1]<<", vp.a: "<<vp.a<<", vp.h: "<<vp.h<<std::endl;
+}
+
 

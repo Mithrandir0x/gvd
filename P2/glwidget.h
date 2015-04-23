@@ -32,8 +32,11 @@ public:
     void setYRotation(int angle);
     void setZRotation(int angle);
 
+    bool cameraActual = true; //true para camara general
+
 public slots:
     void newPlaBase();
+    PlaBase* newPlaBs();
     void newObj(QString fichero);
     void newBola();
     void newConjuntBoles();
@@ -50,14 +53,16 @@ protected:
     void mouseMoveEvent(QMouseEvent *event);
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
+    void Zoom (double inOut);
+    void Pan(double dx, double dy);
 
 
 private:
     Escena *esc;
 
-    int xRot;
-    int yRot;
-    int zRot;
+    double xRot;
+    double yRot;
+    double zRot;
     float  a, p, h;
 
     QColor clearColor;
@@ -72,9 +77,9 @@ private:
     mat4 m220 = Scale(2.0/20.0, 2.0/20.0, 2.0/20.0);
     vec4 ejex =vec4(1.0, 0.0, 0.0, 0.0);
     vec4 ejez =vec4(0.0, 0.0, 1.0, 0.0);
-    int xRotOld;
-    int yRotOld;
-    int zRotOld;
+    double xRotOld;
+    double yRotOld;
+    double zRotOld;
     Capsa3D cb;
     Capsa3D cT;
     vector<Capsa3D> listaCapsasConjuntBoles;

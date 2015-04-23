@@ -7,7 +7,7 @@
 QT       += core gui opengl
 QT       += widgets
 
-TARGET = BillarPractica1
+TARGET = BillarPractica2
 TEMPLATE = app
 
 
@@ -48,14 +48,6 @@ OTHER_FILES += \
 
 RESOURCES += \
     resources.qrc
-
-macx {
-    copyfiles.commands += cp -r $${PWD}/resources ./../build-BillarPractica1-Desktop_Qt_5_4_1_clang_64bit-Debug/BillarPractica1.app/Contents $$escape_expand(\n\t)
-    copyfiles.commands += cp -r $${PWD}/*.glsl ./../build-BillarPractica1-Desktop_Qt_5_4_1_clang_64bit-Debug/BillarPractica1.app/Contents
-}
-
-QMAKE_EXTRA_TARGETS += copyfiles
-POST_TARGETDEPS += copyfiles
 
 
 

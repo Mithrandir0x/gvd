@@ -17,7 +17,6 @@ Escena::Escena(int vpa, int vph)
 
 Escena::~Escena()
 {
-    // Cal anar fent delete dels objectes que se'l hagi fet new
     if (taulaBillar!=NULL)
        delete this->taulaBillar;
     if (plaBase!=NULL)
@@ -34,18 +33,18 @@ void Escena::iniCamera(bool camGen, int a, int h){
        h = 600; //al usarse Camera::AjustaAspectRatioWd no queda bien
        camGeneral.ini(a, h, capsaMinima);
        camGeneral.vs.obs = vec4(0.0, 20.0, 0.0, 1.0);
-       camGeneral.piram.d = 2.0;
+       setDCamera(true, 20.0);
        camGeneral.piram.dant = 10.0;
        camGeneral.piram.dpost = 30.0;
 
-       camGeneral.vs.vrp = vec4(0.0, 0.0, 0.0, 1.0);
-                                  //ver Camera::CalculVup
-       camGeneral.vs.angx = -90.0;//un giro de +90 apunta vup a z+
-       camGeneral.vs.angy = 0.0;//un giro de +90 apunta el vetor forward de la camara a -x
-       camGeneral.vs.angz = 0.0;//un giro de +90 apunta vup a x-
+       setVRPCamera(true, (0.0, 0.0, 0.0, 1.0));
+       //ver Camera::CalculVup
+       //un giro de +90 apunta vup a z+
+       //un giro de +90 apunta el vector forward de la camara a -x
+       //un giro de +90 apunta vup a x-
+       setAnglesCamera(true, -90.0, 0.0, 0.0);
        vec3 vu = camGeneral.CalculVup(camGeneral.vs.angx, camGeneral.vs.angy, camGeneral.vs.angz);
        camGeneral.vs.vup = vec4(vu[0], vu[1], vu[2], 0.0);
-       //camGeneral.vs.vup = vec4(0.0, 0.0, -1.0, 0.0);//con 0,1,0 la camara apunta a -z y no se ve
 
        camGeneral.CalculaMatriuModelView();
        camGeneral.CalculWindow(capsaMinima);
@@ -53,7 +52,6 @@ void Escena::iniCamera(bool camGen, int a, int h){
    }else{
        //inicializar camera en primera persona
    }
-
 }
 
 void Escena::setAnglesCamera(bool camGen, float angX, float angY, float angZ){
@@ -61,23 +59,12 @@ void Escena::setAnglesCamera(bool camGen, float angX, float angY, float angZ){
         camGeneral.vs.angx = angX;
         camGeneral.vs.angy = angY;
         camGeneral.vs.angz = angZ;
-        vec3 vu = camGeneral.CalculVup(camGeneral.vs.angx, camGeneral.vs.angy, camGeneral.vs.angz);
-        camGeneral.vs.vup = vec4(vu[0], vu[1], vu[2], 0.0);
-        camGeneral.CalculaMatriuModelView();
-        CapsaMinCont3DEscena();
-        camGeneral.CalculWindow(capsaMinima);
-        camGeneral.CalculaMatriuProjection();
-
     }
 }
 
 void Escena::setVRPCamera(bool camGen, point4 vrp){
     if(camGen == true){
         camGeneral.vs.vrp = vrp;
-        camGeneral.CalculaMatriuModelView();
-        CapsaMinCont3DEscena();
-        camGeneral.CalculWindow(capsaMinima);
-        camGeneral.CalculaMatriuProjection();
     }
 }
 
@@ -98,9 +85,6 @@ void Escena::setWindowCamera(bool camGen, bool retallat, Capsa2D window){
 void Escena::setDCamera(bool camGen, float d){
     if(camGen == true){
         camGeneral.piram.d = d;
-        CapsaMinCont3DEscena();
-        camGeneral.CalculWindow(capsaMinima);
-        camGeneral.CalculaMatriuProjection();
     }
 }
 
@@ -122,6 +106,7 @@ void Escena::addObjecte(Objecte *obj) {
 
 void Escena::CapsaMinCont3DEscena()
 {
+    // Metode a implementar
     Capsa3D c;
     vec3 pmax;
 
@@ -229,11 +214,12 @@ void Escena::tuneCamera(bool retallat, bool centrat, QGLShaderProgram *program){
     camGeneral.vs.vup = vec4(0.0, 0.0, -1.0, 0.0);
 
     camGeneral.piram.proj = PARALLELA;
-    camGeneral.piram.d = 2.0;
+    camGeneral.piram.d = 20.0;
     camGeneral.piram.dant = 10.0;
     camGeneral.piram.dpost = 30.0;
 
     camGeneral.CalculaMatriuModelView();
+
     camGeneral.CalculWindow(capsaMinima);
 
     /*camGeneral.wd.a = 3.45;//al disminuir reduce al ancho de los objetos y los lleva a la derecha
