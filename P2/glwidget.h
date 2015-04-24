@@ -32,7 +32,7 @@ public:
     void setYRotation(int angle);
     void setZRotation(int angle);
 
-    bool cameraActual = true; //true para camara general
+    bool cameraActual; //true para camara general
 
 public slots:
     void newPlaBase();
@@ -75,13 +75,12 @@ private:
     // Programa de la GPU
     QGLShaderProgram *program;
     mat4 m220 = Scale(2.0/20.0, 2.0/20.0, 2.0/20.0);
-    vec4 ejex =vec4(1.0, 0.0, 0.0, 0.0);
-    vec4 ejez =vec4(0.0, 0.0, 1.0, 0.0);
     double xRotOld;
     double yRotOld;
     double zRotOld;
     Capsa3D cb;
     Capsa3D cT;
+    vec3 ctrB;
     vector<Capsa3D> listaCapsasConjuntBoles;
 
     //  Metode per a carregar de fitxers el vertex i el fragment shader

@@ -15,8 +15,6 @@ PlaBase::PlaBase(point4 v0, point4 v1, point4 v2, point4 v3, color4 cv0, color4 
 
     make();
     capsa = calculCapsa3D();
-
-
 }
 
 PlaBase::~PlaBase()
@@ -51,7 +49,6 @@ void PlaBase::initTextura()
      // Carregar la textura
      glActiveTexture(GL_TEXTURE0);
      texture = new QOpenGLTexture(QImage("://resources/Fabric_Green_L.jpg"));
-     //texture = new QOpenGLTexture(QImage("://resources/Bola9.jpg"));
      texture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
      texture->setMagnificationFilter(QOpenGLTexture::Linear);
 

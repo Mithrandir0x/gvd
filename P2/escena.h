@@ -20,6 +20,8 @@
 #include <camera.h>
 #include <math.h>
 
+#include <QKeyEvent>
+
 using namespace std;
 
 class Escena
@@ -34,7 +36,7 @@ public:
     void aplicaTGCentrat(mat4 m);
     void reset();
 
-    void draw();
+    void draw(bool cameraActual);
     void CapsaMinCont3DEscena();
 
     void iniCamera(bool camGen, int vpa, int vph);
@@ -42,7 +44,9 @@ public:
     void setVRPCamera(bool camGeneral, point4 vrp);
     void setWindowCamera(bool camGeneral, bool retallat, Capsa2D window);
     void setDCamera(bool camGeneral, float d);
-    void tuneCamera(bool retallat, bool centrat, QGLShaderProgram *program);
+    void cam2GPU(bool cameraActual);
+    void computeCollisions(Capsa3D cb, Capsa3D cT, vec3 ctrB, vector<Capsa3D> listaCapsasConjuntBoles, QKeyEvent *event);
+    void actualizaMatr(bool cameraActual);
 
     QGLShaderProgram *pr;
     // Capsa contenedora de l'escena
@@ -53,7 +57,12 @@ public:
     Bola *bolaBlanca = NULL;
     ConjuntBoles *conjuntBoles;
     Camera camGeneral;
+    Camera camFirstP;
     vector<Objecte*> listaObjectes;
+    double dzP = 0.01;
+    double dzN = -0.01;
+    double dxP = 0.01;
+    double dxN = -0.01;
 };
 
 #endif // ESCENA_H

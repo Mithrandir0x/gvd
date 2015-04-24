@@ -5,7 +5,7 @@ Camera::Camera()
     //std::cout<<"Camera::Camera"<<std::endl;
     vs.vrp = vec4(0.0, 0.0, 0.0, 1.0);
     vs.vup = vec4(0.0, 1.0, 0.0, 0.0);
-    vs.obs = vec4(0.0, 0.0, 200.0, 1.0);
+    vs.obs = vec4(0.0, 20.0, 0.0, 1.0);
 
     vs.angx = 0.0;
     vs.angy = 0.0;
@@ -19,16 +19,6 @@ Camera::Camera()
 
 void Camera::ini(int a, int h, Capsa3D capsaMinima)
 {
-    //std::cout<<"Camera::ini"<<std::endl;
-    // Calcul del vrp com el centre de la capsa minima contenedora 3D
-
-    wd.a = 2.5;//al disminuir reduce al ancho de los objetos y los lleva a la derecha
-                               //al aumentar reduce al ancho de los objetos y los lleva a la izquierda
-    wd.h = 2.5;//al disminuir aumenta la profundidad de los objetos y los lleva hacia arriba
-                               //al aumentar disminuye la profundidad de los objetos y los lleva hacia abajo
-    wd.pmin[0] = -1.25;//al aumentar mueve los objetos a la izquierda
-    wd.pmin[1] = -1.25;//al aumentar mueve los objetos hacia abajo*/
-
     vs.vrp[0] = capsaMinima.pmin.x + capsaMinima.a/2;
     vs.vrp[1] = capsaMinima.pmin.y + capsaMinima.h/2;
     vs.vrp[2] = capsaMinima.pmin.z + capsaMinima.p/2;
@@ -44,7 +34,6 @@ void Camera::ini(int a, int h, Capsa3D capsaMinima)
 // angx, angy, angles de gir del sistema de coords obser
 void Camera::CalculaMatriuModelView()
 {
-    // CODI A MODIFICAR DURANT LA PRACTICA 2
     modView = identity();
 
     vec4 eye = vs.obs; //se supone correcto
@@ -56,7 +45,7 @@ void Camera::CalculaMatriuModelView()
 
 void Camera::CalculaMatriuProjection()
 {
-    // CODI A MODIFICAR DURANT LA PRACTICA 2
+    //se suopne que wd, dant y dpost son correctos
     proj = identity();
 
     if(piram.proj == PARALLELA){
@@ -75,15 +64,7 @@ void Camera::CalculWindow( Capsa3D c)
     mat4 MDP;
     vec4  vaux[8], vauxMod[8];
 
-    //wd.pmin.x = -1;
-    //wd.pmin.y = -1;
-
-    //wd.a = 2;
-    //wd.h = 2;
-
-    //vec3 up =  CalculVup(vs.angx,vs.angy,vs.angz);
-    //camGeneral.vs.vup = vec4(vu[0], vu[1], vu[2], 0.0);
-    //modView = LookAt(vs.obs, vs.vrp, up);
+    modView = LookAt(vs.obs, vs.vrp, vs.vup);
 
     if (piram.proj==PERSPECTIVA) {
         CreaMatDp(MDP); // crea la matriu de deformacio perspectiva
@@ -97,10 +78,7 @@ void Camera::CalculWindow( Capsa3D c)
     }
 
     wd = CapsaMinCont2DXYVert(vauxMod, 8);
-    //AmpliaWindow(0.3);      //0.3 aumenta el tamño un 30% (reduce el tamaño)
     AjustaAspectRatioWd();//amplia el window per tal que el seu aspect ratio sigui igual al del viewport
-
-
 }
 
 void Camera::setViewport(int x, int y, int a, int h)
@@ -135,7 +113,8 @@ void Camera::setProjectionToGPU(QGLShaderProgram *program, mat4 p)
 
 void  Camera::AmpliaWindow(double r)
 {
-    // Pre r = 1.5 => amplia a 150%
+    // Pre r = 1.5 => amplia a y h 150% equivalente a un zoom out
+    //para hacer zoom in usar r negativo
     double na, da;
 
     na  = wd.a * (1.0 + r);
@@ -229,7 +208,8 @@ void    Camera::AjustaAspectRatioWd()
     arvp = ((double) vp.h)/((double)(vp.a));
     arwd = wd.h/wd.a;
     if(arwd > arvp) {
-        wd.a = wd.h/arvp;
+        //wd.a = wd.h/arvp;
+        wd.a = wd.h * 1.008;
     }
     else if (arwd <arvp) {
         wd.h = wd.a *arvp;
@@ -250,7 +230,7 @@ void Camera::CreaMatDp(mat4 &MDP)
 }
 
 
-
+//calcula el wd
 Capsa2D  Camera::CapsaMinCont2DXYVert( vec4 *v, int nv)
 {
     Capsa2D c;
@@ -270,8 +250,8 @@ Capsa2D  Camera::CapsaMinCont2DXYVert( vec4 *v, int nv)
         pmax[1] = v[i][1];
     }
 
-    c.a = pmax[0]-pmin[0]+1;
-    c.h = pmax[1]-pmin[1]+1;
+    c.a = pmax[0]-pmin[0] + 0.5 ;
+    c.h = pmax[1]-pmin[1] + 0.5;
     c.pmin[0] = -c.a/2.0;
     c.pmin[1] = -c.h/2.0;
     return c;
@@ -308,7 +288,6 @@ vec4 Camera::CalculObs(vec4 vrp, double d, double angx, double angy)
     obs2[1] = vrp[1] + v[1] *d;
     obs2[2] = vrp[2] + v[2] *d;
     obs2[3] = 1.0;
-    //std::cout<<"v[0]: "<<v[0]<<", v[1]: "<<v[1]<<", v[2]: "<<v[2]<<std::endl;
     return(obs2);
 
 }
@@ -337,8 +316,9 @@ vec3 Camera::CalculVup(double angx, double angy, double angz) // angx, angy, ang
     double sz = sin(PI*angz/180.);
     double cz = cos(PI*angz/180.);
 
-    v = vec3(sx*sy, cx, sx*cy);
-    //v = vec3(-sz*cx+cz*sy*sx, cz*cx+sz*sy*sx, cy*sx);
+    //v = vec3(-sz*cx+cz*sy*sx, cz*cx+sz*sy*sx, cy*sx);//formula completa
+    v = vec3(sx*sy, cx, sx*cy);//suponiendo angz = 0
+
     return(v);
 
 }

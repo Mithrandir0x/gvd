@@ -13,6 +13,7 @@ Escena::Escena(int vpa, int vph)
     conjuntBoles = NULL;
 
     iniCamera(true, vpa, vph);//crea la camera general. a y h del vp obtenidos en glWidget
+    iniCamera(false, vpa, vph);//crea la camera en primera persona.
 }
 
 Escena::~Escena()
@@ -28,63 +29,99 @@ Escena::~Escena()
 }
 
 void Escena::iniCamera(bool camGen, int a, int h){
-   if(camGen == true){
-       a = 600;//inicialmente 640x480 y
-       h = 600; //al usarse Camera::AjustaAspectRatioWd no queda bien
+    if(camGen == true){
+       camGeneral.piram.proj = PARALLELA;
        camGeneral.ini(a, h, capsaMinima);
-       camGeneral.vs.obs = vec4(0.0, 20.0, 0.0, 1.0);
+
+       camGeneral.vs.obs = vec4(0.0, 20.0, 0.0, 1.0);     
+       point4 vrp = point4(0.0, 0.0, 0.0, 1.0);
+       setVRPCamera(true, vrp);
        setDCamera(true, 20.0);
+       setAnglesCamera(true, -90.0, 0.0, 0.0);
+
+       camGeneral.CalculWindow(capsaMinima);       
        camGeneral.piram.dant = 10.0;
        camGeneral.piram.dpost = 30.0;
-
-       setVRPCamera(true, (0.0, 0.0, 0.0, 1.0));
-       //ver Camera::CalculVup
-       //un giro de +90 apunta vup a z+
-       //un giro de +90 apunta el vector forward de la camara a -x
-       //un giro de +90 apunta vup a x-
-       setAnglesCamera(true, -90.0, 0.0, 0.0);
-       vec3 vu = camGeneral.CalculVup(camGeneral.vs.angx, camGeneral.vs.angy, camGeneral.vs.angz);
-       camGeneral.vs.vup = vec4(vu[0], vu[1], vu[2], 0.0);
-
-       camGeneral.CalculaMatriuModelView();
-       camGeneral.CalculWindow(capsaMinima);
        camGeneral.CalculaMatriuProjection();
    }else{
-       //inicializar camera en primera persona
+       camFirstP.piram.proj = PERSPECTIVA;
+       camFirstP.ini(a, h, capsaMinima);
+
+       camFirstP.vs.vup = vec4(0.0, 1.0, 0.0, 0.0);
+       camFirstP.vs.obs = vec4(0.0, 0.0307474, 0.6, 1.0);  
+       point4 vrp = point4(0.0, 0.0307474, 0.5, 1.0);
+       setVRPCamera(false, vrp);  
+       setDCamera(false, 1.3);
+
+       camFirstP.wd.pmin.x = -0.1255;
+       camFirstP.wd.pmin.y = -0.0891265;
+       camFirstP.wd.a = 0.251;
+       camFirstP.wd.h = 0.188253;
+       camFirstP.piram.dant = 0.54;
+       camFirstP.piram.dpost= 1.7;
+       camFirstP.CalculaMatriuProjection();
    }
 }
+
 
 void Escena::setAnglesCamera(bool camGen, float angX, float angY, float angZ){
     if(camGen == true){
         camGeneral.vs.angx = angX;
         camGeneral.vs.angy = angY;
         camGeneral.vs.angz = angZ;
+        vec3 vu = camGeneral.CalculVup(camGeneral.vs.angx, camGeneral.vs.angy, camGeneral.vs.angz);
+        camGeneral.vs.vup = vec4(vu[0], vu[1], vu[2], 0.0);
+        camGeneral.vs.obs = camGeneral.CalculObs(camGeneral.vs.vrp, camGeneral.piram.d, camGeneral.vs.angx, camGeneral.vs.angy);
+        camGeneral.CalculaMatriuModelView();
+    }else{
+        camFirstP.vs.angx = angX;
+        camFirstP.vs.angy = angY;
+        camFirstP.vs.angz = angZ;
+        vec3 vu = camFirstP.CalculVup(camFirstP.vs.angx, camFirstP.vs.angy, camFirstP.vs.angz);
+        camFirstP.vs.vup = vec4(vu[0], vu[1], vu[2], 0.0);
+        camFirstP.vs.obs = camFirstP.CalculObs(camFirstP.vs.vrp,camFirstP.piram.d,camFirstP.vs.angx,camFirstP.vs.angy);
+        camFirstP.CalculaMatriuModelView();
     }
+
+
 }
 
 void Escena::setVRPCamera(bool camGen, point4 vrp){
     if(camGen == true){
-        camGeneral.vs.vrp = vrp;
-    }
+         camGeneral.vs.vrp = vrp;
+         camGeneral.CalculaMatriuModelView();
+     }else{
+         camFirstP.vs.vrp = vrp;
+         camFirstP.CalculaMatriuModelView();
+     }
 }
 
 void Escena::setWindowCamera(bool camGen, bool retallat, Capsa2D window){
     if(camGen == true){
         camGeneral.wd = window;
-        camGeneral.CalculAngleOberturaHoritzontal();
-        camGeneral.CalculAngleOberturaVertical();
         if(retallat == true){
             camGeneral.CalculWindowAmbRetallat();
         }
-        //camGeneral.AmpliaWindow(0.15);   //0.15 aumenta tamaño window un 15% (disminuye imagen)
         camGeneral.AjustaAspectRatioWd();//amplia el window per tal que el seu aspect ratio sigui igual al del viewport
         camGeneral.CalculaMatriuProjection();
+    }else{
+        camFirstP.wd = window;
+        camFirstP.CalculAngleOberturaHoritzontal();
+        camFirstP.CalculAngleOberturaVertical();
+        if(retallat == true){
+            camFirstP.CalculWindowAmbRetallat();
+        }
+        camFirstP.AjustaAspectRatioWd();//amplia el window per tal que el seu aspect ratio sigui igual al del viewport
+        camFirstP.CalculaMatriuProjection();
     }
 }
 
 void Escena::setDCamera(bool camGen, float d){
     if(camGen == true){
         camGeneral.piram.d = d;
+    }else{
+        camFirstP.piram.d = d;
+        camFirstP.CalculaMatriuProjection();
     }
 }
 
@@ -134,8 +171,6 @@ void Escena::CapsaMinCont3DEscena()
 
 void Escena::aplicaTG(mat4 m) {
 
-    // Metode a modificar
-
     if (taulaBillar!=NULL)
         taulaBillar->aplicaTG(m);
     if (plaBase!=NULL)
@@ -163,25 +198,91 @@ void Escena::aplicaTGCentrat(mat4 m) {
     this->aplicaTG(maux);
 }
 
-void Escena::draw() {
+void Escena::computeCollisions(Capsa3D cb, Capsa3D cT, vec3 ctrB, vector<Capsa3D> listaCapsasConjuntBoles, QKeyEvent *event){
+    double deltaDesplacament = 0.01;
+    dzP=deltaDesplacament, dzN=-deltaDesplacament, dxP=deltaDesplacament, dxN=-deltaDesplacament;
+
+    if(cT.pmin.z - cb.pmin.z > - deltaDesplacament)//si bola blanca a distancia <deltaDesplacament ->abs(dzN) < deltaDesplacament en borde de mesa con z negativos
+        dzN = cT.pmin.z - cb.pmin.z;
+    if(cT.pmin.z + cT.p - (cb.pmin.z + cb.p) < deltaDesplacament)//si bola blanca a distancia <deltaDesplacament ->abs(dzP) < deltaDesplacament en borde de mesa con z positivos
+        dzP = cT.pmin.z + cT.p - (cb.pmin.z + cb.p);
+    if(cT.pmin.x - cb.pmin.x > -deltaDesplacament)//si bola blanca a distancia <deltaDesplacament ->abs(dxN) < deltaDesplacament en borde de mesa con x negativos
+        dxN = cT.pmin.x - cb.pmin.x;
+    if(cT.pmin.x + cT.a - (cb.pmin.x + cb.a) < deltaDesplacament)//si bola blanca a distancia <deltaDesplacament ->abs(dxN) < deltaDesplacament en borde de mesa con x positivos
+        dxP = cT.pmin.x + cT.a - (cb.pmin.x + cb.a);   
+
+    for (int i=0; i<conjuntBoles->listaConjuntBoles.size(); i++) {//comparamos bola blanca con resto de bolas
+        if(abs(ctrB.x - (listaCapsasConjuntBoles[i].pmin.x+listaCapsasConjuntBoles[i].a/2.)) < 0.0615
+                && abs(ctrB.z  - (listaCapsasConjuntBoles[i].pmin.z+listaCapsasConjuntBoles[i].p/2.)) < 0.0615){
+
+            if(event->key() == Qt::Key_Up){
+                if(ctrB.z - (listaCapsasConjuntBoles[i].pmin.z + listaCapsasConjuntBoles[i].p/2.)<= 0.0){//si bola blanca con menor z que la i no hay limitacion
+                    dzN = -deltaDesplacament;
+                }else{
+                    if(listaCapsasConjuntBoles[i].pmin.z + listaCapsasConjuntBoles[i].p - cb.pmin.z > -deltaDesplacament){//si distancia menor que deltaDesplacament hay limitacion
+                        dzN = listaCapsasConjuntBoles[i].pmin.z + listaCapsasConjuntBoles[i].p - cb.pmin.z;
+                        if(dzN > -0.002)dzN = 0.0;
+                    }
+                }
+            }
+
+            if(event->key() == Qt::Key_Down){
+                if(ctrB.z- (listaCapsasConjuntBoles[i].pmin.z + listaCapsasConjuntBoles[i].p/2.) >= 0.0){//si bola blanca con mayor z que la i no hay limitacion
+                    dzP = deltaDesplacament;
+                }else{
+                    if(listaCapsasConjuntBoles[i].pmin.z - (cb.pmin.z + cb.p) < deltaDesplacament ){//si distancia menor que deltaDesplacament hay limitacion
+                        dzP = listaCapsasConjuntBoles[i].pmin.z - (cb.pmin.z + cb.p);
+                        if(dzP < 0.002)dzP = 0.0;
+                    }
+                }
+            }
+
+            if(event->key() == Qt::Key_Left){
+                if(ctrB.x- (listaCapsasConjuntBoles[i].pmin.x + listaCapsasConjuntBoles[i].a/2.)<= 0.0){//si bola blanca a la izquierda no hay limitacion
+                    dxN = -deltaDesplacament;
+                }else{
+                    if(listaCapsasConjuntBoles[i].pmin.x + listaCapsasConjuntBoles[i].a - cb.pmin.x > -deltaDesplacament){//si distancia menor que deltaDesplacament hay limitacion
+                        dxN = listaCapsasConjuntBoles[i].pmin.x + listaCapsasConjuntBoles[i].a - cb.pmin.x;
+                        if(dxN > -0.002)dxN = 0.0;
+                    }
+                }
+            }
+
+            if(event->key() == Qt::Key_Right){
+                if(ctrB.x- (listaCapsasConjuntBoles[i].pmin.x + listaCapsasConjuntBoles[i].a/2.) >= 0.0){//si bola blanca a la derecha no hay limitacion
+                    dxP = deltaDesplacament;
+                }else{
+                    if(listaCapsasConjuntBoles[i].pmin.x - (cb.pmin.x + cb.a) < deltaDesplacament ){//si distancia menor que deltaDesplacament hay limitacion
+                        dxP = listaCapsasConjuntBoles[i].pmin.x - (cb.pmin.x + cb.a);
+                        if(dxP < 0.002)dxP = 0.0;
+                    }
+                }
+            }
+
+        }
+    }
+}
+
+
+void Escena::draw(bool cameraActual) {
 
     if (taulaBillar!=NULL){
         taulaBillar->toGPU(pr);
-        camGeneral.toGPU(pr);
+        cam2GPU(cameraActual);
         taulaBillar->draw();
     }
 
     if (plaBase!=NULL){
         plaBase->texture->bind(0);
         plaBase->toGPU(pr);
-        camGeneral.toGPU(pr);
+        cam2GPU(cameraActual);
         plaBase->draw();
     }
 
     if (bolaBlanca!=NULL){
         bolaBlanca->texture->bind(0);
         bolaBlanca->toGPU(pr);
-        camGeneral.toGPU(pr);
+        cam2GPU(cameraActual);
         bolaBlanca->draw();
     }
 
@@ -189,52 +290,32 @@ void Escena::draw() {
         for (int i=0; i<conjuntBoles->listaConjuntBoles.size(); i++) {
             conjuntBoles->listaConjuntBoles[i]->texture->bind(0);
             conjuntBoles->listaConjuntBoles[i]->toGPU(pr);
-            camGeneral.toGPU(pr);
+            cam2GPU(cameraActual);
             conjuntBoles->listaConjuntBoles[i]->draw();
             }
     }
 
 }
 
-void Escena::tuneCamera(bool retallat, bool centrat, QGLShaderProgram *program){
-    double r;
-
-
-    camGeneral.vs.angx = 0.0;
-    camGeneral.vs.angy = 0.0;
-    camGeneral.vs.angz = 0.0;
-
-    CapsaMinCont3DEscena();
-    camGeneral.vs.vrp[0] = capsaMinima.pmin[0]+(capsaMinima.a/2.0);
-    camGeneral.vs.vrp[1] = capsaMinima.pmin[1]+(capsaMinima.h/2.0);
-    camGeneral.vs.vrp[2] = capsaMinima.pmin[2]+(capsaMinima.p/2.0);
-
-    //camGeneral.vs.vrp = vec4(0.0, 0.0, 0.0, 1.0);
-    camGeneral.vs.obs = vec4(0.0, 20.0, 0.0, 1.0);
-    camGeneral.vs.vup = vec4(0.0, 0.0, -1.0, 0.0);
-
-    camGeneral.piram.proj = PARALLELA;
-    camGeneral.piram.d = 20.0;
-    camGeneral.piram.dant = 10.0;
-    camGeneral.piram.dpost = 30.0;
-
-    camGeneral.CalculaMatriuModelView();
-
-    camGeneral.CalculWindow(capsaMinima);
-
-    /*camGeneral.wd.a = 3.45;//al disminuir reduce al ancho de los objetos y los lleva a la derecha
-                           //al aumentar reduce al ancho de los objetos y los lleva a la izquierda
-    camGeneral.wd.h = 3.45;//al disminuir aumenta la profundidad de los objetos y los lleva hacia arriba
-                           //al aumentar disminuye la profundidad de los objetos y los lleva hacia abajo
-    camGeneral.wd.pmin[0] = -1.725;//al aumentar mueve los objetos a la izquierda
-    camGeneral.wd.pmin[1] = -1.725;//al aumentar mueve los objetos hacia abajo*/
-
-    camGeneral.CalculaMatriuProjection();
-
-    /*camGeneral.vp.a = 640;//al aumentar, aumenta la profundidad de la mesa
-    camGeneral.vp.h = 640;//al aumentar, aumenta la anchura de la mesa
-    camGeneral.vp.pmin[0] = 0;//no parece afectar la presentacion
-    camGeneral.vp.pmin[1] = 0;//no parece afectar la presentacion*/
+void Escena::cam2GPU(bool cameraActual){
+    if(cameraActual == true){
+        camGeneral.toGPU(pr);
+    }else{
+        camFirstP.toGPU(pr);
+    }
 }
+
+void Escena::actualizaMatr(bool cameraActual){
+    Capsa3D c;
+
+    if(cameraActual == true){
+        //camGeneral.CalculaMatriuModelView();
+        camGeneral.CalculaMatriuProjection();
+    }else{
+        camFirstP.CalculaMatriuModelView();
+        camFirstP.CalculaMatriuProjection();
+    }
+}
+
 
 
