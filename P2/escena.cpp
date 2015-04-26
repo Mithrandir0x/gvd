@@ -40,7 +40,7 @@ void Escena::iniCamera(bool camGen, int a, int h){
        setAnglesCamera(true, -90.0, 0.0, 0.0);
 
        camGeneral.CalculWindow(capsaMinima);       
-       camGeneral.piram.dant = 10.0;
+       camGeneral.piram.dant = 0.1;
        camGeneral.piram.dpost = 30.0;
        camGeneral.CalculaMatriuProjection();
    }else{

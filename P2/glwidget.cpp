@@ -30,7 +30,6 @@ GLWidget::GLWidget(QWidget *parent)
 
     program = 0;
     moviment = false;
-
 }
 
 
@@ -153,10 +152,10 @@ void GLWidget::paintGL()
    esc->draw(cameraActual);
 
    if(cameraActual == true){
-       std::cout<<"camGeneral"<<std::endl;
+       std::cout<<"\ncamGeneral";
        esc->camGeneral.PrintCamera();
    }else{
-       std::cout<<"camFirstP"<<std::endl;
+       std::cout<<"\ncamFirstP";
        esc->camFirstP.PrintCamera();
    }
 }
@@ -209,6 +208,10 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 {
     mat4 m;
     double angx;
+    cb = esc->bolaBlanca->calculCapsa3D();
+    ctrB.x = cb.pmin.x + cb.a/2.0;
+    ctrB.y = cb.pmin.y + cb.h/2.0;
+    ctrB.z = cb.pmin.z + cb.p/2.0;
 
     if (esc->bolaBlanca!=NULL && esc->plaBase!=NULL && esc->conjuntBoles!=NULL){
         esc->computeCollisions(cb, cT, ctrB, listaCapsasConjuntBoles, event);
@@ -217,46 +220,46 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
        switch ( event->key() )
        {
        case Qt::Key_B:
-                  cameraActual = false;//camFirstP
+                  z = 0.45;
+                  timer = new QTimer(this);
+                  connect(timer, SIGNAL(timeout()),this, SLOT(transition2First()));
+                  timer->start(10);
                   break;
        case Qt::Key_T:
+                  z = 0.6;
+                  timer1 = new QTimer(this);
+                  connect(timer1, SIGNAL(timeout()),this, SLOT(transition2General()));
                   cameraActual = true;//camGen
+                  timer1->start(10);
+
                   break;
        case Qt::Key_Up:
                   if (event->modifiers() & Qt::AltModifier){
                       Pan(0, 0.01);
                       break;
                    }
-                  m = Translate(0.0,  0.0, esc->dzN);
-                  cb.pmin.z += esc->dzN;
-                  ctrB.z += esc->dzN;
+                  m = Translate(0.0,  0.0, esc->dzN) * Translate(ctrB.x,  ctrB.y, ctrB.z) * RotateX((esc->dzN*180.0)/(0.0307474*M_PI)) * Translate(-ctrB.x,  -ctrB.y, -ctrB.z );
            break;
        case Qt::Key_Down:
             if (event->modifiers() & Qt::AltModifier){
               Pan(0, -0.01);
               break;
             }
-            m = Translate(0.0,  0.0, esc->dzP);
-            cb.pmin.z += esc->dzP;
-            ctrB.z += esc->dzP;
+            m = Translate(0.0,  0.0, esc->dzP) * Translate(ctrB.x,  ctrB.y, ctrB.z) * RotateX((esc->dzP*180.0)/(0.0307474*M_PI)) * Translate(-ctrB.x,  -ctrB.y, -ctrB.z );
             break;
        case Qt::Key_Left:
            if (event->modifiers() & Qt::AltModifier){
               Pan(-0.01, 0);
               break;
            }
-           m = Translate(esc->dxN,  0.0, 0.0);
-           cb.pmin.x += esc->dxN;
-           ctrB.x += esc->dxN;
+           m = Translate(esc->dxN,  0.0, 0.0) * Translate(ctrB.x,  ctrB.y, ctrB.z) * RotateZ(-(esc->dxN*180.0)/(0.0307474*M_PI)) * Translate(-ctrB.x,  -ctrB.y, -ctrB.z );
            break;
        case Qt::Key_Right:
           if (event->modifiers() & Qt::AltModifier){
               Pan(0.01, 0);
               break;
            }
-           m = Translate(esc->dxP,  0.0, 0.0);
-           cb.pmin.x += esc->dxP;
-           ctrB.x += esc->dxP;
+           m = Translate(esc->dxP,  0.0, 0.0) * Translate(ctrB.x,  ctrB.y, ctrB.z) * RotateZ(-(esc->dxP*180.0)/(0.0307474*M_PI)) * Translate(-ctrB.x,  -ctrB.y, -ctrB.z );
            break;
        case Qt::Key_Plus:
            Zoom(-0.05);
@@ -298,7 +301,52 @@ void GLWidget::Pan(double dx, double dy) {
     updateGL();
 }
 
+void GLWidget::transition2First(){
+    std::cout<<"\ntransition2First";
 
+    z += 0.001;
+    if(z>0.601){
+        updateGL();
+        timer->stop();
+        delete timer;
+        timer = NULL;
+        return;
+    }
+
+    if(z<0.6){
+        esc->camGeneral.vs.obs = vec4(0.0, 20.0 - 33.282087667 * z, z, 1.0);
+        esc->camGeneral.vs.vup = vec4(0.0, z/0.6, -1.0+(z/0.6), 0.0);
+        esc->camGeneral.CalculaMatriuModelView();
+    }else{
+        cameraActual = false;//camFirstP
+    }
+
+    updateGL();
+}
+
+void GLWidget::transition2General(){
+    std::cout<<"\ntransition2General";
+
+    if(z>0.4){
+       z -= 0.001;
+    }else{
+       z -= 0.2;
+    }
+
+    if(z<-0.001){
+        updateGL();
+        timer1->stop();
+        delete timer1;
+        timer1 = NULL;
+        return;
+    }
+
+    esc->camGeneral.vs.obs = vec4(0.0, 20.0 - 33.282087667 * z, z, 1.0);
+    esc->camGeneral.vs.vup = vec4(0.0, z/0.6, -1.0+(z/0.6), 0.0);
+    esc->camGeneral.CalculaMatriuModelView();
+
+    updateGL();
+}
 
 void GLWidget::adaptaObjecteTamanyWidget(Objecte *obj)
 {
@@ -363,8 +411,6 @@ void GLWidget::newBola()
 {
     Bola *bolablanca = new Bola(0.0, 0.03075, 0.5, 0.03075, 1.0, 1.0, 1.0, "0");//x0,y0,z0,r,R,G,B,numBola
     newObjecte(bolablanca);
-    cb = bolablanca->calculCapsa3D();//para el calculo de colisiones
-    ctrB = vec3(0.0, 0.03075, 0.5);
 }
 
 void GLWidget::newConjuntBoles()
@@ -408,8 +454,6 @@ void GLWidget::newConjuntBoles()
 
         Bola *bolab = new Bola(0.0, 0.03075, 0.5, 0.03075, 1.0, 1.0, 1.0, "0");//x0,y0,z0,r,R,G,B,numBola
         esc->addObjecte(bolab);
-        cb = bolab->calculCapsa3D();//para el calculo de colisiones
-        ctrB = vec3(0.0, 0.03075, 0.5);
 
         ConjuntBoles *conjuntboles = new ConjuntBoles();
         esc->conjuntBoles = conjuntboles;

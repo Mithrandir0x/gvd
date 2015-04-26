@@ -45,6 +45,9 @@ public slots:
     // Metode per iniciar la dinàmica del joc
     void Play();
 
+    void transition2First();
+    void transition2General();
+
 protected:
     void initializeGL();
     void paintGL();
@@ -82,6 +85,9 @@ private:
     Capsa3D cT;
     vec3 ctrB;
     vector<Capsa3D> listaCapsasConjuntBoles;
+    QTimer *timer;
+    QTimer *timer1;
+    double z;
 
     //  Metode per a carregar de fitxers el vertex i el fragment shader
    void InitShader( const char* vertexShaderFile,
@@ -96,7 +102,7 @@ private:
     // Metode per adaptar l'escena al tamany del widget
     void adaptaObjecteTamanyWidget(Objecte *obj);
 
-
+    void modcamFirst();
 };
 
 
