@@ -152,6 +152,10 @@ de les observacions donades per la primera pràctica.
 >     //capsa = obj->calculCapsa3D();
 > }
 > ```
+>
+> Aquest canvi es va introduir inicialment a partir del feedback donat, però
+> al llarg de la pràctica, aquesta implementació desapareixerà degut a que ja
+> no és necessari donat que la càmera fa aquesta tasca.
 
 ## `Escena`
 
@@ -175,7 +179,7 @@ de les observacions donades per la primera pràctica.
 > }
 > ```
 
-- A `Escena::~Escena` Evitar destruir objectes nuls.
+- A `Escena::~Escena` s'ha d'evitar destruir objectes nuls.
 
 > Per arreglar aquest problema, hem canviat la implementació del mètode:
 >
@@ -192,6 +196,62 @@ de les observacions donades per la primera pràctica.
 >     if (conjuntBoles!=NULL)
 >        delete this->conjuntBoles;
 > }
+> ```
+
+- Falta implementar el mètode `CapsaMinCont3DEscena`.
+
+> Et voila:
+>
+> ```c
+> void Escena::CapsaMinCont3DEscena()
+> {
+>     // Metode a implementar
+>     Capsa3D c;
+>     vec3 pmax;
+> 
+>     capsaMinima.pmin[0]=INFINITY;
+>     capsaMinima.pmin[1]=INFINITY;
+>     capsaMinima.pmin[2]=INFINITY;
+>     pmax[0] = -INFINITY;
+>     pmax[1] = -INFINITY;
+>     pmax[2] = -INFINITY;
+> 
+>     for (int i=0; i<listaObjectes.size(); i++) {
+>         c = listaObjectes[i]->calculCapsa3D();
+> 
+>         if (capsaMinima.pmin[0]>c.pmin[0]) capsaMinima.pmin[0] = c.pmin[0];
+>         if (capsaMinima.pmin[1]>c.pmin[1]) capsaMinima.pmin[1] = c.pmin[1];
+>         if (capsaMinima.pmin[2]>c.pmin[2]) capsaMinima.pmin[2] = c.pmin[2];
+>         if (pmax[0]<c.pmin[0]+c.a) pmax[0] = c.pmin[0]+c.a;
+>         if (pmax[1]<c.pmin[1]+c.h) pmax[1] = c.pmin[1]+c.h;
+>         if (pmax[2]<c.pmin[2]+c.p) pmax[2] = c.pmin[2]+c.p;
+>     }
+>     capsaMinima.a = pmax[0]-capsaMinima.pmin[0];
+>     capsaMinima.h = pmax[1]-capsaMinima.pmin[1];
+>     capsaMinima.p = pmax[2]-capsaMinima.pmin[2];
+> }
+> ```
+
+- Ara serà `Escena` qui s'encarregui de gestionar les colisions de les boles,
+  en comptes de `GLWidget`. Per això s'ha introduït el mètode `computeCollisions`:
+
+> La signatura del mètode:
+>
+> ```c
+> void Escena::computeCollisions(Capsa3D cb, Capsa3D cT, vec3 ctrB, vector<Capsa3D> listaCapsasConjuntBoles, QKeyEvent *event){
+>     // El codi segueix sent el mateix que hi havia a GLWidget
+>     // al mètode KeyPressEvent.
+> }
+> ```
+> 
+> A més, s'han afegit com a atributs de la clase:
+>
+> ```c
+> // escena.h
+> double dzP = 0.01;
+> double dzN = -0.01;
+> double dxP = 0.01;
+> double dxN = -0.01;
 > ```
 
 ---
@@ -228,10 +288,6 @@ I per últim, quan es divideix per la quarta ordenada, s'obté les coordenades
 homogeneitzades.
 
 ## 3 Modificació de la classe càmera
-
-**WARNING**
-> Verificar matrius amb identitat per veure si s'estan passant correctament les
-> matrius model-view i projection.
 
 ### 3.1 Implementació del pas a la GPU de la matriu M-V/P des de la classe Càmera
 
@@ -325,13 +381,6 @@ void Camera::CalculaMatriuModelView()
 
 #### `Camera::CalculaMatriuProjection`
 
-> *Annotacions*
-> - És el VRP el COP?
-
-> **WARNING**
->
-> - Verificar que els arguments de totes dues funcions s'utilitzen correctament.
-
 En funció del tipus de projecció que s'estigui utilitzant, la matriu de
 projecció canvia:
 
@@ -353,12 +402,6 @@ void Camera::CalculaMatriuProjection()
 ```
 
 #### `Camera::CalculWindow`
-
-> **WARNING**
-> - La capsa mínima que rep per paràmetre, de qui és? És la capsa mínima de
-> l'escena o es la capsa de l'objecte al que apunta la càmera?
-> - Preguntar qué fa la funció `Camera::VertexCapsa3D`
-
 
 La *window* es calcula amb coordenades de càmera. Per això, s'agafa la capsa
 contenidora, i es transforma a coordenades de càmera.
@@ -514,14 +557,6 @@ Escena::Escena(int vpa, int vph)
 Alhora d'inicialitzar la càmera, també hem canviat una mica els paràmetres
 del mètode per que rebin la mida de la finestra:
 
-> Annotacions
->
-> - Tècnicament, s'hauria de calcular l'amplada i l'alçada del viewport, i el VRP.
->   Però aixó entra una mica en conflicte amb el punt anterior, on es demana que
->   s'estigui mirant al punt `(0, 0, 0)`. (Crec...)
->   - L'altra possibilitat és que a partir del càlcul de la window, que encara no
->     està implementat, es pot calcular els punts 
-
 ```c
 void Escena::iniCamera(bool camGen, int a, int h){
    if(camGen == true){
@@ -545,10 +580,7 @@ void Escena::iniCamera(bool camGen, int a, int h){
        camGeneral.CalculaMatriuModelView();
        camGeneral.CalculWindow(capsaMinima);
        camGeneral.CalculaMatriuProjection();
-   }else{
-       //inicializar camera en primera persona
    }
-
 }
 ```
 
@@ -556,6 +588,10 @@ De moment, treballarem amb la primera càmera, i quan s'introdueixi la càmera
 en primera persona, s'introduirà els canvis per fer-la funcionar.
 
 #### `Escena::setAnglesCamera`
+
+Al canviar els angles de rotació del sistema de visualització, és necessari
+recalcular el vector de verticalitat, `vup`, tornar a recalcular la posició de
+l'observador, `obs`, i per tant, recalcular la matriu model-view:
 
 ```c
 void Escena::setAnglesCamera(bool camGen, float angX, float angY, float angZ){
@@ -565,25 +601,416 @@ void Escena::setAnglesCamera(bool camGen, float angX, float angY, float angZ){
         camGeneral.vs.angz = angZ;
         vec3 vu = camGeneral.CalculVup(camGeneral.vs.angx, camGeneral.vs.angy, camGeneral.vs.angz);
         camGeneral.vs.vup = vec4(vu[0], vu[1], vu[2], 0.0);
+        camGeneral.vs.obs = camGeneral.CalculObs(camGeneral.vs.vrp, camGeneral.piram.d, camGeneral.vs.angx, camGeneral.vs.angy);
         camGeneral.CalculaMatriuModelView();
-        CapsaMinCont3DEscena();
-        camGeneral.CalculWindow(capsaMinima);
-        camGeneral.CalculaMatriuProjection();
-
     }
 }
 ```
 
 #### `Escena::setVRPCamera`
 
+Si es canvia la posició del punt a on apunta el pla de projecció, s'haurà de
+recalcular la matriu model-view:
+
 ```c
 void Escena::setVRPCamera(bool camGen, point4 vrp){
     if(camGen == true){
         camGeneral.vs.vrp = vrp;
         camGeneral.CalculaMatriuModelView();
-        CapsaMinCont3DEscena();
-        camGeneral.CalculWindow(capsaMinima);
+    }
+}
+```
+
+#### `Escena::setWindowCamera`
+
+És evident que si la finestra canvia, ja sigui per que es retalla, o per que
+canvia, s'ha de recalcular la matriu de projecció:
+
+```c
+void Escena::setWindowCamera(bool camGen, bool retallat, Capsa2D window){
+    if(camGen == true){
+        camGeneral.wd = window;
+        if(retallat == true){
+            camGeneral.CalculWindowAmbRetallat();
+        }
+        camGeneral.AjustaAspectRatioWd();//amplia el window per tal que el seu aspect ratio sigui igual al del viewport
         camGeneral.CalculaMatriuProjection();
+    }
+}
+```
+
+#### `Escena::setDCamera`
+
+Com que la distància entre els plans antero-posterior de la piràmide de
+projecció paralela no canvien, no cal fer cap recalcul:
+
+```c
+void Escena::setDCamera(bool camGen, float d){
+    if(camGen == true){
+        camGeneral.piram.d = d;
+    }
+}
+```
+
+## 5 Modificació de la classe GLWidget per incloure la càmera general
+
+### 5.1 Inicialitzar la càmera general
+
+Hem introduït a la clase ``GLWidget` un nou atribut:
+
+```c
+bool cameraActual; //true para camara general
+```
+
+Aquest paràmetre ens permetrà saber amb quina càmera estem renderitzant. Quan
+és `true`, s'està usant la càmera general, en cas contrari, s'estarà utilitzant
+la càmera en primera persona.
+
+Alhora de construir `GLWidget`:
+
+```c
+GLWidget::GLWidget(QWidget *parent)
+    : QGLWidget(QGLFormat(QGL::SampleBuffers), parent)
+
+{
+    /* ... */
+
+    cameraActual = true;
+    esc = new Escena(this->size().width(), this->size().height());
+    
+    /* ... */
+}
+```
+
+Com que ara la càmera serà la responsable de assegurar una projecció correcte,
+s'ha esborrat la implementació d'`adaptaObjecteTamanyWidget`.
+
+Dins les funcions esmentades a l'enunciat de la pràctica en aquest punt, s'han
+fet els canvis necessaris per fer funcionar la càmera:
+
+#### `GLWidget::initializeGL`
+
+Li passem a `Escena` el shader program per gestionar de forma més còmode
+l'enviament de les matrius model-view i de projecció:
+
+```c
+void GLWidget::initializeGL()
+{
+    //std::cout<<"GLWidget::initializeGL"<<std::endl;
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+
+    initShadersGPU();
+    esc->pr = program;
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    if(cameraActual==true){
+        esc->camGeneral.toGPU(program);
+    }
+}
+```
+
+#### `GLWidget::paintGL`
+
+```c
+void GLWidget::paintGL()
+{
+   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+   esc->actualizaMatr(cameraActual);
+   esc->draw(cameraActual);
+
+   /* ... */
+}
+```
+
+#### `GLWidget::resizeGL`
+
+```c
+void GLWidget::resizeGL(int width, int height)
+{
+    int side = qMin(width, height);
+    glViewport((width - side) / 2, (height - side) / 2, side, side);
+
+    if(cameraActual==true){
+        esc->camGeneral.setViewport(0, 0, width, height);
+    }
+}
+```
+
+### 5.2 Modificar interactivament la càmera general
+
+Per poder ajustar els angles de projecció, en primer lloc, hem canviat el mètode
+`qNormalizeAngle` per que acceptés angles com a flotants de doble precissió:
+
+```c
+static void qNormalizeAngle(double &angle)
+{
+    while (angle < 0)
+        angle += 360;
+    while (angle > 360)
+        angle -= 360;
+}
+```
+
+### 5.2.1 Arrosegant el ratólí amb el **botó esquerra** pitjat es canvien els **angles** de visió de la càmera.
+
+Hem actualitzat els mètodes de rotacions per que poguesin canviar els angles de
+rotació del sistema de visualització.
+
+#### `GLWidget::setXRotation`
+
+```c
+void GLWidget::setXRotation(int angle)
+{
+    if (angle > 0) {
+        esc->camGeneral.vs.angx += 1.0;
+    } else if (angle<0)
+        esc->camGeneral.vs.angx -= 1.0;
+    qNormalizeAngle(esc->camGeneral.vs.angx);
+    esc->setAnglesCamera(cameraActual, esc->camGeneral.vs.angx, esc->camGeneral.vs.angy, esc->camGeneral.vs.angz);
+    updateGL();
+}
+```
+
+#### `GLWidget::setYRotation`
+
+```c
+void GLWidget::setYRotation(int angle)
+{
+    if (angle > 0) {
+        esc->camGeneral.vs.angy += 1.0;
+    } else if (angle<0)
+        esc->camGeneral.vs.angy -= 1.0;
+
+    qNormalizeAngle(esc->camGeneral.vs.angy);
+    esc->setAnglesCamera(cameraActual, esc->camGeneral.vs.angx, esc->camGeneral.vs.angy, esc->camGeneral.vs.angz);
+    updateGL();
+
+}
+```
+
+En comptes d'incrementar segons l'angle obtingut, ho fem amb el mateix increment
+de desplaçament per veure més lentament el canvi.
+
+Una vegada actualitzats els angles de desplaçament, fem un canvi sobre el mètode
+`mouseMoveEvent` per actualitzar l'eix X o Y en funció del desplaçament del
+ratolí:
+
+```c
+void GLWidget::mouseMoveEvent(QMouseEvent *event)
+{
+    if(cameraActual == false)return;//solo funciona con camGeneral
+
+    int dx = event->x() - lastPos.x();
+    int dy = event->y() - lastPos.y();
+
+
+    if (event->buttons() & Qt::LeftButton) {
+        if(lastPos.y()!= event->y() && lastPos.x()!= event->x()) {
+            //setYRotation(dx);
+            //setXRotation(dy);
+        }
+        else if(lastPos.y()!= event->y()) {
+            setXRotation(dy);
+        }
+        else if (lastPos.x()!= event->x()) {
+            setYRotation(dx);
+        }
+    }
+
+    lastPos = event->pos();
+}
+```
+
+### 5.2.2 Prement les tecles `+` o `-` es farà **zoom** de l'escena.
+
+#### `GLWidget::Zoom`
+
+Aquest mètode només ho fa per la càmera general:
+
+```c
+void GLWidget::Zoom (double inOut) {
+    esc->camGeneral.AmpliaWindow(inOut);
+    esc->camGeneral.CalculaMatriuProjection();
+    updateGL();
+}
+```
+
+Com que s'està modificant la window, és obvi que s'ha de calcular la matriu
+de projecció abans d'entrar a renderitzar el frame.
+
+#### `GLWidget::keyPressEvent`
+
+Per gestionar el zoom amb les tecles demanades, s'han fet els següents canvis:
+
+```c
+void GLWidget::keyPressEvent(QKeyEvent *event)
+{
+    /* ... */
+
+    switch ( event->key() )
+    {
+        /* ... */
+        case Qt::Key_Plus:
+            Zoom(-0.05);
+            break;
+        case Qt::Key_Minus:
+            Zoom(0.05);
+            break;
+    }
+
+    /* ... */
+}
+```
+
+### 5.2.3 Prement la tecla `Alt` simultàniament amb les tecles de les fletxes es farà un **panning 2D**
+
+#### `GLWidget::Pan`
+
+En primer lloc, s'ha implementat el mètode `Pan` per desplaçar la window
+segons la direcció que s'hagi entrat per teclat:
+
+```c
+void GLWidget::Pan(double dx, double dy) {
+    esc->camGeneral.wd.pmin.x = esc->camGeneral.wd.pmin.x + dx;
+    esc->camGeneral.wd.pmin.y = esc->camGeneral.wd.pmin.y + dy;
+    esc->camGeneral.CalculaMatriuProjection();
+    updateGL();
+}
+```
+
+Per modificar el centre de projecció, només cal moure el punt mínim del pla
+anterior de la finestra per desplaçar la projecció. I òbviament, cal actualitzar
+la matriu de projecció.
+
+#### `GLWidget::keyPressEvent`
+
+Des d'aquest mètode es crida el mètode `Pan` que hem creat:
+
+```c
+void GLWidget::keyPressEvent(QKeyEvent *event)
+{
+    /* ... */
+
+    switch ( event->key() )
+    {
+        /* ... */
+        case Qt::Key_Up:
+            if (event->modifiers() & Qt::AltModifier){
+                Pan(0, 0.01);
+                break;
+            }
+            /* ... */
+            break;
+        case Qt::Key_Down:
+            if (event->modifiers() & Qt::AltModifier){
+                Pan(0, -0.01);
+                break;
+            }
+            /* ... */
+            break;
+        case Qt::Key_Left:
+            if (event->modifiers() & Qt::AltModifier){
+                Pan(-0.01, 0);
+                break;
+            }
+            /* ... */
+            break;
+        case Qt::Key_Right:
+            if (event->modifiers() & Qt::AltModifier){
+                Pan(0.01, 0);
+                break;
+            }
+            /* ... */
+            break;
+        /* ... */
+    }
+
+    /* ... */
+
+}
+```
+
+## 6 Modificació de la classe Escena i GLWidget per incloure la càmera en primera persona
+
+### 6.1 Modificació de la classe Escena per afegir la càmera en primera persona
+
+Per implementar la càmera en primera persona s'ha introduit un nou atribut a la
+clase `Escena`:
+
+```c
+// escena.h
+Camera camFirstP;
+```
+
+D'aquesta, tindrem dues instàncies de la càmera, cadascuna amb les configuracions
+de sistema de projecció i piràmide de visualització, i ens permetrà canviar d'una
+càmera a l'altra de manera més senzilla i còmode.
+
+S'han de modificar els següents mètodes de la càmera:
+
+#### `Escena::iniCamera`
+
+```c
+void Escena::iniCamera(bool camGen, int a, int h){
+    if(camGen == true){
+        /* ... */
+    }else{
+       camFirstP.piram.proj = PERSPECTIVA;
+       camFirstP.ini(a, h, capsaMinima);
+
+       camFirstP.vs.vup = vec4(0.0, 1.0, 0.0, 0.0);
+       camFirstP.vs.obs = vec4(0.0, 0.0307474, 0.6, 1.0);  
+       point4 vrp = point4(0.0, 0.0307474, 0.5, 1.0);
+       setVRPCamera(false, vrp);  
+       setDCamera(false, 1.3);
+
+       camFirstP.wd.pmin.x = -0.1255;
+       camFirstP.wd.pmin.y = -0.0891265;
+       camFirstP.wd.a = 0.251;
+       camFirstP.wd.h = 0.188253;
+       camFirstP.piram.dant = 0.54;
+       camFirstP.piram.dpost= 1.7;
+       camFirstP.CalculaMatriuProjection();
+   }
+}
+```
+
+#### `Escena::setAnglesCamera`
+
+Tot i que la implementació és la mateixa amb respecte la càmera general, només
+canvia la instància de càmera que s'està usant, aquesta implementació ha anat
+variant bastant, i per poder experimentar còmodament amb les diferents
+projeccions, es deixa d'aquesta manera:
+
+```c
+void Escena::setAnglesCamera(bool camGen, float angX, float angY, float angZ){
+    if(camGen == true){
+        /* ... */
+    }else{
+        camFirstP.vs.angx = angX;
+        camFirstP.vs.angy = angY;
+        camFirstP.vs.angz = angZ;
+        vec3 vu = camFirstP.CalculVup(camFirstP.vs.angx, camFirstP.vs.angy, camFirstP.vs.angz);
+        camFirstP.vs.vup = vec4(vu[0], vu[1], vu[2], 0.0);
+        camFirstP.vs.obs = camFirstP.CalculObs(camFirstP.vs.vrp,camFirstP.piram.d,camFirstP.vs.angx,camFirstP.vs.angy);
+        camFirstP.CalculaMatriuModelView();
+    }
+}
+```
+
+#### `Escena::setVRPCamera`
+
+Al igual que l'anterior, l'únic que canvia és la instància de càmera usada
+
+```c
+void Escena::setVRPCamera(bool camGen, point4 vrp){
+    if(camGen == true){
+        /* ... */
+    }else{
+        camFirstP.vs.vrp = vrp;
+        camFirstP.CalculaMatriuModelView();
     }
 }
 ```
@@ -593,15 +1020,16 @@ void Escena::setVRPCamera(bool camGen, point4 vrp){
 ```c
 void Escena::setWindowCamera(bool camGen, bool retallat, Capsa2D window){
     if(camGen == true){
-        camGeneral.wd = window;
-        camGeneral.CalculAngleOberturaHoritzontal();
-        camGeneral.CalculAngleOberturaVertical();
+        /* ... */
+    }else{
+        camFirstP.wd = window;
+        camFirstP.CalculAngleOberturaHoritzontal();
+        camFirstP.CalculAngleOberturaVertical();
         if(retallat == true){
-            camGeneral.CalculWindowAmbRetallat();
+            camFirstP.CalculWindowAmbRetallat();
         }
-        //camGeneral.AmpliaWindow(0.15);   //0.15 aumenta tamaño window un 15% (disminuye imagen)
-        camGeneral.AjustaAspectRatioWd();//amplia el window per tal que el seu aspect ratio sigui igual al del viewport
-        camGeneral.CalculaMatriuProjection();
+        camFirstP.AjustaAspectRatioWd();//amplia el window per tal que el seu aspect ratio sigui igual al del viewport
+        camFirstP.CalculaMatriuProjection();
     }
 }
 ```
@@ -612,53 +1040,259 @@ void Escena::setWindowCamera(bool camGen, bool retallat, Capsa2D window){
 void Escena::setDCamera(bool camGen, float d){
     if(camGen == true){
         camGeneral.piram.d = d;
-        CapsaMinCont3DEscena();
-        camGeneral.CalculWindow(capsaMinima);
-        camGeneral.CalculaMatriuProjection();
+    }else{
+        camFirstP.piram.d = d;
+        camFirstP.CalculaMatriuProjection();
     }
 }
 ```
 
-## 5 Modificació de la classe GLWidget per incloure la càmera general
-
-### 5.1 Inicialitzar la càmera general
-
-> NO IMPLEMENTAT
-
-### 5.2 Modificar interactivament la càmera general
-
-> NO IMPLEMENTAT
-
-## 6 Modificació de la classe Escena i GLWidget per incloure la càmera en primera persona
-
-### 6.1 Modificació de la classe Escena per afegir la càmera en primera persona
-
-S'han de modificar els següents mètodes de la càmera:
-
-#### `Escena::iniCamera`
-
-> NO IMPLEMENTAT
-
-#### `Escena::setAnglesCamera`
-
-> NO IMPLEMENTAT
-
-#### `Escena::setVRPCamera`
-
-> NO IMPLEMENTAT
-
-#### `Escena::setWindowCamera`
-
-> NO IMPLEMENTAT
-
-#### `Escena::setDCamera`
-
-> NO IMPLEMENTAT
-
 ### 6.2 Modificació de la classe GLWidget per modificar interactivament la càmera en primera persona
 
-> NO IMPLEMENTAT
+Per introduir la càmera en primera persona i que funcionés s'han fet alguns
+canvis aquí i allà
+
+#### `GLWidget::initializeGL`
+
+Al igual que amb la càmera general, s'envia les matrius a la GPU amb la nova
+càmera implementada:
+
+```c
+void GLWidget::initializeGL()
+{
+    /* ... */
+
+    if(cameraActual==true){
+        esc->camGeneral.toGPU(program);
+    }else{
+        esc->camFirstP.toGPU(program);
+    }
+}
+```
+
+#### `GLWidget::resizeGL`
+
+```c
+void GLWidget::resizeGL(int width, int height)
+{
+    /* ... */
+
+    if(cameraActual==true){
+        esc->camGeneral.setViewport(0, 0, width, height);
+    }else{
+        esc->camFirstP.setViewport(0, 0, width, height);
+    }
+}
+```
+
+Després, alhora d'afegir nous objectes a l'escena, s'han fet alguns canvis a la
+instanciació dels objectes:
+
+#### `GLWidget::newObjecte`
+
+Quan s'instància un nou objecte, recalculem la capsa mínima contenidora de
+l'escena i actualitzem el vector `vrp` amb el nou objecte instanciat.
+
+```c
+void GLWidget::newObjecte(Objecte * obj)
+{
+    point4 vrp;
+
+    esc->addObjecte(obj);
+    esc->CapsaMinCont3DEscena();
+    vrp[0] = esc->capsaMinima.pmin[0]+(esc->capsaMinima.a/2.0);
+    vrp[1] = esc->capsaMinima.pmin[1]+(esc->capsaMinima.h/2.0);
+    vrp[2] = esc->capsaMinima.pmin[2]+(esc->capsaMinima.p/2.0);
+    vrp[3] = 1.0;
+    esc->setVRPCamera(cameraActual, vrp);
+    if(cameraActual == true){
+        esc->camGeneral.CalculWindow(esc->capsaMinima);
+        esc->camGeneral.AmpliaWindow(-0.1);
+    }else{
+        //por si apretamos B antes de cargar obj
+        esc->camFirstP.vs.vrp = point4(0.0, 0.0307474, 0.5, 1.0);
+    }
+
+
+    updateGL();
+}
+```
+
+En funció de la càmera usada, hem tingut que fer uns petits ajustos puntuals
+per que tot quedés correctament definit.
+
+El mateix ha passat alhora d'afegir el conjunt de boles o la sala de billar:
+
+#### `GLWidget::newConjuntBoles`
+
+```c
+void GLWidget::newConjuntBoles()
+{
+    point4 vrp;
+    ConjuntBoles *conjuntboles = new ConjuntBoles();
+
+    esc->conjuntBoles = conjuntboles;
+    for(int i=0; i<conjuntboles->listaConjuntBoles.size(); i++){
+        esc->listaObjectes.push_back(conjuntboles->listaConjuntBoles[i]);
+        listaCapsasConjuntBoles.push_back(conjuntboles->listaConjuntBoles[i]->calculCapsa3D());
+    }
+
+    esc->CapsaMinCont3DEscena();
+    vrp[0] = esc->capsaMinima.pmin[0]+(esc->capsaMinima.a/2.0);
+    vrp[1] = esc->capsaMinima.pmin[1]+(esc->capsaMinima.h/2.0);
+    vrp[2] = esc->capsaMinima.pmin[2]+(esc->capsaMinima.p/2.0);
+    vrp[3] = 1.0;
+    esc->setVRPCamera(cameraActual, vrp);
+    if(cameraActual == true){
+        esc->camGeneral.CalculWindow(esc->capsaMinima);
+        esc->camGeneral.AmpliaWindow(-0.1);
+    }else{
+        esc->camFirstP.vs.vrp = point4(0.0, 0.0307474, 0.5, 1.0);
+    }
+
+    updateGL();
+}
+```
+
+#### `GLWidget::newSalaBillar`
+
+```c
+void GLWidget::newSalaBillar()
+{
+    PlaBase *plaBase = this->newPlaBs();
+    esc->addObjecte(plaBase);
+    cT = plaBase->calculCapsa3D();//para el calculo de colisiones
+
+    Bola *bolab = new Bola(0.0, 0.03075, 0.5, 0.03075, 1.0, 1.0, 1.0, "0");//x0,y0,z0,r,R,G,B,numBola
+    esc->addObjecte(bolab);
+    cb = bolab->calculCapsa3D();//para el calculo de colisiones
+    ctrB = vec3(0.0, 0.03075, 0.5);
+
+    ConjuntBoles *conjuntboles = new ConjuntBoles();
+    esc->conjuntBoles = conjuntboles;
+    for(int i=0; i<conjuntboles->listaConjuntBoles.size(); i++){
+        esc->listaObjectes.push_back(conjuntboles->listaConjuntBoles[i]);
+        listaCapsasConjuntBoles.push_back(conjuntboles->listaConjuntBoles[i]->calculCapsa3D());
+    }
+
+    esc->CapsaMinCont3DEscena();
+    point4 vrp;
+    vrp[0] = esc->capsaMinima.pmin[0]+(esc->capsaMinima.a/2.0);
+    vrp[1] = esc->capsaMinima.pmin[1]+(esc->capsaMinima.h/2.0);
+    vrp[2] = esc->capsaMinima.pmin[2]+(esc->capsaMinima.p/2.0);
+    vrp[3] = 1.0;
+
+    esc->camGeneral.vs.vrp = point4(vrp[0], vrp[1] , vrp[2], 1.0);
+
+    esc->camGeneral.CalculWindow(esc->capsaMinima);
+    esc->camGeneral.AmpliaWindow(-0.1);
+
+    esc->camFirstP.vs.vrp = point4(0.0, 0.0307474, 0.5, 1.0);
+
+    updateGL();
+}
+```
+
+#### `GLWidget::keyPressEvent`
+
+Finalment, per seleccionar quina càmera es vol usar, s'ha modificat el mètode
+`keyPressEvent`:
+
+```c
+void GLWidget::keyPressEvent(QKeyEvent *event)
+{
+    /* ... */
+
+    switch ( event->key() )
+    {
+        /* ... */
+        
+        case Qt::Key_B:
+            cameraActual = false;//camFirstP
+            break;
+        case Qt::Key_T:
+            cameraActual = true;//camGen
+            break;
+        
+        /* ... */
+    }
+
+    /* ... */
+
+}
+```
+
+Com que a `PaintGL` ja se li passa a l'`Escena` quin tipus de càmera es vol
+utilitzar, no cal fer res més.
 
 ### 6.3 Modificació de la càmera en primera persona amb el moviment de la bola blanca
 
-> NO IMPLEMENTAT
+Per a aquest últim pas de la pràctica s'han introduit algunes noves variables,
+arrel del refactor del càlcul de col·lisions inicial:
+
+```c
+// glwidget.h
+vec3 ctrB;
+```
+
+Quan es fa el càlcul de col·lisions, utilitzem aquesta variable per guardar la
+posicíó del centre de la bola.
+
+#### `GLWidget::keyPressEvent`
+
+El codi introduit, a més de recalcular la posició del centre de la bola amb la
+nova variable creada, i calcular la matriu de translació per moure la bola 
+blanca, s'ha afegit una nova condició per verificar uns calculs sobre el `vrp`
+que només es faran en la càmera en primera persona.
+
+```c
+void GLWidget::keyPressEvent(QKeyEvent *event)
+{
+    if (esc->bolaBlanca!=NULL && esc->plaBase!=NULL && esc->conjuntBoles!=NULL){
+        esc->computeCollisions(cb, cT, ctrB, listaCapsasConjuntBoles, event);
+    }
+
+    switch ( event->key() )
+    {
+        /* ... */
+        case Qt::Key_Up:
+            /* ... */
+            m = Translate(0.0,  0.0, esc->dzN);
+            cb.pmin.z += esc->dzN;
+            ctrB.z += esc->dzN;
+            break;
+        case Qt::Key_Down:
+            /* ... */
+            m = Translate(0.0,  0.0, esc->dzP);
+            cb.pmin.z += esc->dzP;
+            ctrB.z += esc->dzP;
+            break;
+        case Qt::Key_Left:
+            /* ... */
+            m = Translate(esc->dxN,  0.0, 0.0);
+            cb.pmin.x += esc->dxN;
+            ctrB.x += esc->dxN;
+            break;
+        case Qt::Key_Right:
+            /* ... */
+            m = Translate(esc->dxP,  0.0, 0.0);
+            cb.pmin.x += esc->dxP;
+            ctrB.x += esc->dxP;
+            break;
+        /* ... */
+    }
+
+    if (esc->bolaBlanca!=NULL){
+        esc->bolaBlanca->aplicaTG(m);
+
+        if(cameraActual == false){
+            esc->setVRPCamera(false, point4(ctrB.x, ctrB.y, ctrB.z, 1.0));
+            esc->camFirstP.vs.obs = vec4(ctrB.x, 0.0307474, cb.pmin.z + (cb.p/2.0) + 0.1, 1.0);
+            esc->camFirstP.piram.dpost = esc->camFirstP.vs.obs.z - esc->capsaMinima.pmin.z + 0.1;
+        }
+   }
+}
+```
+
+Ajustem l'observador per que miri a la bola blanca, i ajustem el pla posterior
+de la piràmide de projecció per que es puguin veure totes les boles.
