@@ -220,18 +220,19 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
        switch ( event->key() )
        {
        case Qt::Key_B:
-                  z = 0.45;
+                  /*z = 0.45;
                   timer = new QTimer(this);
                   connect(timer, SIGNAL(timeout()),this, SLOT(transition2First()));
-                  timer->start(10);
+                  timer->start(10);*/
+                  cameraActual = false; //camFirstP
                   break;
        case Qt::Key_T:
-                  z = 0.6;
+                  /*z = 0.6;
                   timer1 = new QTimer(this);
                   connect(timer1, SIGNAL(timeout()),this, SLOT(transition2General()));
                   cameraActual = true;//camGen
-                  timer1->start(10);
-
+                  timer1->start(10);*/
+                  cameraActual = true;//CamGen
                   break;
        case Qt::Key_Up:
                   if (event->modifiers() & Qt::AltModifier){
