@@ -1296,3 +1296,159 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
 
 Ajustem l'observador per que miri a la bola blanca, i ajustem el pla posterior
 de la piràmide de projecció per que es puguin veure totes les boles.
+
+---
+
+# Extensions de la pràctica
+
+## Extensió 1. Donar més realisme a la dinàmica del moviment de la bola bola
+
+Per a fer que la bola blanca roti sobre sí mateixa, s'ha fet un petit canvi
+alhora de moure la bola al premer una tecla:
+
+#### `GLWidget::keyPressEvent`
+
+Quan es calcula la translació per moure la bola per la taula de billar, abans
+de moure-la, es mou la bola al origen de coordenades i es rota la bola blanca.
+
+```c
+void GLWidget::keyPressEvent(QKeyEvent *event)
+{
+    /* ... */
+
+    switch ( event->key() )
+    {
+        /* ... */
+        
+        case Qt::Key_Up:
+            /* ... */
+            m = Translate(0.0,  0.0, esc->dzN) * Translate(ctrB.x,  ctrB.y, ctrB.z) * RotateX((esc->dzN*180.0)/(0.0307474*M_PI)) * Translate(-ctrB.x,  -ctrB.y, -ctrB.z );
+           break;
+        case Qt::Key_Down:
+            /* ... */
+            m = Translate(0.0,  0.0, esc->dzP) * Translate(ctrB.x,  ctrB.y, ctrB.z) * RotateX((esc->dzP*180.0)/(0.0307474*M_PI)) * Translate(-ctrB.x,  -ctrB.y, -ctrB.z );
+            break;
+        case Qt::Key_Left:
+           /* ... */
+           m = Translate(esc->dxN,  0.0, 0.0) * Translate(ctrB.x,  ctrB.y, ctrB.z) * RotateZ(-(esc->dxN*180.0)/(0.0307474*M_PI)) * Translate(-ctrB.x,  -ctrB.y, -ctrB.z );
+           break;
+        case Qt::Key_Right:
+            /* ... */
+            m = Translate(esc->dxP,  0.0, 0.0) * Translate(ctrB.x,  ctrB.y, ctrB.z) * RotateZ(-(esc->dxP*180.0)/(0.0307474*M_PI)) * Translate(-ctrB.x,  -ctrB.y, -ctrB.z );
+            break;
+        
+        /* ... */
+    }
+
+    /* ... */
+}
+```
+
+## Extensió 2. Es desitja que la transició entre càmera general i la càmera en primera persona sigui suau i animada.
+
+S'han implementat dos nous mètodes per controlar les transicions entre la càmera
+general i la càmera en primera persona:
+
+```c
+// glwidget.h
+class GLWidget : public QGLWidget
+{
+/* ... */
+public:
+    void transition2First();
+    void transition2General();
+/* ... */
+private:
+    QTimer *timer;
+    QTimer *timer1;
+    double z;
+}
+```
+
+#### `GLWidget::transition2First`
+
+```c
+void GLWidget::transition2First(){
+    std::cout<<"\ntransition2First";
+
+    z += 0.001;
+    if(z>0.601){
+        updateGL();
+        timer->stop();
+        delete timer;
+        timer = NULL;
+        return;
+    }
+
+    if(z<0.6){
+        esc->camGeneral.vs.obs = vec4(0.0, 20.0 - 33.282087667 * z, z, 1.0);
+        esc->camGeneral.vs.vup = vec4(0.0, z/0.6, -1.0+(z/0.6), 0.0);
+        esc->camGeneral.CalculaMatriuModelView();
+    }else{
+        cameraActual = false;//camFirstP
+    }
+
+    updateGL();
+}
+```
+
+#### `GLWidget::transition2General`
+
+```c
+void GLWidget::transition2General(){
+    std::cout<<"\ntransition2General";
+
+    if(z>0.4){
+       z -= 0.001;
+    }else{
+       z -= 0.2;
+    }
+
+    if(z<-0.001){
+        updateGL();
+        timer1->stop();
+        delete timer1;
+        timer1 = NULL;
+        return;
+    }
+
+    esc->camGeneral.vs.obs = vec4(0.0, 20.0 - 33.282087667 * z, z, 1.0);
+    esc->camGeneral.vs.vup = vec4(0.0, z/0.6, -1.0+(z/0.6), 0.0);
+    esc->camGeneral.CalculaMatriuModelView();
+
+    updateGL();
+}
+```
+
+#### `GLWidget::keyPressEvent`
+
+Quan es presiona qualsevol de les dues tecles, s'instància un `QTimer` per a
+cada tipus de transició que es vulgui fer, cridant al mètode corresponent que
+s'encarregarà de modificar l'observador i el vector de verticalitat:
+
+```c
+void GLWidget::keyPressEvent(QKeyEvent *event)
+{
+    /* ... */
+
+    switch ( event->key() )
+    {
+        case Qt::Key_B:
+            z = 0.45;
+            timer = new QTimer(this);
+            connect(timer, SIGNAL(timeout()),this, SLOT(transition2First()));
+            timer->start(10);
+            break;
+        case Qt::Key_T:
+            z = 0.6;
+            timer1 = new QTimer(this);
+            connect(timer1, SIGNAL(timeout()),this, SLOT(transition2General()));
+            cameraActual = true;//camGen
+            timer1->start(10);
+            break;
+
+    }
+
+    /* ... */
+}
+```
