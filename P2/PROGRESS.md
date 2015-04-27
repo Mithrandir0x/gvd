@@ -560,26 +560,19 @@ del mètode per que rebin la mida de la finestra:
 ```c
 void Escena::iniCamera(bool camGen, int a, int h){
    if(camGen == true){
-       a = 600;//inicialmente 640x480 y
-       h = 600; //al usarse Camera::AjustaAspectRatioWd no queda bien
-       camGeneral.ini(a, h, capsaMinima);
-       camGeneral.vs.obs = vec4(0.0, 20.0, 0.0, 1.0);
-       camGeneral.piram.d = 2.0;
-       camGeneral.piram.dant = 10.0;
-       camGeneral.piram.dpost = 30.0;
+        camGeneral.piram.proj = PARALLELA;
+        camGeneral.ini(a, h, capsaMinima);
 
-       camGeneral.vs.vrp = vec4(0.0, 0.0, 0.0, 1.0);
-                                  //ver Camera::CalculVup
-       camGeneral.vs.angx = -90.0;//un giro de +90 apunta vup a z+
-       camGeneral.vs.angy = 0.0;//un giro de +90 apunta el vetor forward de la camara a -x
-       camGeneral.vs.angz = 0.0;//un giro de +90 apunta vup a x-
-       vec3 vu = camGeneral.CalculVup(camGeneral.vs.angx, camGeneral.vs.angy, camGeneral.vs.angz);
-       camGeneral.vs.vup = vec4(vu[0], vu[1], vu[2], 0.0);
-       //camGeneral.vs.vup = vec4(0.0, 0.0, -1.0, 0.0);//con 0,1,0 la camara apunta a -z y no se ve
+        camGeneral.vs.obs = vec4(0.0, 20.0, 0.0, 1.0);     
+        point4 vrp = point4(0.0, 0.0, 0.0, 1.0);
+        setVRPCamera(true, vrp);
+        setDCamera(true, 20.0);
+        setAnglesCamera(true, -90.0, 0.0, 0.0);
 
-       camGeneral.CalculaMatriuModelView();
-       camGeneral.CalculWindow(capsaMinima);
-       camGeneral.CalculaMatriuProjection();
+        camGeneral.CalculWindow(capsaMinima);
+        camGeneral.piram.dant = 0.1;
+        camGeneral.piram.dpost = 30.0;
+        camGeneral.CalculaMatriuProjection();
    }
 }
 ```
