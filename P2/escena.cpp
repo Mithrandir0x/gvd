@@ -57,7 +57,7 @@ void Escena::iniCamera(bool camGen, int a, int h){
        camFirstP.wd.pmin.y = -0.0891265;
        camFirstP.wd.a = 0.251;
        camFirstP.wd.h = 0.188253;
-       camFirstP.piram.dant = 0.54;
+       camFirstP.piram.dant = 0.34;
        camFirstP.piram.dpost= 1.7;
        camFirstP.CalculaMatriuProjection();
    }
