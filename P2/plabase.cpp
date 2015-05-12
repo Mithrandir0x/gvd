@@ -1,6 +1,6 @@
 #include "plabase.h"
 
-PlaBase::PlaBase(point4 v0, point4 v1, point4 v2, point4 v3, color4 cv0, color4 cv1, color4 cv2, color4 cv3) : Objecte(NumVertices)
+PlaBase::PlaBase(point4 v0, point4 v1, point4 v2, point4 v3, color4 cv0, color4 cv1, color4 cv2, color4 cv3, Material *material) : Objecte(NumVertices)
 {
 
     vertices[0] = v0;
@@ -12,6 +12,8 @@ PlaBase::PlaBase(point4 v0, point4 v1, point4 v2, point4 v3, color4 cv0, color4 
     vertex_colors[1] = cv1; //red
     vertex_colors[2] = cv2; //yellow
     vertex_colors[3] = cv3; //green
+
+    mat = material;
 
     make();
     capsa = calculCapsa3D();
@@ -34,12 +36,17 @@ void PlaBase::make()
 
 void PlaBase::quad( int a, int b, int c, int d )
 {
-    colors[Index] = vertex_colors[a]; points[Index] = vertices[a]; vertexsTextura[Index] = vec2(1.0, 0.0); Index++;
-    colors[Index] = vertex_colors[b]; points[Index] = vertices[b]; vertexsTextura[Index] = vec2(0.0, 0.0); Index++;
-    colors[Index] = vertex_colors[c]; points[Index] = vertices[c]; vertexsTextura[Index] = vec2(0.0, 1.0); Index++;
-    colors[Index] = vertex_colors[a]; points[Index] = vertices[a]; vertexsTextura[Index] = vec2(1.0, 0.0); Index++;
-    colors[Index] = vertex_colors[c]; points[Index] = vertices[c]; vertexsTextura[Index] = vec2(0.0, 1.0); Index++;
-    colors[Index] = vertex_colors[d]; points[Index] = vertices[d]; vertexsTextura[Index] = vec2(1.0, 1.0); Index++;
+    normal3 n = cross(vertices[a] - vertices[b],vertices[b] - vertices[c]); //normal para cualquier shading porque es un plano
+
+    points[Index] = vertices[a]; vertexsTextura[Index] = vec2(1.0, 0.0);  normal[Index] = n; Index++;
+    points[Index] = vertices[b]; vertexsTextura[Index] = vec2(0.0, 0.0);  normal[Index] = n; Index++;
+    points[Index] = vertices[c]; vertexsTextura[Index] = vec2(0.0, 1.0);  normal[Index] = n; Index++;
+
+    n = cross(vertices[a] - vertices[c],vertices[c] - vertices[d]); //normal para cualquier shading porque es un plano
+
+    points[Index] = vertices[a]; vertexsTextura[Index] = vec2(1.0, 0.0);  normal[Index] = n; Index++;
+    points[Index] = vertices[c]; vertexsTextura[Index] = vec2(0.0, 1.0);  normal[Index] = n; Index++;
+    points[Index] = vertices[d]; vertexsTextura[Index] = vec2(1.0, 1.0);  normal[Index] = n; Index++;
 }
 
 void PlaBase::initTextura()

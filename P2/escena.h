@@ -19,8 +19,9 @@
 #include <conjuntboles.h>
 #include <camera.h>
 #include <math.h>
-
+#include <llum.h>
 #include <QKeyEvent>
+#include <conjuntllums.h>
 
 using namespace std;
 
@@ -47,6 +48,7 @@ public:
     void cam2GPU(bool cameraActual);
     void computeCollisions(Capsa3D cb, Capsa3D cT, vec3 ctrB, vector<Capsa3D> listaCapsasConjuntBoles, QKeyEvent *event);
     void actualizaMatr(bool cameraActual);
+    void setAmbientToGPU(QGLShaderProgram *program);
 
     QGLShaderProgram *pr;
     // Capsa contenedora de l'escena
@@ -63,6 +65,10 @@ public:
     double dzN = -0.01;
     double dxP = 0.01;
     double dxN = -0.01;
+
+    vec4 AmbientLight;
+    ConjuntLlums *conjllums;
+
 };
 
 #endif // ESCENA_H

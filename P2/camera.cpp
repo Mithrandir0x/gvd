@@ -60,7 +60,6 @@ void Camera::CalculaMatriuProjection()
 
 void Camera::CalculWindow( Capsa3D c)
 {
-   // CODI A MODIFICAR DURANT LA PRACTICA 2
     mat4 MDP;
     vec4  vaux[8], vauxMod[8];
 
@@ -91,14 +90,12 @@ void Camera::setViewport(int x, int y, int a, int h)
 
 void Camera::toGPU(QGLShaderProgram *program)
 {
-    // CODI A MODIFICAR DURANT LA PRACTICA 2
     this->setProjectionToGPU(program, this->proj);
     this->setModelViewToGPU(program, this->modView);
 }
 
 void Camera::setModelViewToGPU(QGLShaderProgram *program, mat4 m)
 {
-   // CODI A MODIFICAR DURANT LA PRACTICA 2
     model_view = program->uniformLocation("model_view");
     glUniformMatrix4fv( model_view, 1, GL_TRUE, m );
 
@@ -106,7 +103,6 @@ void Camera::setModelViewToGPU(QGLShaderProgram *program, mat4 m)
 
 void Camera::setProjectionToGPU(QGLShaderProgram *program, mat4 p)
 {
-       // CODI A MODIFICAR DURANT LA PRACTICA 2
     projection = program->uniformLocation("projection");
     glUniformMatrix4fv(projection,1,GL_TRUE, p);
 }

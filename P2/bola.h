@@ -12,7 +12,7 @@ class Bola : public Objecte
 {
 public:
 
-    Bola(double x0, double y0, double z0, double r, double R, double G, double B, QString numBola);
+    Bola(double x0, double y0, double z0, double r, double R, double G, double B, Material *material, QString tipoShading, QString numBola);
     ~Bola();
     void make(double x0, double y0, double z0, double r, QString numBola);
     color4 color; //color de la bola
@@ -26,6 +26,7 @@ private:
 
     double r; // radio
     int NumIteracionsEsfera = 5;
+    QString tipoShading;
 };
 
 #endif // BOLA_H
