@@ -1,10 +1,7 @@
-
-
 #include <math.h>
 
 #include <glwidget.h>
 #include <QString>
-
 
 GLWidget::GLWidget(QWidget *parent)
     : QGLWidget(QGLFormat(QGL::SampleBuffers), parent)
@@ -28,6 +25,8 @@ GLWidget::GLWidget(QWidget *parent)
     qtGreen = QColor::fromCmykF(0.40, 0.0, 1.0, 0.0);
     qtPurple = QColor::fromCmykF(0.39, 0.39, 0.0, 0.0);
 
+    tipoShading = "Flat";
+    esc->conTextura = true;
     program = 0;
     moviment = false;
 }
@@ -71,10 +70,14 @@ GLWidget::InitShader(const char* vShaderFile, const char* fShaderFile)
 void GLWidget::initShadersGPU()
 {
 // Carrega dels shaders i posa a punt per utilitzar els programes carregats a la GPU
-   InitShader( "://vshader1.glsl", "://fshader1.glsl" );
-
+    if(this->tipoShading == "Flat" || this->tipoShading =="Gouraud"){
+        InitShader( "://vshaderFlatGouraud.glsl", "://fshaderFlatGouraud.glsl" );
+    }else if(this->tipoShading == "Phong"){
+        InitShader( "://vshaderPhong.glsl", "://fshaderPhong.glsl" );
+    }else{
+        InitShader( "://vshaderToon.glsl", "://fshaderToon.glsl" );
+    }
 }
-
 
 QSize GLWidget::minimumSizeHint() const
 {
@@ -126,7 +129,6 @@ void GLWidget::setZRotation(int angle)
 {
 }
 
-
 void GLWidget::initializeGL()
 {
     //std::cout<<"GLWidget::initializeGL"<<std::endl;
@@ -142,6 +144,9 @@ void GLWidget::initializeGL()
     }else{
         esc->camFirstP.toGPU(program);
     }
+
+    esc->setAmbientToGPU(program);
+    esc->conjllums->toGPU(program);//incluye la primera luz y 2 mas
 }
 
 void GLWidget::paintGL()
@@ -151,13 +156,13 @@ void GLWidget::paintGL()
    esc->actualizaMatr(cameraActual);
    esc->draw(cameraActual);
 
-   if(cameraActual == true){
+   /*if(cameraActual == true){
        std::cout<<"\ncamGeneral";
        esc->camGeneral.PrintCamera();
    }else{
        std::cout<<"\ncamFirstP";
        esc->camFirstP.PrintCamera();
-   }
+   }*/
 }
 
 
@@ -204,6 +209,25 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
 }
 
 
+void GLWidget::reinit(QString Shading, bool Text){
+    esc->conTextura = Text;
+    if(tipoShading != Shading){
+        if(((tipoShading == "Flat" || tipoShading == "Gouraud") && (Shading != "Flat" && Shading != "Gouraud")) ||
+              ((tipoShading != "Flat" && tipoShading != "Gouraud") && (Shading == "Flat" || Shading == "Gouraud"))  ){
+            std::cout<<"GLWidget::CAMBIO DE SHADER"<<std::endl;
+            initShadersGPU();
+        }
+        if((tipoShading == "Flat" && Shading != "Flat") || (tipoShading != "Flat" && Shading == "Flat")){
+            std::cout<<"GLWidget::NEW NORMALS"<<std::endl;
+            tipoShading = Shading;
+            newSalaBillar();
+        }else{
+            tipoShading = Shading;
+        }
+    }
+}
+
+
 void GLWidget::keyPressEvent(QKeyEvent *event)
 {
     mat4 m;
@@ -216,30 +240,61 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
     if (esc->bolaBlanca!=NULL && esc->plaBase!=NULL && esc->conjuntBoles!=NULL){
         esc->computeCollisions(cb, cT, ctrB, listaCapsasConjuntBoles, event);
     }
-
        switch ( event->key() )
        {
-       case Qt::Key_B:
-                  /*z = 0.45;
-                  timer = new QTimer(this);
-                  connect(timer, SIGNAL(timeout()),this, SLOT(transition2First()));
-                  timer->start(10);*/
-                  cameraActual = false; //camFirstP
-                  break;
+       case Qt::Key_1:
+           if (event->modifiers() & Qt::ShiftModifier){
+             reinit("Flat", true);
+             break;
+           }
+           reinit("Flat", false);
+           break;
+       case Qt::Key_Exclam:
+           reinit("Flat", true);
+           break;
+       case Qt::Key_2:
+           if (event->modifiers() & Qt::ShiftModifier){
+             reinit("Gouraud", true);
+             break;
+           }
+           reinit("Gouraud", false);
+           break;
+       case Qt::Key_QuoteDbl:
+           reinit("Gouraud", true);
+           break;
+       case Qt::Key_3:
+           if (event->modifiers() & Qt::ShiftModifier){
+             reinit("Phong", true);
+             break;
+           }
+           reinit("Phong", false);
+           break;
+       case Qt::Key_periodcentered:
+           reinit("Phong", true);
+           break;
+       case Qt::Key_4:
+           if (event->modifiers() & Qt::ShiftModifier){
+             reinit("Toon", true);
+             break;
+           }
+           reinit("Toon", false);
+           break;
+       case Qt::Key_Dollar:
+           reinit("Toon", true);
+           break;
        case Qt::Key_T:
-                  /*z = 0.6;
-                  timer1 = new QTimer(this);
-                  connect(timer1, SIGNAL(timeout()),this, SLOT(transition2General()));
-                  cameraActual = true;//camGen
-                  timer1->start(10);*/
-                  cameraActual = true;//CamGen
-                  break;
+           z = 0.6;
+           timer1 = new QTimer(this);
+           connect(timer1, SIGNAL(timeout()),this, SLOT(transition2General()));
+           cameraActual = true;//camGen
+           timer1->start(10);
+           break;
        case Qt::Key_Up:
-                  if (event->modifiers() & Qt::AltModifier){
-                      Pan(0, 0.01);
-                      break;
-                   }
-                  m = Translate(0.0,  0.0, esc->dzN) * Translate(ctrB.x,  ctrB.y, ctrB.z) * RotateX((esc->dzN*180.0)/(0.0307474*M_PI)) * Translate(-ctrB.x,  -ctrB.y, -ctrB.z );
+           if (event->modifiers() & Qt::AltModifier){
+                Pan(0, 0.01);
+                break;
+           }
+           m = Translate(0.0,  0.0, esc->dzN) * Translate(ctrB.x,  ctrB.y, ctrB.z) * RotateX((esc->dzN*180.0)/(0.0307474*M_PI)) * Translate(-ctrB.x,  -ctrB.y, -ctrB.z );
            break;
        case Qt::Key_Down:
             if (event->modifiers() & Qt::AltModifier){
@@ -386,6 +441,7 @@ void GLWidget::newPlaBase()
 }
 
 PlaBase* GLWidget::newPlaBs(){
+
     point4 v0  = point4( 0.5441, 0.0, 1.0, 1.0 );
     point4 v1  = point4( 0.5441, 0.0,-1.0, 1.0 );
     point4 v2  = point4(-0.5441, 0.0,-1.0, 1.0 );
@@ -396,7 +452,14 @@ PlaBase* GLWidget::newPlaBs(){
     color4 cv2  = color4( 1.0, 1.0, 0.0, 1.0 ); //yellow
     color4 cv3  = color4( 0.0, 1.0, 0.0, 1.0 ); //green
 
-    PlaBase *plaBase = new PlaBase(v0, v1, v2, v3, cv0, cv1, cv2, cv3);
+    vec3 ka = vec3(0.19125, 0.0735, 0.0225);
+    vec3 kd = vec3(0.7038, 0.27048, 0.0828);
+    vec3 ke = vec3(0.256777, 0.137622, 0.086014);
+    float kre = 0.1*128;
+
+    Material *mat = new Material(ka, kd, ke, kre);
+
+    PlaBase *plaBase = new PlaBase(v0, v1, v2, v3, cv0, cv1, cv2, cv3, mat);
     return plaBase;
 }
 
@@ -410,14 +473,20 @@ void GLWidget::newObj(QString fichero)
 
 void GLWidget::newBola()
 {
-    Bola *bolablanca = new Bola(0.0, 0.03075, 0.5, 0.03075, 1.0, 1.0, 1.0, "0");//x0,y0,z0,r,R,G,B,numBola
+    vec4 ka = vec4(0.25, 0.20725, 0.20725, 1);
+    vec4 kd = vec4(1.0, 0.829, 0.829, 1);
+    vec4 ke = vec4(0.296648, 0.296648, 0.296648, 1);
+    float kre = 0.088*128;
+
+    Material *mat = new Material(ka, kd, ke, kre);
+    Bola *bolablanca = new Bola(0.0, 0.03075, 0.5, 0.03075, 1.0, 1.0, 1.0, mat, tipoShading, "0");//x0,y0,z0,r,R,G,B,material,numBola
     newObjecte(bolablanca);
 }
 
 void GLWidget::newConjuntBoles()
 {
     point4 vrp;
-    ConjuntBoles *conjuntboles = new ConjuntBoles();
+    ConjuntBoles *conjuntboles = new ConjuntBoles(tipoShading);
 
     esc->conjuntBoles = conjuntboles;
     for(int i=0; i<conjuntboles->listaConjuntBoles.size(); i++){
@@ -452,11 +521,16 @@ void GLWidget::newConjuntBoles()
         if (!fileName.isNull())
             newObj(fileName);
         cT = esc->taulaBillar->calculCapsa3D();*/
+        vec4 ka = vec4(0.25, 0.20725, 0.20725, 1);
+        vec4 kd = vec4(1.0, 0.829, 0.829, 1);
+        vec4 ke = vec4(0.296648, 0.296648, 0.296648, 1);
+        float kre = 0.088*128;
 
-        Bola *bolab = new Bola(0.0, 0.03075, 0.5, 0.03075, 1.0, 1.0, 1.0, "0");//x0,y0,z0,r,R,G,B,numBola
+        Material *mat = new Material(ka, kd, ke, kre);
+        Bola *bolab = new Bola(0.0, 0.03075, 0.5, 0.03075, 1.0, 1.0, 1.0, mat, tipoShading, "0");//x0,y0,z0,r,R,G,B,material,numBola
         esc->addObjecte(bolab);
 
-        ConjuntBoles *conjuntboles = new ConjuntBoles();
+        ConjuntBoles *conjuntboles = new ConjuntBoles(tipoShading);
         esc->conjuntBoles = conjuntboles;
         for(int i=0; i<conjuntboles->listaConjuntBoles.size(); i++){
             esc->listaObjectes.push_back(conjuntboles->listaConjuntBoles[i]);

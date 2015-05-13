@@ -5,10 +5,13 @@
 #include <escena.h>
 #include <bola.h>
 #include <conjuntboles.h>
+#include <material.h>
 
 #include <QtWidgets>
 #include <QGLWidget>
 #include <QTime>
+
+#include <QDir>
 
 #define ROTATIONSPEED 8
 
@@ -58,7 +61,7 @@ protected:
     void keyReleaseEvent(QKeyEvent *event);
     void Zoom (double inOut);
     void Pan(double dx, double dy);
-
+    void reinit(QString Shading, bool Text);
 
 private:
     Escena *esc;
@@ -88,6 +91,7 @@ private:
     QTimer *timer;
     QTimer *timer1;
     double z;
+    QString tipoShading;
 
     //  Metode per a carregar de fitxers el vertex i el fragment shader
    void InitShader( const char* vertexShaderFile,

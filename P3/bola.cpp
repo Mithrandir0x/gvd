@@ -1,10 +1,12 @@
 #include "bola.h"
 
-Bola::Bola(double x0, double y0, double z0, double r, double R, double G, double B, QString numBola) : Objecte(NumVerticesBola){
+Bola::Bola(double x0, double y0, double z0, double r, double R, double G, double B, Material *material, QString tipoShading, QString numBola) : Objecte(NumVerticesBola){
    color.x = R;
    color.y = G;
    color.z = B;
    color.w = 1;
+   mat = material;
+   this->tipoShading = tipoShading;
    make(x0,y0,z0,r,numBola);//esfera centrada en el origen de radio 1
    capsa = calculCapsa3D();
    double aristaMax = 0.0;
@@ -53,9 +55,6 @@ void Bola::make(double x0, double  y0, double  z0, double r, QString numBola)
 
 void Bola::initTextura(QString numBola)
  {
-     //numBola = "2";
-     //qDebug() << "Initializing textures...";
-
      QString fileTextura = "://resources/Bola";//añadido
      fileTextura.append(numBola).append(".jpg");//añadido
 
@@ -102,10 +101,17 @@ void Bola::triangle(const vec4& a, const vec4& b, const vec4& c )
     double u, v;
 
     vec4 vertArr[3] = {a, b, c};
+    normal3 n = cross(vertArr[0] - vertArr[1],vertArr[1] - vertArr[2]); //normal para flat shading
 
     for(int i =0; i<3;i++){
         points[Index] = vertArr[i];
-        colors[Index] = this->color;
+        //colors[Index] = this->color;//para el shading en lugar del color de cada vertex usamos su normal
+        if(this->tipoShading == "Flat"){
+            normal[Index] = n;
+        }else{
+            normal[Index] = vec3(vertArr[i].x, vertArr[i].y, vertArr[i].z);
+        }
+
         u = 0.5 + atan2(-points[Index].z, -points[Index].x)/(2*M_PI);
         v = 0.5 - asin(-points[Index].y)/M_PI;
         if(u < 0.0)u=0.0;

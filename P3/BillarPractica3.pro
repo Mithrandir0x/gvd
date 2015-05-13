@@ -7,7 +7,7 @@
 QT       += core gui opengl
 QT       += widgets
 
-TARGET = BillarPractica3
+TARGET = BillarPractica2
 TEMPLATE = app
 
 
@@ -24,7 +24,9 @@ SOURCES += main.cpp\
     bola.cpp \
     conjuntboles.cpp \
     camera.cpp \
-    llum.cpp
+    llum.cpp \
+    conjuntllums.cpp \
+    material.cpp
 
 HEADERS  += mainwindow.h \
     vec.h \
@@ -40,13 +42,19 @@ HEADERS  += mainwindow.h \
     bola.h \
     conjuntboles.h \
     camera.h \
-    llum.h
+    llum.h \
+    conjuntllums.h \
+    material.h
 
 FORMS    += mainwindow.ui
 
 OTHER_FILES += \
-    vshader1.glsl \
-    fshader1.glsl
+    vshaderFlatGouraud.glsl \
+    fshaderFlatGouraud.glsl \
+    vshaderPhong.glsl \
+    fshaderPhong.glsl \
+    vshaderToon.glsl \
+    fshaderToon.glsl
 
 RESOURCES += \
     resources.qrc

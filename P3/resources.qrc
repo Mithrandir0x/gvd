@@ -1,7 +1,7 @@
 <RCC>
     <qresource prefix="/">
-        <file>vshader1.glsl</file>
-        <file>fshader1.glsl</file>
+        <file>vshaderFlatGouraud.glsl</file>
+        <file>fshaderFlatGouraud.glsl</file>
         <file>resources/Bola0.jpg</file>
         <file>resources/Bola1.jpg</file>
         <file>resources/Bola2.jpg</file>

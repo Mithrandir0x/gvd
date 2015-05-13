@@ -3,7 +3,6 @@
 Escena::Escena(int vpa, int vph)
 {
     //std::cout<<"Escena::Escena"<<std::endl;
-    // Capsa minima contenidora provisional: S'ha de fer un recorregut dels objectes de l'escenes
     capsaMinima.pmin[0] = 0.0; capsaMinima.pmin[1] = 0.0; capsaMinima.pmin[2]=0.0;
     capsaMinima.a = 1; capsaMinima.h = 1; capsaMinima.p = 1;
 
@@ -14,6 +13,10 @@ Escena::Escena(int vpa, int vph)
 
     iniCamera(true, vpa, vph);//crea la camera general. a y h del vp obtenidos en glWidget
     iniCamera(false, vpa, vph);//crea la camera en primera persona.
+
+    AmbientLight = vec4(0.4, 0.4, 0.4, 1.0);
+    conjllums = new ConjuntLlums(); //incluye la primera luz y 2 mas
+
 }
 
 Escena::~Escena()
@@ -57,7 +60,7 @@ void Escena::iniCamera(bool camGen, int a, int h){
        camFirstP.wd.pmin.y = -0.0891265;
        camFirstP.wd.a = 0.251;
        camFirstP.wd.h = 0.188253;
-       camFirstP.piram.dant = 0.34;
+       camFirstP.piram.dant = 0.54;
        camFirstP.piram.dpost= 1.7;
        camFirstP.CalculaMatriuProjection();
    }
@@ -265,9 +268,11 @@ void Escena::computeCollisions(Capsa3D cb, Capsa3D cT, vec3 ctrB, vector<Capsa3D
 
 
 void Escena::draw(bool cameraActual) {
-
     if (taulaBillar!=NULL){
         taulaBillar->toGPU(pr);
+        setAmbientToGPU(pr);
+        conjllums->toGPU(pr);
+        setconTexturaToGPU(pr, conTextura);
         cam2GPU(cameraActual);
         taulaBillar->draw();
     }
@@ -275,6 +280,9 @@ void Escena::draw(bool cameraActual) {
     if (plaBase!=NULL){
         plaBase->texture->bind(0);
         plaBase->toGPU(pr);
+        setAmbientToGPU(pr);
+        conjllums->toGPU(pr);
+        setconTexturaToGPU(pr, conTextura);
         cam2GPU(cameraActual);
         plaBase->draw();
     }
@@ -282,6 +290,9 @@ void Escena::draw(bool cameraActual) {
     if (bolaBlanca!=NULL){
         bolaBlanca->texture->bind(0);
         bolaBlanca->toGPU(pr);
+        setAmbientToGPU(pr);
+        conjllums->toGPU(pr);
+        setconTexturaToGPU(pr, conTextura);
         cam2GPU(cameraActual);
         bolaBlanca->draw();
     }
@@ -290,6 +301,9 @@ void Escena::draw(bool cameraActual) {
         for (int i=0; i<conjuntBoles->listaConjuntBoles.size(); i++) {
             conjuntBoles->listaConjuntBoles[i]->texture->bind(0);
             conjuntBoles->listaConjuntBoles[i]->toGPU(pr);
+            setAmbientToGPU(pr);
+            conjllums->toGPU(pr);
+            setconTexturaToGPU(pr, conTextura);
             cam2GPU(cameraActual);
             conjuntBoles->listaConjuntBoles[i]->draw();
             }
@@ -298,6 +312,7 @@ void Escena::draw(bool cameraActual) {
 }
 
 void Escena::cam2GPU(bool cameraActual){
+
     if(cameraActual == true){
         camGeneral.toGPU(pr);
     }else{
@@ -315,6 +330,17 @@ void Escena::actualizaMatr(bool cameraActual){
         camFirstP.CalculaMatriuModelView();
         camFirstP.CalculaMatriuProjection();
     }
+}
+
+void Escena::setAmbientToGPU(QGLShaderProgram *program){
+    GLuint LuzAmbLocation = program->uniformLocation("LuzAmbiente");
+    glUniform4fv(LuzAmbLocation, 1, AmbientLight);
+}
+
+void Escena::setconTexturaToGPU(QGLShaderProgram *program, bool conText)
+{
+    GLuint conTextLocation = program->uniformLocation("conTextura");
+    glUniform1f( conTextLocation, conText );
 }
 
 

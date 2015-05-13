@@ -5,12 +5,14 @@
 #include <vector>
 #include <Common.h>
 #include <cara.h>
+#include <material.h>
 
 #include <QGLShaderProgram>
 #include <QOpenGLTexture>
 
 typedef Common::vec4  color4;
 typedef Common::vec4  point4;
+typedef Common::vec3  normal3;
 
 using namespace std;
 
@@ -36,15 +38,16 @@ protected:
     GLuint buffer; // Buffer de comunicacio amb la GPU
 
     // Estructures de vertexs i colors per passar a la GPU
-    int     numPoints;
+    int numPoints;
     point4 *points;
     color4 *colors;
     int Index; // index de control del numero de vertexs a posar a la GPU
 
     vec2 *vertexsTextura; // coordenades de textura associades a cada vertex
+    Material *mat;
+    normal3 *normal;
 
 public:
-
   // Capsa mínima contenidora de l'objecte
     Capsa3D capsa;
     QOpenGLTexture *texture;
@@ -52,7 +55,6 @@ public:
     //explicit Objecte(QObject *parent = 0);
     Objecte(const int npoints, QObject *parent = 0);
     Objecte(const int npoints, QString n);
-
     ~Objecte();
 
     // llegeix un model en format OBJ
