@@ -2,6 +2,8 @@
     <qresource prefix="/">
         <file>vshaderFlatGouraud.glsl</file>
         <file>fshaderFlatGouraud.glsl</file>
+        <file>vshaderPhong.glsl</file>
+        <file>fshaderPhong.glsl</file>
         <file>resources/Bola0.jpg</file>
         <file>resources/Bola1.jpg</file>
         <file>resources/Bola2.jpg</file>
