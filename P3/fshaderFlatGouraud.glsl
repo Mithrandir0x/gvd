@@ -14,10 +14,7 @@ uniform bool conTextura;
 
 void main()
 {
-   //gl_FragColor = color;
-   //gl_FragColor = texture2D(texMap, v_texcoord);
     if(conTextura == true){
-        //gl_FragColor = color * texture2D(texMap, v_texcoord);
         gl_FragColor = 0.25 * color + 0.75 * texture2D(texMap, v_texcoord);
     }else{
         gl_FragColor = color;

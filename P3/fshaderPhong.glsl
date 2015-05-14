@@ -52,7 +52,7 @@ uniform bool conTextura;
 void main()
 {
   
-  vec3 E = normalize( -pos );//vector de la pos al eye. en coordenadas de camara el eye esta en el origen
+  vec3 E = normalize( -pos );//vector de la pos al eye. En coordenadas de camara el eye esta en el origen
   vec3 H1 = normalize( L1 + E );
   vec3 H2 = normalize( L2 + E );
   vec3 H3 = normalize( L3 + E );
@@ -80,13 +80,10 @@ void main()
   vec4 color =  LuzAmbiente * material.cA  + Ilum1 + Ilum2 + Ilum3;
   color[3] = 1.0;
 
-
-
-
-    if(conTextura == true){
-        gl_FragColor = 0.25 * color + 0.75 * texture2D(texMap, v_texcoord);
-    }else{
-        gl_FragColor = color;
-    }
+   if(conTextura == true){
+       gl_FragColor = 0.25 * color + 0.75 * texture2D(texMap, v_texcoord);
+   }else{
+       gl_FragColor = color;
+   }
 }
 

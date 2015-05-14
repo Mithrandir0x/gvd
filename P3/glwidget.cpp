@@ -25,8 +25,8 @@ GLWidget::GLWidget(QWidget *parent)
     qtGreen = QColor::fromCmykF(0.40, 0.0, 1.0, 0.0);
     qtPurple = QColor::fromCmykF(0.39, 0.39, 0.0, 0.0);
 
-    tipoShading = "Phong";
-    esc->conTextura = true;
+    tipoShading = "Toon";
+    esc->conTextura = false;
     program = 0;
     moviment = false;
 }
@@ -42,7 +42,7 @@ GLWidget::~GLWidget()
 // Create a GLSL program object from vertex and fragment shader files
 void
 GLWidget::InitShader(const char* vShaderFile, const char* fShaderFile)
-{           
+{
 
     QGLShader *vshader = new QGLShader(QGLShader::Vertex, this);
     QGLShader *fshader = new QGLShader(QGLShader::Fragment, this);
@@ -64,18 +64,17 @@ GLWidget::InitShader(const char* vShaderFile, const char* fShaderFile)
 
     // unió del shader al pipeline gràfic
     program->bind();
-
 }
 
 void GLWidget::initShadersGPU()
 {
 // Carrega dels shaders i posa a punt per utilitzar els programes carregats a la GPU
     if(this->tipoShading == "Flat" || this->tipoShading =="Gouraud"){
-        InitShader( "://vshaderFlatGouraud.glsl", "://fshaderFlatGouraud.glsl" );
+        InitShader( "../pr3.3.3/vshaderFlatGouraud.glsl", "../pr3.3.3/fshaderFlatGouraud.glsl" );
     }else if(this->tipoShading == "Phong"){
-        InitShader( "://vshaderPhong.glsl", "://fshaderPhong.glsl" );
+        InitShader( "../pr3.3.3/vshaderPhong.glsl", "../pr3.3.3/fshaderPhong.glsl" );
     }else{
-        InitShader( "://vshaderToon.glsl", "://fshaderToon.glsl" );
+        InitShader( "../pr3.3.3/vshaderToon.glsl", "../pr3.3.3/fshaderToon.glsl" );
     }
 }
 
@@ -210,18 +209,21 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
 
 
 void GLWidget::reinit(QString Shading, bool Text){
+    QString tipoShadingOld = tipoShading;
     esc->conTextura = Text;
     if(tipoShading != Shading){
         if(((tipoShading == "Flat" || tipoShading == "Gouraud") && (Shading != "Flat" && Shading != "Gouraud")) ||
-              ((tipoShading != "Flat" && tipoShading != "Gouraud") && (Shading == "Flat" || Shading == "Gouraud"))  ){
-            std::cout<<"GLWidget::CAMBIO DE SHADER"<<std::endl;
+              ((tipoShading != "Flat" && tipoShading != "Gouraud"))  ){
+            std::cout<< "CAMBIO DE SHADER: " << Shading.toStdString()<<std::endl;
+            tipoShading = Shading;
             initShadersGPU();
         }
-        if((tipoShading == "Flat" && Shading != "Flat") || (tipoShading != "Flat" && Shading == "Flat")){
-            std::cout<<"GLWidget::NEW NORMALS"<<std::endl;
+        if((tipoShadingOld == "Flat" && Shading != "Flat") || (tipoShadingOld != "Flat" && Shading == "Flat")){
+            std::cout<<"NEW NORMALS "<< Shading.toStdString()<<std::endl;
             tipoShading = Shading;
             newSalaBillar();
         }else{
+            std::cout<< "MISMAS NORMALES: " << Shading.toStdString()<<std::endl;
             tipoShading = Shading;
         }
     }
@@ -335,7 +337,7 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
           }
        }
 
-       update();
+       updateGL();
 }
 
 void GLWidget::keyReleaseEvent(QKeyEvent *event)
