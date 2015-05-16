@@ -25,7 +25,7 @@ GLWidget::GLWidget(QWidget *parent)
     qtGreen = QColor::fromCmykF(0.40, 0.0, 1.0, 0.0);
     qtPurple = QColor::fromCmykF(0.39, 0.39, 0.0, 0.0);
 
-    tipoShading = "Phong";
+    tipoShading = "Flat";
     esc->conTextura = false;
     program = 0;
     moviment = false;

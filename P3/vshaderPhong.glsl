@@ -8,7 +8,6 @@
 
 
 IN vec4 vPosition;
-OUT vec3 Position;
 IN vec3 vNormal;
 OUT vec3 Normal;
 IN vec2 vCoordTexture;
@@ -58,7 +57,7 @@ void main()
 {
   gl_Position = projection * model_view * vPosition;
   //gl_Position = gl_Position/gl_Position.w;
-  gl_Position[3] = 1;
+  gl_Position[3] = 1.0;
 
   pos = (model_view * vPosition).xyz;
   L1 = normalize( (model_view * light1.gpuLightPosition).xyz - pos );
@@ -70,7 +69,6 @@ void main()
   distance2 = length(light2.gpuLightPosition - vPosition);
   distance3 = length(light3.gpuLightPosition - vPosition);
 
-  Position = vPosition.xyz;
   Normal = vNormal;
   v_texcoord = vCoordTexture;
 

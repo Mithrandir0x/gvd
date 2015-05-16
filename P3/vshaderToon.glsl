@@ -42,7 +42,8 @@ uniform bool conTextura;
 void main()
 {
   gl_Position = projection * model_view * vPosition;
-  gl_Position = gl_Position/gl_Position.w;
+  //gl_Position = gl_Position/gl_Position.w;
+  gl_Position[3] = 1.0;
 
   vec3 pos = (model_view * vPosition).xyz;
   //Normal = normalize( (model_view*vec4(vNormal, 0.0)).xyz );
