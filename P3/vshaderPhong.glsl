@@ -57,7 +57,8 @@ uniform bool conTextura;
 void main()
 {
   gl_Position = projection * model_view * vPosition;
-  gl_Position = gl_Position/gl_Position.w;
+  //gl_Position = gl_Position/gl_Position.w;
+  gl_Position[3] = 1;
 
   pos = (model_view * vPosition).xyz;
   L1 = normalize( (model_view * light1.gpuLightPosition).xyz - pos );

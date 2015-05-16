@@ -47,7 +47,6 @@ public:
     void setDCamera(bool camGeneral, float d);
     void cam2GPU(bool cameraActual);
     void computeCollisions(Capsa3D cb, Capsa3D cT, vec3 ctrB, vector<Capsa3D> listaCapsasConjuntBoles, QKeyEvent *event);
-    void actualizaMatr(bool cameraActual);
     void setAmbientToGPU(QGLShaderProgram *program);
     void setconTexturaToGPU(QGLShaderProgram *program, bool conText);
 

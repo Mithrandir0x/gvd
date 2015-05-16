@@ -63,7 +63,7 @@ void Camera::CalculWindow( Capsa3D c)
     mat4 MDP;
     vec4  vaux[8], vauxMod[8];
 
-    modView = LookAt(vs.obs, vs.vrp, vs.vup);
+    //modView = LookAt(vs.obs, vs.vrp, vs.vup);
 
     if (piram.proj==PERSPECTIVA) {
         CreaMatDp(MDP); // crea la matriu de deformacio perspectiva

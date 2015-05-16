@@ -41,13 +41,15 @@ protected:
     int numPoints;
     point4 *points;
     color4 *colors;
-    int Index; // index de control del numero de vertexs a posar a la GPU
+    //int Index; // index de control del numero de vertexs a posar a la GPU
 
     vec2 *vertexsTextura; // coordenades de textura associades a cada vertex
     Material *mat;
-    normal3 *normal;
+    //normal3 *normal;
 
 public:
+    int Index;
+    normal3 *normal;
   // Capsa mínima contenidora de l'objecte
     Capsa3D capsa;
     QOpenGLTexture *texture;

@@ -12,7 +12,6 @@ Escena::Escena(int vpa, int vph)
     conjuntBoles = NULL;
 
     iniCamera(true, vpa, vph);//crea la camera general. a y h del vp obtenidos en glWidget
-    iniCamera(false, vpa, vph);//crea la camera en primera persona.
 
     AmbientLight = vec4(0.4, 0.4, 0.4, 1.0);
     conjllums = new ConjuntLlums(); //incluye la primera luz y 2 mas
@@ -47,25 +46,9 @@ void Escena::iniCamera(bool camGen, int a, int h){
        camGeneral.piram.dpost = 30.0;
        camGeneral.CalculaMatriuProjection();
    }else{
-       camFirstP.piram.proj = PERSPECTIVA;
-       camFirstP.ini(a, h, capsaMinima);
 
-       camFirstP.vs.vup = vec4(0.0, 1.0, 0.0, 0.0);
-       camFirstP.vs.obs = vec4(0.0, 0.0307474, 0.6, 1.0);  
-       point4 vrp = point4(0.0, 0.0307474, 0.5, 1.0);
-       setVRPCamera(false, vrp);  
-       setDCamera(false, 1.3);
-
-       camFirstP.wd.pmin.x = -0.1255;
-       camFirstP.wd.pmin.y = -0.0891265;
-       camFirstP.wd.a = 0.251;
-       camFirstP.wd.h = 0.188253;
-       camFirstP.piram.dant = 0.54;
-       camFirstP.piram.dpost= 1.7;
-       camFirstP.CalculaMatriuProjection();
    }
 }
-
 
 void Escena::setAnglesCamera(bool camGen, float angX, float angY, float angZ){
     if(camGen == true){
@@ -77,58 +60,40 @@ void Escena::setAnglesCamera(bool camGen, float angX, float angY, float angZ){
         camGeneral.vs.obs = camGeneral.CalculObs(camGeneral.vs.vrp, camGeneral.piram.d, camGeneral.vs.angx, camGeneral.vs.angy);
         camGeneral.CalculaMatriuModelView();
     }else{
-        camFirstP.vs.angx = angX;
-        camFirstP.vs.angy = angY;
-        camFirstP.vs.angz = angZ;
-        vec3 vu = camFirstP.CalculVup(camFirstP.vs.angx, camFirstP.vs.angy, camFirstP.vs.angz);
-        camFirstP.vs.vup = vec4(vu[0], vu[1], vu[2], 0.0);
-        camFirstP.vs.obs = camFirstP.CalculObs(camFirstP.vs.vrp,camFirstP.piram.d,camFirstP.vs.angx,camFirstP.vs.angy);
-        camFirstP.CalculaMatriuModelView();
     }
-
-
 }
 
-void Escena::setVRPCamera(bool camGen, point4 vrp){
+void Escena::setVRPCamera(bool camGen, point4 vrp){//suponiendo que el obs no cambia
     if(camGen == true){
          camGeneral.vs.vrp = vrp;
+         camGeneral.vs.angx = 180.0 /M_PI * atan2(vrp.y-camGeneral.vs.obs.y, vrp.z-camGeneral.vs.obs.z);
+         camGeneral.vs.angy = 180.0 /M_PI * atan2(camGeneral.vs.obs.x - vrp.x, camGeneral.vs.obs.z - vrp.z);
+         camGeneral.vs.angz = 180.0 /M_PI * atan2(vrp.y-camGeneral.vs.obs.y, vrp.x-camGeneral.vs.obs.x);
          camGeneral.CalculaMatriuModelView();
      }else{
-         camFirstP.vs.vrp = vrp;
-         camFirstP.CalculaMatriuModelView();
      }
 }
 
 void Escena::setWindowCamera(bool camGen, bool retallat, Capsa2D window){
-    if(camGen == true){
-        camGeneral.wd = window;
+    if(camGen == true){        
         if(retallat == true){
+            camGeneral.wd = window;
             camGeneral.CalculWindowAmbRetallat();
         }
         camGeneral.AjustaAspectRatioWd();//amplia el window per tal que el seu aspect ratio sigui igual al del viewport
         camGeneral.CalculaMatriuProjection();
     }else{
-        camFirstP.wd = window;
-        camFirstP.CalculAngleOberturaHoritzontal();
-        camFirstP.CalculAngleOberturaVertical();
-        if(retallat == true){
-            camFirstP.CalculWindowAmbRetallat();
-        }
-        camFirstP.AjustaAspectRatioWd();//amplia el window per tal que el seu aspect ratio sigui igual al del viewport
-        camFirstP.CalculaMatriuProjection();
     }
 }
 
 void Escena::setDCamera(bool camGen, float d){
     if(camGen == true){
         camGeneral.piram.d = d;
+        camGeneral.CalculObs(camGeneral.vs.vrp, d, camGeneral.vs.angx, camGeneral.vs.angy);
+        camGeneral.CalculaMatriuModelView();
     }else{
-        camFirstP.piram.d = d;
-        camFirstP.CalculaMatriuProjection();
     }
 }
-
-
 
 void Escena::addObjecte(Objecte *obj) {
     if (dynamic_cast<TaulaBillar*>(obj)){
@@ -308,7 +273,6 @@ void Escena::draw(bool cameraActual) {
             conjuntBoles->listaConjuntBoles[i]->draw();
             }
     }
-
 }
 
 void Escena::cam2GPU(bool cameraActual){
@@ -316,19 +280,6 @@ void Escena::cam2GPU(bool cameraActual){
     if(cameraActual == true){
         camGeneral.toGPU(pr);
     }else{
-        camFirstP.toGPU(pr);
-    }
-}
-
-void Escena::actualizaMatr(bool cameraActual){
-    Capsa3D c;
-
-    if(cameraActual == true){
-        //camGeneral.CalculaMatriuModelView();
-        camGeneral.CalculaMatriuProjection();
-    }else{
-        camFirstP.CalculaMatriuModelView();
-        camFirstP.CalculaMatriuProjection();
     }
 }
 

@@ -37,6 +37,8 @@ public:
 
     bool cameraActual; //true para camara general
 
+
+
 public slots:
     void newPlaBase();
     PlaBase* newPlaBs();
@@ -47,9 +49,6 @@ public slots:
 
     // Metode per iniciar la dinàmica del joc
     void Play();
-
-    void transition2First();
-    void transition2General();
 
 protected:
     void initializeGL();
@@ -78,6 +77,13 @@ private:
 
     bool moviment;
 
+    QGLShader *vshaderFG;
+    QGLShader *fshaderFG;
+    QGLShader *vshaderP;
+    QGLShader *fshaderP;
+    QGLShader *vshaderT;
+    QGLShader *fshaderT;
+
     // Programa de la GPU
     QGLShaderProgram *program;
     mat4 m220 = Scale(2.0/20.0, 2.0/20.0, 2.0/20.0);
@@ -94,19 +100,14 @@ private:
     QString tipoShading;
 
     //  Metode per a carregar de fitxers el vertex i el fragment shader
-   void InitShader( const char* vertexShaderFile,
-                    const char* fragmentShaderFile );
+   void InitShader();
 
    // Metode per inicialitzar els shaders de l'aplicacio
-    void initShadersGPU();
+    void changeShadersGPU();
 
     // Metode que carrega un nou objecte a l'escena
     void newObjecte(Objecte * obj);
 
-    // Metode per adaptar l'escena al tamany del widget
-    void adaptaObjecteTamanyWidget(Objecte *obj);
-
-    void modcamFirst();
 };
 
 

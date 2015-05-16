@@ -63,19 +63,19 @@ void main()
   vec4 diffuse1 = light1.gpuId * material.cD * max( dot(L1, N), 0.0 );
   vec4 specular1 = max(pow(max(dot(N, H1), 0.0), material.coefRefEsp) * light1.gpuIs * material.cS , 0.0);
   float attDist1 = 1.0/(light1.gpuAtt_constant + light1.gpuAtt_linear * distance1 + light1.gpuAtt_quadratic * pow(distance1,2.0) );
-  float Ilum1 = (ambient1 + diffuse1 + specular1);
+  float Ilum1 = attDist1 * (ambient1 + diffuse1 + specular1);
 
   vec4 ambient2 = light2.gpuIa * material.cA;
   vec4 diffuse2 = light2.gpuId * material.cD * max( dot(L2, N), 0.0 );
   vec4 specular2 = max(pow(max(dot(N, H2), 0.0), material.coefRefEsp) * light2.gpuIs * material.cS , 0.0);
   float attDist2 = 1.0/(light2.gpuAtt_constant + light2.gpuAtt_linear * distance2 + light2.gpuAtt_quadratic * pow(distance2,2.0) );
-  float Ilum2 = (ambient2 + diffuse2 + specular2);
+  float Ilum2 = attDist2 * (ambient2 + diffuse2 + specular2);
 
   vec4 ambient3 = light3.gpuIa * material.cA;
   vec4 diffuse3 = light3.gpuId * material.cD * max( dot(L3, N), 0.0 );
   vec4 specular3 = max(pow(max(dot(N, H3), 0.0), material.coefRefEsp) * light3.gpuIs * material.cS , 0.0);
   float attDist3 = 1.0/(light3.gpuAtt_constant + light3.gpuAtt_linear * distance3 + light3.gpuAtt_quadratic * pow(distance3,2.0) );
-  float Ilum3 = (ambient3 + diffuse3 + specular3);
+  float Ilum3 = attDist3 * (ambient3 + diffuse3 + specular3);
 
   vec4 color =  LuzAmbiente * material.cA  + Ilum1 + Ilum2 + Ilum3;
   color[3] = 1.0;

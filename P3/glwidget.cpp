@@ -25,7 +25,7 @@ GLWidget::GLWidget(QWidget *parent)
     qtGreen = QColor::fromCmykF(0.40, 0.0, 1.0, 0.0);
     qtPurple = QColor::fromCmykF(0.39, 0.39, 0.0, 0.0);
 
-    tipoShading = "Toon";
+    tipoShading = "Phong";
     esc->conTextura = false;
     program = 0;
     moviment = false;
@@ -41,19 +41,34 @@ GLWidget::~GLWidget()
 
 // Create a GLSL program object from vertex and fragment shader files
 void
-GLWidget::InitShader(const char* vShaderFile, const char* fShaderFile)
+GLWidget::InitShader()
 {
+    vshaderFG = new QGLShader(QGLShader::Vertex, this);
+    fshaderFG = new QGLShader(QGLShader::Fragment, this);
+    vshaderP = new QGLShader(QGLShader::Vertex, this);
+    fshaderP = new QGLShader(QGLShader::Fragment, this);
+    vshaderT = new QGLShader(QGLShader::Vertex, this);
+    fshaderT = new QGLShader(QGLShader::Fragment, this);
 
-    QGLShader *vshader = new QGLShader(QGLShader::Vertex, this);
-    QGLShader *fshader = new QGLShader(QGLShader::Fragment, this);
-
-    // Compilació del vertex shader
-    vshader->compileSourceFile(vShaderFile);
-    fshader->compileSourceFile(fShaderFile);
+    vshaderFG->compileSourceFile("://vshaderFlatGouraud.glsl");
+    fshaderFG->compileSourceFile("://fshaderFlatGouraud.glsl");
+    vshaderP->compileSourceFile("://vshaderPhong.glsl");
+    fshaderP->compileSourceFile("://fshaderPhong.glsl");
+    vshaderT->compileSourceFile("://vshaderToon.glsl");
+    fshaderT->compileSourceFile("://fshaderToon.glsl");
 
     program = new QGLShaderProgram(this);
-    program->addShader(vshader);
-    program->addShader(fshader);
+
+    if(tipoShading == "Flat" || tipoShading == "Gouraud"){
+        program->addShader(vshaderFG);
+        program->addShader(fshaderFG);
+    }else if(tipoShading == "Phong"){
+        program->addShader(vshaderP);
+        program->addShader(fshaderP);
+    }else{
+        program->addShader(vshaderT);
+        program->addShader(fshaderT);
+    }
 
     program->bindAttributeLocation("vPosition", PROGRAM_VERTEX_ATTRIBUTE);
     program->bindAttributeLocation("vColor", PROGRAM_COLOR_ATTRIBUTE);
@@ -66,16 +81,22 @@ GLWidget::InitShader(const char* vShaderFile, const char* fShaderFile)
     program->bind();
 }
 
-void GLWidget::initShadersGPU()
+void GLWidget::changeShadersGPU()
 {
-// Carrega dels shaders i posa a punt per utilitzar els programes carregats a la GPU
+    program->removeAllShaders();
+
     if(this->tipoShading == "Flat" || this->tipoShading =="Gouraud"){
-        InitShader( "../pr3.3.3/vshaderFlatGouraud.glsl", "../pr3.3.3/fshaderFlatGouraud.glsl" );
+        program->addShader(vshaderFG);
+        program->addShader(fshaderFG);
     }else if(this->tipoShading == "Phong"){
-        InitShader( "../pr3.3.3/vshaderPhong.glsl", "../pr3.3.3/fshaderPhong.glsl" );
-    }else{
-        InitShader( "../pr3.3.3/vshaderToon.glsl", "../pr3.3.3/fshaderToon.glsl" );
+        program->addShader(vshaderP);
+        program->addShader(fshaderP);
+    }else{   
+        program->addShader(vshaderT);
+        program->addShader(fshaderT);
     }
+    program->link();
+    program->bind();
 }
 
 QSize GLWidget::minimumSizeHint() const
@@ -134,14 +155,13 @@ void GLWidget::initializeGL()
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
-    initShadersGPU();
+    InitShader();
     esc->pr = program;
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     if(cameraActual==true){
         esc->camGeneral.toGPU(program);
     }else{
-        esc->camFirstP.toGPU(program);
     }
 
     esc->setAmbientToGPU(program);
@@ -152,15 +172,13 @@ void GLWidget::paintGL()
 {
    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-   esc->actualizaMatr(cameraActual);
    esc->draw(cameraActual);
 
    /*if(cameraActual == true){
        std::cout<<"\ncamGeneral";
        esc->camGeneral.PrintCamera();
    }else{
-       std::cout<<"\ncamFirstP";
-       esc->camFirstP.PrintCamera();
+
    }*/
 }
 
@@ -173,7 +191,6 @@ void GLWidget::resizeGL(int width, int height)
     if(cameraActual==true){
         esc->camGeneral.setViewport(0, 0, width, height);
     }else{
-        esc->camFirstP.setViewport(0, 0, width, height);
     }
 }
 
@@ -192,7 +209,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
 
 
     if (event->buttons() & Qt::LeftButton) {
-        if(lastPos.y()!= event->y() && lastPos.x()!= event->x()) {
+        if(lastPos.y()!= event->y() && lastPos.x()!= event->x()) {//no utilizado por consideraciones de diseño
             //setYRotation(dx);
             //setXRotation(dy);
         }
@@ -216,7 +233,7 @@ void GLWidget::reinit(QString Shading, bool Text){
               ((tipoShading != "Flat" && tipoShading != "Gouraud"))  ){
             std::cout<< "CAMBIO DE SHADER: " << Shading.toStdString()<<std::endl;
             tipoShading = Shading;
-            initShadersGPU();
+            changeShadersGPU();
         }
         if((tipoShadingOld == "Flat" && Shading != "Flat") || (tipoShadingOld != "Flat" && Shading == "Flat")){
             std::cout<<"NEW NORMALS "<< Shading.toStdString()<<std::endl;
@@ -284,19 +301,16 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
        case Qt::Key_Dollar:
            reinit("Toon", true);
            break;
-       case Qt::Key_T:
-           z = 0.6;
-           timer1 = new QTimer(this);
-           connect(timer1, SIGNAL(timeout()),this, SLOT(transition2General()));
-           cameraActual = true;//camGen
-           timer1->start(10);
-           break;
        case Qt::Key_Up:
            if (event->modifiers() & Qt::AltModifier){
                 Pan(0, 0.01);
                 break;
            }
            m = Translate(0.0,  0.0, esc->dzN) * Translate(ctrB.x,  ctrB.y, ctrB.z) * RotateX((esc->dzN*180.0)/(0.0307474*M_PI)) * Translate(-ctrB.x,  -ctrB.y, -ctrB.z );
+           for(int i = 0; i<esc->bolaBlanca->Index; i++){
+             vec4 kk  = (Translate(ctrB.x,  ctrB.y, ctrB.z) * RotateX((esc->dzN*180.0)/(0.0307474*M_PI)) * Translate(-ctrB.x,  -ctrB.y, -ctrB.z ) * vec4(esc->bolaBlanca->normal[i],0));
+             esc->bolaBlanca->normal[i] = vec3(kk.x, kk.y, kk.z);
+           }
            break;
        case Qt::Key_Down:
             if (event->modifiers() & Qt::AltModifier){
@@ -304,6 +318,10 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
               break;
             }
             m = Translate(0.0,  0.0, esc->dzP) * Translate(ctrB.x,  ctrB.y, ctrB.z) * RotateX((esc->dzP*180.0)/(0.0307474*M_PI)) * Translate(-ctrB.x,  -ctrB.y, -ctrB.z );
+            for(int i = 0; i<esc->bolaBlanca->Index; i++){
+              vec4 kk  = (Translate(ctrB.x,  ctrB.y, ctrB.z) * RotateX((esc->dzP*180.0)/(0.0307474*M_PI)) * Translate(-ctrB.x,  -ctrB.y, -ctrB.z ) * vec4(esc->bolaBlanca->normal[i],0));
+              esc->bolaBlanca->normal[i] = vec3(kk.x, kk.y, kk.z);
+            }
             break;
        case Qt::Key_Left:
            if (event->modifiers() & Qt::AltModifier){
@@ -311,6 +329,10 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
               break;
            }
            m = Translate(esc->dxN,  0.0, 0.0) * Translate(ctrB.x,  ctrB.y, ctrB.z) * RotateZ(-(esc->dxN*180.0)/(0.0307474*M_PI)) * Translate(-ctrB.x,  -ctrB.y, -ctrB.z );
+           for(int i = 0; i<esc->bolaBlanca->Index; i++){
+             vec4 kk  = (Translate(ctrB.x,  ctrB.y, ctrB.z) * RotateZ(-(esc->dxN*180.0)/(0.0307474*M_PI)) * Translate(-ctrB.x,  -ctrB.y, -ctrB.z ) * vec4(esc->bolaBlanca->normal[i],0));
+             esc->bolaBlanca->normal[i] = vec3(kk.x, kk.y, kk.z);
+           }
            break;
        case Qt::Key_Right:
           if (event->modifiers() & Qt::AltModifier){
@@ -318,6 +340,10 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
               break;
            }
            m = Translate(esc->dxP,  0.0, 0.0) * Translate(ctrB.x,  ctrB.y, ctrB.z) * RotateZ(-(esc->dxP*180.0)/(0.0307474*M_PI)) * Translate(-ctrB.x,  -ctrB.y, -ctrB.z );
+           for(int i = 0; i<esc->bolaBlanca->Index; i++){
+             vec4 kk  = (Translate(ctrB.x,  ctrB.y, ctrB.z) * RotateZ(-(esc->dxP*180.0)/(0.0307474*M_PI)) * Translate(-ctrB.x,  -ctrB.y, -ctrB.z ) * vec4(esc->bolaBlanca->normal[i],0));
+             esc->bolaBlanca->normal[i] = vec3(kk.x, kk.y, kk.z);
+           }
            break;
        case Qt::Key_Plus:
            Zoom(-0.05);
@@ -331,9 +357,6 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
           esc->bolaBlanca->aplicaTG(m);
 
           if(cameraActual == false){
-              esc->setVRPCamera(false, point4(ctrB.x, ctrB.y, ctrB.z, 1.0));
-              esc->camFirstP.vs.obs = vec4(ctrB.x, 0.0307474, cb.pmin.z + (cb.p/2.0) + 0.1, 1.0);
-              esc->camFirstP.piram.dpost = esc->camFirstP.vs.obs.z - esc->capsaMinima.pmin.z + 0.1;
           }
        }
 
@@ -359,57 +382,6 @@ void GLWidget::Pan(double dx, double dy) {
     updateGL();
 }
 
-void GLWidget::transition2First(){
-    std::cout<<"\ntransition2First";
-
-    z += 0.001;
-    if(z>0.601){
-        updateGL();
-        timer->stop();
-        delete timer;
-        timer = NULL;
-        return;
-    }
-
-    if(z<0.6){
-        esc->camGeneral.vs.obs = vec4(0.0, 20.0 - 33.282087667 * z, z, 1.0);
-        esc->camGeneral.vs.vup = vec4(0.0, z/0.6, -1.0+(z/0.6), 0.0);
-        esc->camGeneral.CalculaMatriuModelView();
-    }else{
-        cameraActual = false;//camFirstP
-    }
-
-    updateGL();
-}
-
-void GLWidget::transition2General(){
-    std::cout<<"\ntransition2General";
-
-    if(z>0.4){
-       z -= 0.001;
-    }else{
-       z -= 0.2;
-    }
-
-    if(z<-0.001){
-        updateGL();
-        timer1->stop();
-        delete timer1;
-        timer1 = NULL;
-        return;
-    }
-
-    esc->camGeneral.vs.obs = vec4(0.0, 20.0 - 33.282087667 * z, z, 1.0);
-    esc->camGeneral.vs.vup = vec4(0.0, z/0.6, -1.0+(z/0.6), 0.0);
-    esc->camGeneral.CalculaMatriuModelView();
-
-    updateGL();
-}
-
-void GLWidget::adaptaObjecteTamanyWidget(Objecte *obj)
-{
-
-}
 
 void GLWidget::newObjecte(Objecte * obj)
 {
@@ -425,10 +397,9 @@ void GLWidget::newObjecte(Objecte * obj)
     if(cameraActual == true){
         esc->camGeneral.CalculWindow(esc->capsaMinima);
         esc->camGeneral.AmpliaWindow(-0.1);
+        esc->camGeneral.CalculaMatriuProjection();
     }else{
-        esc->camFirstP.vs.vrp = point4(0.0, 0.0307474, 0.5, 1.0);//por si apretamos B antes de cargar obj
     }
-
 
     updateGL();
 }
@@ -505,8 +476,8 @@ void GLWidget::newConjuntBoles()
     if(cameraActual == true){
         esc->camGeneral.CalculWindow(esc->capsaMinima);
         esc->camGeneral.AmpliaWindow(-0.1);
+        esc->camGeneral.CalculaMatriuProjection();
     }else{
-        esc->camFirstP.vs.vrp = point4(0.0, 0.0307474, 0.5, 1.0);
     }
 
     updateGL();
@@ -546,12 +517,11 @@ void GLWidget::newConjuntBoles()
         vrp[2] = esc->capsaMinima.pmin[2]+(esc->capsaMinima.p/2.0);
         vrp[3] = 1.0;
 
-        esc->camGeneral.vs.vrp = point4(vrp[0], vrp[1] , vrp[2], 1.0);
+        esc->setVRPCamera(cameraActual, vrp);
 
         esc->camGeneral.CalculWindow(esc->capsaMinima);
         esc->camGeneral.AmpliaWindow(-0.1);
-
-        esc->camFirstP.vs.vrp = point4(0.0, 0.0307474, 0.5, 1.0);
+        esc->camGeneral.CalculaMatriuProjection();
 
         updateGL();
     }
