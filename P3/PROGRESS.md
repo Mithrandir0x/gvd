@@ -489,6 +489,10 @@ void PlaBase::quad( int a, int b, int c, int d )
 }
 ```
 
+Independentment del tipus de shading que s'estigui utilitzant, les normals es
+calculen de la mateixa manera, a diferència de la classe `Bola`, com veurem a
+continuació.
+
 ### 3.3 Càlcul de les normals de `Bola`
 
 A diferència del pla base, la bola requereix una mica més de complexitat per a
