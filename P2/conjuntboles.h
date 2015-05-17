@@ -6,7 +6,7 @@
 class ConjuntBoles
 {
 public:
-    ConjuntBoles(QString tipoShading);
+    ConjuntBoles();
     ~ConjuntBoles();
 
     vector<Bola*> listaConjuntBoles;

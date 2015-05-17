@@ -10,7 +10,7 @@ GLWidget::GLWidget(QWidget *parent)
     : QGLWidget(QGLFormat(QGL::SampleBuffers), parent)
 
 {
-    std::cout<<"GLWidget::GLWidget"<<std::endl;
+    //std::cout<<"GLWidget::GLWidget"<<std::endl;
     setFocusPolicy( Qt::StrongFocus );
 
     cameraActual = true;
@@ -27,8 +27,6 @@ GLWidget::GLWidget(QWidget *parent)
     clearColor = Qt::black;
     qtGreen = QColor::fromCmykF(0.40, 0.0, 1.0, 0.0);
     qtPurple = QColor::fromCmykF(0.39, 0.39, 0.0, 0.0);
-
-    tipoShading = "Flat";
 
     program = 0;
     moviment = false;
@@ -128,9 +126,10 @@ void GLWidget::setZRotation(int angle)
 {
 }
 
+
 void GLWidget::initializeGL()
 {
-    std::cout<<"GLWidget::initializeGL"<<std::endl;
+    //std::cout<<"GLWidget::initializeGL"<<std::endl;
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
@@ -143,9 +142,6 @@ void GLWidget::initializeGL()
     }else{
         esc->camFirstP.toGPU(program);
     }
-
-    esc->setAmbientToGPU(program);
-    esc->conjllums->toGPU(program);//incluye la primera luz y 2 mas
 }
 
 void GLWidget::paintGL()
@@ -155,13 +151,13 @@ void GLWidget::paintGL()
    esc->actualizaMatr(cameraActual);
    esc->draw(cameraActual);
 
-   /*if(cameraActual == true){
+   if(cameraActual == true){
        std::cout<<"\ncamGeneral";
        esc->camGeneral.PrintCamera();
    }else{
        std::cout<<"\ncamFirstP";
        esc->camFirstP.PrintCamera();
-   }*/
+   }
 }
 
 
@@ -224,18 +220,19 @@ void GLWidget::keyPressEvent(QKeyEvent *event)
        switch ( event->key() )
        {
        case Qt::Key_B:
-                  z = 0.45;
+                  /*z = 0.45;
                   timer = new QTimer(this);
                   connect(timer, SIGNAL(timeout()),this, SLOT(transition2First()));
-                  timer->start(10);
+                  timer->start(10);*/
+                  cameraActual = false; //camFirstP
                   break;
        case Qt::Key_T:
-                  z = 0.6;
+                  /*z = 0.6;
                   timer1 = new QTimer(this);
                   connect(timer1, SIGNAL(timeout()),this, SLOT(transition2General()));
                   cameraActual = true;//camGen
-                  timer1->start(10);
-
+                  timer1->start(10);*/
+                  cameraActual = true;//CamGen
                   break;
        case Qt::Key_Up:
                   if (event->modifiers() & Qt::AltModifier){
@@ -389,7 +386,6 @@ void GLWidget::newPlaBase()
 }
 
 PlaBase* GLWidget::newPlaBs(){
-
     point4 v0  = point4( 0.5441, 0.0, 1.0, 1.0 );
     point4 v1  = point4( 0.5441, 0.0,-1.0, 1.0 );
     point4 v2  = point4(-0.5441, 0.0,-1.0, 1.0 );
@@ -400,14 +396,7 @@ PlaBase* GLWidget::newPlaBs(){
     color4 cv2  = color4( 1.0, 1.0, 0.0, 1.0 ); //yellow
     color4 cv3  = color4( 0.0, 1.0, 0.0, 1.0 ); //green
 
-    vec3 ka = vec3(0.19125, 0.0735, 0.0225);
-    vec3 kd = vec3(0.7038, 0.27048, 0.0828);
-    vec3 ke = vec3(0.256777, 0.137622, 0.086014);
-    float kre = 0.1*128;
-
-    Material *mat = new Material(ka, kd, ke, kre);
-
-    PlaBase *plaBase = new PlaBase(v0, v1, v2, v3, cv0, cv1, cv2, cv3, mat);
+    PlaBase *plaBase = new PlaBase(v0, v1, v2, v3, cv0, cv1, cv2, cv3);
     return plaBase;
 }
 
@@ -421,20 +410,14 @@ void GLWidget::newObj(QString fichero)
 
 void GLWidget::newBola()
 {
-    vec4 ka = vec4(0.25, 0.20725, 0.20725, 1);
-    vec4 kd = vec4(1.0, 0.829, 0.829, 1);
-    vec4 ke = vec4(0.296648, 0.296648, 0.296648, 1);
-    float kre = 0.088*128;
-
-    Material *mat = new Material(ka, kd, ke, kre);
-    Bola *bolablanca = new Bola(0.0, 0.03075, 0.5, 0.03075, 1.0, 1.0, 1.0, mat, tipoShading, "0");//x0,y0,z0,r,R,G,B,material,numBola
+    Bola *bolablanca = new Bola(0.0, 0.03075, 0.5, 0.03075, 1.0, 1.0, 1.0, "0");//x0,y0,z0,r,R,G,B,numBola
     newObjecte(bolablanca);
 }
 
 void GLWidget::newConjuntBoles()
 {
     point4 vrp;
-    ConjuntBoles *conjuntboles = new ConjuntBoles(tipoShading);
+    ConjuntBoles *conjuntboles = new ConjuntBoles();
 
     esc->conjuntBoles = conjuntboles;
     for(int i=0; i<conjuntboles->listaConjuntBoles.size(); i++){
@@ -469,16 +452,11 @@ void GLWidget::newConjuntBoles()
         if (!fileName.isNull())
             newObj(fileName);
         cT = esc->taulaBillar->calculCapsa3D();*/
-        vec4 ka = vec4(0.25, 0.20725, 0.20725, 1);
-        vec4 kd = vec4(1.0, 0.829, 0.829, 1);
-        vec4 ke = vec4(0.296648, 0.296648, 0.296648, 1);
-        float kre = 0.088*128;
 
-        Material *mat = new Material(ka, kd, ke, kre);
-        Bola *bolab = new Bola(0.0, 0.03075, 0.5, 0.03075, 1.0, 1.0, 1.0, mat, tipoShading, "0");//x0,y0,z0,r,R,G,B,material,numBola
+        Bola *bolab = new Bola(0.0, 0.03075, 0.5, 0.03075, 1.0, 1.0, 1.0, "0");//x0,y0,z0,r,R,G,B,numBola
         esc->addObjecte(bolab);
 
-        ConjuntBoles *conjuntboles = new ConjuntBoles(tipoShading);
+        ConjuntBoles *conjuntboles = new ConjuntBoles();
         esc->conjuntBoles = conjuntboles;
         for(int i=0; i<conjuntboles->listaConjuntBoles.size(); i++){
             esc->listaObjectes.push_back(conjuntboles->listaConjuntBoles[i]);

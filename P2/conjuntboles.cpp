@@ -1,6 +1,6 @@
 #include "conjuntboles.h"
 
-ConjuntBoles::ConjuntBoles(QString tipoShading)
+ConjuntBoles::ConjuntBoles()
 {
     Capsa3D capsa;
     Bola *bola;
@@ -54,13 +54,7 @@ ConjuntBoles::ConjuntBoles(QString tipoShading)
             if(i==14)numBola = "15";
         }
         //std::cout<<"\ncentro bola "<< i<<", x= "<<x<<", y= "<<y<<", z= "<<z<<"\n";
-        vec4 ka = vec4(0.25, 0.20725, 0.20725, 1);
-        vec4 kd = vec4(1.0, 0.829, 0.829, 1);
-        vec4 ke = vec4(0.296648, 0.296648, 0.296648, 1);
-        float kre = 0.088*128;
-
-        Material *mat = new Material(ka, kd, ke, kre);
-        bola = new Bola(x, y, z, r, 1.0, 1.0, 0.0, mat, tipoShading, numBola);
+        bola = new Bola(x, y, z, r, 1.0, 1.0, 0.0, numBola);
         //capsa = bola->calculCapsa3D();
         //std::cout<<"centro bola "<< i <<", x= "<< capsa.pmin.x + capsa.a/2. << ", y= " << capsa.pmin.y + capsa.h/2. <<  ", z= " << capsa.pmin.z + capsa.p/2. <<"\n";
         listaConjuntBoles.push_back(bola);

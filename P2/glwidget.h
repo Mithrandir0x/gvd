@@ -5,7 +5,6 @@
 #include <escena.h>
 #include <bola.h>
 #include <conjuntboles.h>
-#include <material.h>
 
 #include <QtWidgets>
 #include <QGLWidget>
@@ -89,7 +88,6 @@ private:
     QTimer *timer;
     QTimer *timer1;
     double z;
-    QString tipoShading;
 
     //  Metode per a carregar de fitxers el vertex i el fragment shader
    void InitShader( const char* vertexShaderFile,
