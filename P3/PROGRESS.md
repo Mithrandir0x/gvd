@@ -720,7 +720,8 @@ void GLWidget::reinit(QString Shading, bool Text){
 ```
 
 En el cas que es canvii de `Flat` a qualsevol altra shader, cal tornar a
-recalcular les normals de l'escena per a calcular la il·luminació correctament.
+recalcular les normals de l'escena per a calcular la il·luminació correctament,
+i en el cas de tornar al `Flat` shader, es tornen a recalcular també.
 
 #### `GLWidget::keyPressEvent`
 
@@ -905,6 +906,9 @@ void main()
 }
 ```
 
+Com es pot veure, en el vertex shader es calcula el color que serà interpolat
+i passat al fragment shader, a continuació:
+
 ```c
 // fshaderFlatGouraud.glsl
 
@@ -922,8 +926,6 @@ void main()
         gl_FragColor = color;
     }
 }
-
-
 ```
 
 #### 3.5.5 `Phong` shading
@@ -1004,6 +1006,10 @@ void main()
 
 }
 ```
+
+Una vegada calculades les normals de cadascun dels vèrtex, aquestes són interpolades
+i enviades al fragment shader, a on ja es pot calcular el color corresponent al
+píxel:
 
 ```c
 // fshaderPhong.glsl
@@ -1141,6 +1147,9 @@ void main()
 
 ```
 
+En el fragment shader, calculem el color discretitzat en funció de la llum
+direccional que apunta cap al centre de coordenades del mon:
+
 ```c
 // fshaderToon.glsl
 
@@ -1187,3 +1196,35 @@ void main()
     }
 }
 ```
+
+#### 3.5.7 Texturització i il·luminació
+
+Per últim, anem a fer un petit incís sobre cóm hem combinat les textures amb
+la il·luminació i els materials de la textura.
+
+A qualsevol dels fragments shaders es pot veure el següent fragment de codi:
+
+```glsl
+// ...
+uniform bool conTextura;
+// ...
+
+void main()
+{
+    // ...        
+    if(conTextura == true){
+        gl_FragColor = 0.25 * color + 0.75 * texture2D(texMap, v_texcoord);
+    }else{
+        gl_FragColor = color;
+    }
+}
+```
+
+Com s'ha esmentat més abans, utilitzem la variable uniforme `conTextura` per
+decidir si s'ha d'aplicar o no la textura al píxel que s'està calculant.
+
+El color calculat, ja sigui des del vertex shader pasat al fragment shader, o 
+calculat des del propi fragment shader, es combina amb el color de la textura,
+en una proporció de 25% del color calculat a partir de la il·luminació i del
+material propi de l'objecte amb un 75% del color de la textura, tal com es
+demana a l'enunciat de la pràctica.
