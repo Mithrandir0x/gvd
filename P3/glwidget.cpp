@@ -425,10 +425,10 @@ PlaBase* GLWidget::newPlaBs(){
     color4 cv2  = color4( 1.0, 1.0, 0.0, 1.0 ); //yellow
     color4 cv3  = color4( 0.0, 1.0, 0.0, 1.0 ); //green
 
-    vec3 ka = vec3(0.19125, 0.0735, 0.0225);
-    vec3 kd = vec3(0.7038, 0.27048, 0.0828);
-    vec3 ke = vec3(0.256777, 0.137622, 0.086014);
-    float kre = 0.1*128;
+    vec3 ka = vec3(0.0, 0.05, 0.0);
+    vec3 kd = vec3(0.4, 0.5, 0.4);
+    vec3 ke = vec3(0.04, 0.7, 0.04);
+    float kre = 0.078125 * 128;
 
     Material *mat = new Material(ka, kd, ke, kre);
 

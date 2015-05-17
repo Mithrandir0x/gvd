@@ -6,7 +6,6 @@
 #define OUT out
 #endif
 
-IN vec3 Normal;
 IN vec2 v_texcoord;
 
 IN vec3 pos;

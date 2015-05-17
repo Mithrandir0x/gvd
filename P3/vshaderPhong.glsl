@@ -9,7 +9,6 @@
 
 IN vec4 vPosition;
 IN vec3 vNormal;
-OUT vec3 Normal;
 IN vec2 vCoordTexture;
 OUT vec2 v_texcoord;
 
@@ -69,7 +68,6 @@ void main()
   distance2 = length(light2.gpuLightPosition - vPosition);
   distance3 = length(light3.gpuLightPosition - vPosition);
 
-  Normal = vNormal;
   v_texcoord = vCoordTexture;
 
 }
